@@ -6,7 +6,7 @@
 # ./obj
 #module add netcdf
 # Set flags to point the compiler to the include files
-version      =1.3
+
 FF           = gfortran
 #FF           = pgf90
 CC           = cc 
@@ -37,11 +37,11 @@ OBJECT=$(FORT:.f90=.o) $(CPP:.c=.o)
 
 
 geff:	$(OBJECT)
-	$(FF) $(INLCUDE) $(OBJECT)  -o ../bin/${HOSTNAME}_geff_${version}  $(LIB)
+	$(FF) $(INLCUDE) $(OBJECT)  -o geff_exe  $(LIB)
 
 
 all:	geff
 
 clean:
-	rm -f *.o *.mod ../bin/${HOSTNAME}_ecfire_v1.3 
+	rm -f *.o *.mod geff_exe
 
