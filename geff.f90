@@ -54,7 +54,8 @@ PROGRAM geff
 ! --- release history --- 
 ! v1.0 MARCH 2014 - First release of the model 
 ! v1.2 AUGUST 2014 - Added the FWI calculation
-! v1.3 FEB 2016 - Corrected bug in the keetch byram calculation
+! v1.3 FEB 2017 - Corrected bug in the keetch byram calculation
+!      MAY 2017          Chnaged the way the land see mask is handled to allow for the small islands to be included 
 !============================================================================================
 !
   USE netcdf
@@ -238,17 +239,17 @@ PROGRAM geff
           
            !---------------------------------------
            ! ONLY  MODEL POINT IF 
-           ! NOT A LAKE/SEA POINT 
+           ! NOT A 100%  LAKE/SEA POINT 
            ! NOT ARTIC CLIMATE .AND. icr(ix,iy) .lt.  5
            ! fuel model IS DEFINED (i.e. one of the  20 valid fuel models)
-           ! vegetation stage is defined 
+           ! vegetation stage is defined  (this has been removed )
            !---------------------------------------
 
          !  bounding necessary since the land sea mask in the climatic zone
           !and the IFS land-sea mask are not the same! 
-           IF (rlsm(ix,iy) .gt. 0.0  .AND. icr(ix,iy) .GT. 0.0 )  THEN
+           IF (rlsm(ix,iy) .gt. 0.0 )  THEN
            
-              
+              IF (icr(ix,iy) .lt. 0.0)   icr(ix,iy)=1 !check this in the future
    ! 0- set-up conditions 
    !---------------------------------------------------------------------------
      ! 0.1 weather type for the pixel 
