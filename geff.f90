@@ -247,10 +247,9 @@ PROGRAM geff
 
          !  bounding necessary since the land sea mask in the climatic zone
           !and the IFS land-sea mask are not the same! 
-           IF (rlsm(ix,iy) .gt. 0.0 )  THEN
+           IF (rlsm(ix,iy) .gt. 0.0000001  .AND. icr(ix,iy) .lt. 5 )  THEN
            
-              IF (icr(ix,iy) .lt. 0.0)   icr(ix,iy)=1 !check this in the future
-   ! 0- set-up conditions 
+            ! 0- set-up conditions 
    !---------------------------------------------------------------------------
      ! 0.1 weather type for the pixel 
 
