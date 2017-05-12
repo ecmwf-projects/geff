@@ -240,14 +240,14 @@ PROGRAM geff
            !---------------------------------------
            ! ONLY  MODEL POINT IF 
            ! NOT A 100%  LAKE/SEA POINT 
-           ! NOT ARTIC CLIMATE .AND. icr(ix,iy) .lt.  5
+           ! YES ALSO  ARTIC CLIMATE .AND. icr(ix,iy) .gt.  0
            ! fuel model IS DEFINED (i.e. one of the  20 valid fuel models)
            ! vegetation stage is defined  (this has been removed )
            !---------------------------------------
 
          !  bounding necessary since the land sea mask in the climatic zone
           !and the IFS land-sea mask are not the same! 
-           IF (rlsm(ix,iy) .gt. 0.0000001  .AND. icr(ix,iy) .lt. 5 )  THEN
+           IF (rlsm(ix,iy) .gt. 0.0000001  .AND. icr(ix,iy) .gt. 0 )  THEN
            
             ! 0- set-up conditions 
    !---------------------------------------------------------------------------
