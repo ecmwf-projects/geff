@@ -44,7 +44,7 @@ SUBROUTINE open_output
   time_units="days since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" 00:00 UTC"
 !===========================================================
 
-  CALL check(NF90_CREATE(path = output_file, cmode=NF90_CLOBBER, ncid = ncidout))
+  CALL check(NF90_CREATE(path = output_file, cmode=NF90_HDF5, ncid = ncidout))
 
 ! define the dimensions
   CALL check(NF90_DEF_DIM(ncidout, lon_name, nlon, LonDimID))
