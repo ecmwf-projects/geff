@@ -1167,8 +1167,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     ENDIF
 !    WRITE (9,*) 'fwi_risk(ix,iy)%fwi',fwi_risk(ix,iy)%fwi,'10.096371392382368 '
 
-
-       IF (zsnow .EQ. 1 .OR. zrain .GT. 1.5) THEN
+! mask snow points (do we have to mask for heavy precipitation ?)
+       IF (zsnow .EQ. 1 ) THEN
            fwi_risk(ix,iy)%bui=0.0
            fwi_risk(ix,iy)%isi=0.0
            fwi_risk(ix,iy)%fwi=0.0
