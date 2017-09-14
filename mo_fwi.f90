@@ -44,12 +44,19 @@ CONTAINS
     REAL, DIMENSION(1:12)     , PARAMETER ::  LfN = (/-1.6, -1.6, -1.6, 0.9, 3.8, 5.8, 6.4, 5.0, 2.4, 0.4, -1.6, -1.6/)
     REAL, DIMENSION(1:12)     , PARAMETER ::  LfS = (/6.4, 5.0, 2.4, 0.4, -1.6, -1.6, -1.6, -1.6, -1.6, 0.9, 3.8, 5.8/)
 
-    if (lat .GT. 0) THEN 
-        df = LfN(mm)
-     ELSE IF (lat .LE. 0) THEN
-        df = LfS(mm)
-     ENDIF
-   END SUBROUTINE  DryingFactor
+
+
+
+    IF (lat .GE. 15) THEN 
+       df = LfN(mm)
+       !  Use Equatorial numbers 
+    ELSE IF (lat .LT. 15 .AND. lat .GE. -15) THEN
+       df= 1.39
+    ELSE IF (lat .LT. -15) THEN
+       df = LfS(mm)
+    ENDIF
+ 
+ END SUBROUTINE  DryingFactor
 
 
    SUBROUTINE  DayLength (lat, mm, dl)

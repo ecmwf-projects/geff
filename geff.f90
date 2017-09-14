@@ -1087,7 +1087,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
       IF ((ztemp-r0CtoK) .GT. -2.8)THEN 
         vv = 0.36 * ((ztemp-r0CtoK)+2.8) + Lf
       ELSE
-        vv = 0.0
+        vv = Lf
       ENDIF
 
       fwi_risk(ix,iy)%dc=MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0)
