@@ -79,8 +79,8 @@ SUBROUTINE setdown
 
   ! define global attributes
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "rundate", now))
-  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "ecfire", version))
-  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "comments","ecfire restart file"))
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "geff", version))
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "comments","geff  restart file"))
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "refdate", time_units))
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "nday",nday))
 
@@ -110,7 +110,7 @@ SUBROUTINE setdown
    CALL define_ncdf_output(ncvar_mcwood,"mcwood" , &
         & "Moisture Content shrub(wood) ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
 
-   CALL define_ncdf_output(ncvar_mark5_kb,"kb_drought_index" , &
+   CALL define_ncdf_output(ncvar_mark5_kb,"kbdi" , &
         & "keetch-Byram drought index","inch", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
    CALL define_ncdf_output(ncvar_mark5_tsr,"mark5_timesincerain", &
         & "Time since rain","number", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
@@ -118,9 +118,9 @@ SUBROUTINE setdown
 
   CALL define_ncdf_output(ncvar_fwi_ffmc,"ffmc", &
       & "Fine Fuel Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dmc,"dmc", &
+  CALL define_ncdf_output(ncvar_fwi_dmc,"fdmc", &
       & "Duff Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dc,"dc", &
+  CALL define_ncdf_output(ncvar_fwi_dc,"fdc-", &
       & "Drought Code","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID/) )
 
   
@@ -157,7 +157,7 @@ SUBROUTINE setdown
   
   print*,"MARK-5"
   print*,"======"
-  print*,"kb_drought_index"
+  print*,"kbdi"
   CALL check( nf90_put_var(ncidout, ncvar_mark5_kb(1)  , mark5_fuel%kb_drought_index  ))
   print*,"timesincerain"
   CALL check( nf90_put_var(ncidout, ncvar_mark5_tsr(1)  , mark5_fuel%timesincerain  ))
@@ -166,9 +166,9 @@ SUBROUTINE setdown
   print*,"======"
   print*,"ffmc"
   CALL check( nf90_put_var(ncidout, ncvar_fwi_ffmc(1), fwi_risk%ffmc ))
-  print*,"dmc"
+  print*,"fdmc"
   CALL check( nf90_put_var(ncidout, ncvar_fwi_dmc(1), fwi_risk%dmc ))
-  print*,"dc"
+  print*,"fdc-"
   CALL check( nf90_put_var(ncidout, ncvar_fwi_dc(1), fwi_risk%dc ))
   CALL check( nf90_close(ncidout))
 

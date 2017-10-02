@@ -66,16 +66,16 @@ SUBROUTINE initialize
     CALL check(NF90_GET_VAR(ncid, iVarId, mc(:,:)%rbndryt))
 
 
-    CALL check(NF90_INQ_VARID(ncid, "kb_drought_index", iVarId))
+    CALL check(NF90_INQ_VARID(ncid, "kbdi", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, mark5_fuel(:,:)%kb_drought_index))
     CALL check(NF90_INQ_VARID(ncid, "mark5_timesincerain", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, mark5_fuel(:,:)%timesincerain))
 
     CALL check(NF90_INQ_VARID(ncid, "ffmc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%ffmc))
-    CALL check(NF90_INQ_VARID(ncid, "dmc", iVarId))
+    CALL check(NF90_INQ_VARID(ncid, "fdmc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%dmc))
-    CALL check(NF90_INQ_VARID(ncid, "dc", iVarId))
+    CALL check(NF90_INQ_VARID(ncid, "fdc-", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%dc))
 
 
