@@ -43,19 +43,34 @@ CONTAINS
     REAL,    INTENT (OUT) :: df 
     REAL, DIMENSION(1:12)     , PARAMETER ::  LfN = (/-1.6, -1.6, -1.6, 0.9, 3.8, 5.8, 6.4, 5.0, 2.4, 0.4, -1.6, -1.6/)
     REAL, DIMENSION(1:12)     , PARAMETER ::  LfS = (/6.4, 5.0, 2.4, 0.4, -1.6, -1.6, -1.6, -1.6, -1.6, 0.9, 3.8, 5.8/)
+! local 
+    REAL:: dl
 
+!  original formulation 
+!
+!    IF (lat .GE. 15) THEN 
+!       df = LfN(mm)
+!       !  Use Equatorial numbers 
+!    ELSE IF (lat .LT. 15 .AND. lat .GE. -15) THEN
+!       df= 1.39
+!    ELSE IF (lat .LT. -15) THEN
+!       df = LfS(mm)
+!    ENDIF
+!
+! New global implementation 
+!Australian fire weather as represented by the 
+!McArthur Forest Fire Danger Index and the 
+!Canadian Forest Fire Weather Index 
+!Andrew J. Dowdy, Graham A. Mills, Klara Finkele and William de Groot 
+!CAWCR Technical Report No. 10 
+!June 2009 
+! equation A25
+!
 
+    CALL DayLength(lat,mm,dl)
 
+    df = max (1.43*dl-4.25, -1.6)
 
-    IF (lat .GE. 15) THEN 
-       df = LfN(mm)
-       !  Use Equatorial numbers 
-    ELSE IF (lat .LT. 15 .AND. lat .GE. -15) THEN
-       df= 1.39
-    ELSE IF (lat .LT. -15) THEN
-       df = LfS(mm)
-    ENDIF
- 
  END SUBROUTINE  DryingFactor
 
 

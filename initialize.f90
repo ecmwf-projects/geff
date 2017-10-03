@@ -75,7 +75,7 @@ SUBROUTINE initialize
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%ffmc))
     CALL check(NF90_INQ_VARID(ncid, "fdmc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%dmc))
-    CALL check(NF90_INQ_VARID(ncid, "fdc-", iVarId))
+    CALL check(NF90_INQ_VARID(ncid, "fdc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%dc))
 
 

@@ -171,13 +171,13 @@ IF(lnc_nfdrs) THEN
         & "Moisture Content shrub(wood) ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
    CALL define_ncdf_output(ncvar_ros,"nros" , &
       & "Rate of Spread "," ft /min", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-   CALL define_ncdf_output(ncvar_sc,"nsc-" , &
+   CALL define_ncdf_output(ncvar_sc,"nsc" , &
       & "Spread component ","ft/min", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
    CALL define_ncdf_output(ncvar_erc,"nerc" , &
       & "Energy Release Component","25Btu/ft^2", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-   CALL define_ncdf_output(ncvar_bi,"nbi-" , &
+   CALL define_ncdf_output(ncvar_bi,"nbi" , &
       & "Burning Index","10ft", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_ic,"nic-" , &
+  CALL define_ncdf_output(ncvar_ic,"nic" , &
       & "Ignition Probability","%", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_mcoi,"nfdrs_mcoi", &
       & "Human-caused Fire Occurrence Index","%", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
@@ -190,7 +190,7 @@ END IF
 IF (lnc_mark5) THEN
   CALL define_ncdf_output(ncvar_mark5_kb,"kbdi" , &
       & "keetch-Byram drought index","inch", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_mark5_df,"mdf-", &
+  CALL define_ncdf_output(ncvar_mark5_df,"mdf", &
       & "Mark5 drought factor","--", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_mark5_mc,"mark5_moist", &
       & "Mark5 moisture content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
@@ -216,7 +216,7 @@ IF (lnc_fwi) THEN
       & "Fine Fuel Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_fwi_dmc,"fdmc", &
       & "Duff Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dc,"fdc-", &
+  CALL define_ncdf_output(ncvar_fwi_dc,"fdc", &
       & "Drought Code","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_fwi_isi,"fisi", &
       & "Initial Spread Index","-", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
