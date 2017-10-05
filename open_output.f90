@@ -198,7 +198,7 @@ IF (lnc_mark5) THEN
       & "Mark5 fuel weight","tonnes/acres", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
  CALL define_ncdf_output(ncvar_mark5_ros0,"mark5_ros0", &
       & "Mark5 Rate of Spread","km/hr", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
- CALL define_ncdf_output(ncvar_mark5_ros,"maros", &
+ CALL define_ncdf_output(ncvar_mark5_ros,"mros", &
       & "Mark5 Rate of Spread for slope theta","km/hr", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
  CALL define_ncdf_output(ncvar_mark5_height,"mark5_height", &
       & "Mark5 flame height","m", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
