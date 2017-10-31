@@ -21,7 +21,7 @@ SUBROUTINE check(status)
 
   IF (status /= nf90_noerr) THEN
     PRINT *,TRIM(NF90_STRERROR(status))
-    STOP 'Bad NETCDF status'
+    STOP 1
   END IF
 END SUBROUTINE check
 

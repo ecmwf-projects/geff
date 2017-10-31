@@ -7,6 +7,8 @@
 #module add netcdf
 # Set flags to point the compiler to the include files
 
+module load netcdf4
+
 FF           = gfortran
 #FF           = pgf90
 CC           = cc 

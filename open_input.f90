@@ -42,7 +42,7 @@ SUBROUTINE open_input
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_lsm, LonDimID, len = nloncheck))
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF  
     ! here we check that the rherature file has the same number of days as the rain file
      ! data for 
@@ -71,7 +71,7 @@ SUBROUTINE open_input
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_rain, LonDimID, len = nloncheck))
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     !----------------------------
@@ -113,7 +113,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck ) THEN 
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, tempfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! id for temperature
@@ -148,7 +148,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck) THEN 
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, maxtempfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! ids for maximum temperature
@@ -182,7 +182,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck)  THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, mintempfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! ids for minimum temperature
@@ -215,7 +215,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, rhfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! id  for rh
@@ -247,7 +247,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, maxrhfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for rh
@@ -280,7 +280,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, minrhfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for 
@@ -313,7 +313,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, ccfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for 
@@ -346,7 +346,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, wspeedfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! id  for weend speed 
@@ -378,7 +378,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck)  THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, snowfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for 
@@ -410,7 +410,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck)  THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, dpfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for 
@@ -443,7 +443,7 @@ SUBROUTINE open_input
     &   nlat.ne.nlatcheck .or. &
     &   nday.ne.ndaycheck)  THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, vsfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for 
@@ -477,7 +477,7 @@ SUBROUTINE open_input
 !    &   nlat.ne.nlatcheck .or. &
 !    &   nday.ne.ndaycheck)  THEN
 !      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, lalfile
-!      STOP '*** data dimensions input error *** '
+!      STOP 1
 !    ENDIF
 !
 !    ! data for 
@@ -508,7 +508,7 @@ SUBROUTINE open_input
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_rainclim, LonDimID, len = nloncheck))
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainclimfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
    ! data for 
     CALL check(NF90_INQ_VARID(ncid_rainclim, crainclimvar, VarId_rainclim))
@@ -541,7 +541,7 @@ SUBROUTINE open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN 
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, crfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for climate regions
@@ -575,7 +575,7 @@ SUBROUTINE open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN 
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, fmfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data for climate regions
@@ -609,7 +609,7 @@ SUBROUTINE open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN 
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, cvfile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data id
@@ -643,7 +643,7 @@ SUBROUTINE open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN 
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, slopefile
-      STOP '*** data dimensions input error *** '
+      STOP 1
     ENDIF
 
     ! data id

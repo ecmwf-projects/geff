@@ -48,7 +48,7 @@ SUBROUTINE initialize
    
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
       WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,'init_file'
-      STOP '*** data dimensions input error *** '
+      STOP 1 
     ENDIF
 
     !
