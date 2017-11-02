@@ -4,10 +4,11 @@
 # Usage:  make all
 #  will compile code and place the object files into 
 # ./obj
-#module add netcdf
-# Set flags to point the compiler to the include files
 
-module load netcdf4
+# Set flags to point the compiler to the include files
+# please make sure you have done the module load specified before running the 
+# makefile
+#module load netcdf4
 
 FF           = gfortran
 #FF           = pgf90
