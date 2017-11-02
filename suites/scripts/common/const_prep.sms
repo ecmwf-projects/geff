@@ -1,0 +1,135 @@
+#!/bin/bash -l
+%manual
+
+Prepare fields which are shared by all ensemble members.
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <static.h>
+%includeonce <geff.h>
+%includeonce <const.h>
+
+
+module load cdo
+module load nco
+
+export MARS_MULTITARGET_STRICT_FORMAT=1
+
+case %CONTEXT% in
+  hres   ) str='type=fc, stream=oper' ;;
+  ens    ) str='type=cf, stream=enfo, number=0' ;;
+  fillup ) str='type=fc, stream=enfo' ;;
+  *      ) false ;;
+esac
+
+mars << EOF
+  RETRIEVE,
+    date=$const_ymd,
+    stream=oper,
+    type=an,
+    class=od,
+    expver=1,
+    levtype=sfc,
+    time=0,
+    step=0,
+    param=163.128,
+    target="slope.grib"
+  RETRIEVE,
+    param=27.128,
+    fieldset=LVC
+  RETRIEVE,
+    param=28.128,
+    fieldset=HVC
+  COMPUTE,
+    fieldset=HVCLVC,
+    formula="HVC+LVC"
+  WRITE,
+    fieldset=HVCLVC,
+    target="vc.grib"
+EOF
+
+mars << EOF
+  RETRIEVE,
+    date=$const_ymd,
+    time=0,
+    step=0,
+    class=od,
+    expver=1,
+    levtype=sfc,
+    $str,
+    param=172.128,
+    target="lm.grib"
+EOF
+
+
+# prepare interpolation table for CDO (interpolation from IFS grid to regular grid)
+
+resol=$(grib_get -pN -wstepRange=0 lm.grib)
+cdo -R genbil,n$resol lm.grib remapbil.nc
+cdo -R gencon,n$resol lm.grib remapcon.nc
+
+mkdir -p $const_dir
+gzip -c remapbil.nc > $const_dir/remapbil.nc.gz
+gzip -c remapcon.nc > $const_dir/remapcon.nc.gz
+
+ecflow_client --alter change variable "%CONTEXT%_resol" $resol /%SUITE%
+
+
+# slope, land/sea fraction, vegetation cover
+
+#src_resol=$(grib_get -pN slope.grib)
+#weights=wgb_N${src_resol}_to_N${resol}_remapbil.nc
+#zcat $static_dir/$weights.gz > $weights
+
+
+cdo -R -f nc -remapbil,n$resol -setname,slope -settime,12:00:00 slope.grib tmp.nc
+cdo -setrtoc,0.0,0.005,0 -setrtoc,0.005,0.02,1 -setrtoc,0.02,0.04,2 \
+    -setrtoc,0.04,0.06,3 -setrtoc,0.06,0.1,4 -setrtoc,0.15,0.25,5 tmp.nc slope.nc
+cdo -R -f nc -remapbil,n$resol -setname,lsm -settime,12:00:00 lm.grib lm.nc
+cdo -R -f nc -remapbil,n$resol -setname,cv -settime,12:00:00 vc.grib vc.nc
+# land/sea mask for removing values over ocean
+cdo -gtc,0 lm.nc mask.nc
+for v in slope lm vc mask; do
+    ncatted -O -a version,global,c,c,"$geff_version" $v.nc
+done
+
+
+
+# vegetation stage climatology
+
+
+for day in $(seq 0 $const_maxday); do
+  day_ymd=$(newdate -D $const_ymd +$day)
+  md=${day_ymd:4:4}
+  # 29 Feb missing from veg clim
+  if [[ $md == '0229' ]]; then
+      md='0228'
+  fi
+  cdo -O -R -f nc -remapbil,n$resol -seldate,2013$md $static_dir/$static_vegstage_file vs.d$day
+done
+
+cdo -O -mergetime vs.d* vs.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" vs.nc
+
+rm -f vs.d*
+
+
+# Koeppen (cr)
+
+
+cdo -R -f nc -remapbil,n$resol -settime,12:00:00 \
+    $static_dir/Koeppen_CRU_GPCCVASClimO_Late_d_reduced_NFDRS_n1280.nc koeppen.nc
+
+
+# compress and store fields on GPFS
+
+
+mkdir -p $const_dir
+gzip -c slope.nc > $const_dir/slope.nc.gz
+gzip -c lm.nc    > $const_dir/lm.nc.gz
+gzip -c mask.nc  > $const_dir/mask.nc.gz
+gzip -c vc.nc    > $const_dir/vc.nc.gz
+gzip -c vs.nc    > $const_dir/vs.nc.gz
+gzip -c koeppen.nc > $const_dir/koeppen.nc.gz

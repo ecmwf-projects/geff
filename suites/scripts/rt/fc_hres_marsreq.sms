@@ -1,0 +1,80 @@
+#!/bin/bash -l
+
+%manual
+
+  DESCRIPTION
+
+    Retrieve 10-day ECMWF deterministic forecast.
+    Det. Forecast is one of ensemble members in the GEFF model.
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+%includeonce <const.h>
+
+module load cdo
+
+ymd=%YMD%
+prev_ymd=$(newdate -D $ymd -1)
+
+mkdir -p $ens_grib_dir
+
+export MARS_MULTITARGET_STRICT_FORMAT=1
+
+
+# Instantaneous parameters - retrieving step 0
+# (instead of analysis) + steps 3-240.
+# 164.128 = total cloud cover
+# 165.128 = 10m U wind component
+# 166.128 = 10m V wind component
+# 167.128 = 2m temperature
+# 141.128 = snow depth
+# 168.128 = 2m dew point temperature
+# 201.128 = Maximum temperature at 2 metres
+#           since previous post-processing
+
+# Precipitation; we retrieve steps 3-240
+# for today and steps 3-24 of previous day
+# 228.128 = total precipitation.
+# We do not retrieve step 0 or analysis
+# of precipitaton as it is an accumulated
+# field (ok?).
+
+# Additionally we retrieve constant fields
+# which are used by all ensemble members
+# 163.128 = slope
+# 27.128  = low vegetation cover
+# 28.128  = high vegetation cover
+# 172.128 = land-sea mask
+
+
+
+mars << EOF
+
+  RETRIEVE,
+    $ens_mars_date,
+    stream = oper,
+    $ens_mars_steps,
+    levtype = sfc,
+    $ens_mars_expver,
+    $ens_mars_class,
+    type = fc,
+    param = 164.128/165.128/166.128/167.128/141.128/168.128/201.128,
+    target = "hr.[param]"
+
+  RETRIEVE,
+    $ens_mars_steps,
+    param = 228.128,
+    target = "hr.[param]"
+
+  RETRIEVE,
+    $ens_mars_prev_date,
+    $ens_mars_first_24h_steps,
+    param = 228.128,
+    target = "hr.[param]"
+EOF
+
+
+
+mv hr.* $ens_grib_dir/

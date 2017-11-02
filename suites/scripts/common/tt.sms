@@ -1,0 +1,67 @@
+#!/bin/bash -l
+
+%manual
+
+Prepare temperature forcing fields in NetCDF format.
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+%includeonce <static.h>
+
+rm -f tmp.grb
+touch tmp.grb
+
+for keys in 'type=an,step=0' 'type=fc,step=3/6/9/12/15/18/21/24'; do
+mars << EOF
+    retrieve,
+        source = "${sim_grib_prefix}167.128",
+        $keys,
+        $sim_mars_stream,
+        $sim_mars_expver,
+        $sim_mars_class,
+        date = $sim_ymd,
+        time = 0,
+        levtype = sfc,
+        param = 167.128,
+        fieldset = T
+    write,
+        fieldset = T,
+        target = "tt.grb"
+EOF
+cat tt.grb >> tmp.grb
+done
+
+module load cdo
+module load nco
+module load grib_api
+module swap metview/dev
+
+weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
+zcat $static_dir/$weights.gz > $weights
+
+# maximum and minimum temperature for the day
+for h in 3 6 9 12 15 18 21; do
+    hh=$(printf '%%02d' $h)
+    metview -b ~/bin/field_at_solar_time $sim_ymd $hh tmp.grb tt.$hh.grb
+    cdo -R -f nc -remap,n$sim_resol,$weights -settime,$hh:00:00 -setname,tt tt.$hh.grb tt.$hh.nc
+done
+
+cdo mergetime tt.??.nc tmp.nc
+cdo infov tmp.nc
+
+date=$(date -d $sim_ymd +%%F)
+cdo -settime,12:00:00 -setname,t2 tt.12.nc tt.nc
+cdo -settime,12:00:00 -setname,maxt2 -daymax tmp.nc ttmax.nc
+cdo -settime,12:00:00 -setname,mint2 -daymin tmp.nc ttmin.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" tt.nc
+ncatted -O -a version,global,c,c,"$geff_version" ttmin.nc
+ncatted -O -a version,global,c,c,"$geff_version" ttmax.nc
+
+mkdir -p $sim_dir
+gzip -c tt.nc > $sim_dir/tt.nc.gz
+gzip -c ttmax.nc > $sim_dir/ttmax.nc.gz
+gzip -c ttmin.nc > $sim_dir/ttmin.nc.gz

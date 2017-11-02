@@ -1,0 +1,16 @@
+#!/bin/bash -l
+%manual
+
+Update the %SUITE%:latest variable/label.
+
+This variable indicates to other suites
+what is the most recent GEFF-RT output.
+
+%end
+
+%include <ecflow_bash.h>
+%include <sim.h>
+%include <suite.h>
+
+ecflow_client --alter change variable latest $sim_ymd /%SUITE%
+ecflow_client --alter change label latest $sim_ymd /%SUITE%

@@ -1,0 +1,17 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <fo.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+
+module load cdo
+module load nco
+
+input=$fo_dir/$sim_ymd/172.128
+cdo -R -f nc -remapbil,n$sim_resol  -setname,lsm $input lm.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" lm.nc
+
+mkdir -p $sim_dir
+gzip -c lm.nc > $sim_dir/lm.nc.gz

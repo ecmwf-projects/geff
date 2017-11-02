@@ -1,0 +1,49 @@
+#!/bin/bash -l
+
+%manual
+
+Prepare cloud cover forcings fields in NetCDF format
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+%includeonce <static.h>
+
+rm -f tmp.grb
+touch tmp.grb
+
+for keys in 'type=an,step=0' 'type=fc,step=3/6/9/12/15/18/21/24'; do
+mars << EOF
+    retrieve,
+        source = "${sim_grib_prefix}164.128",
+        $sim_mars_expver,
+        $sim_mars_class,
+        $sim_mars_stream,
+        $keys,
+        time = 0,
+        date = $sim_ymd,
+        levtype = sfc,
+        param = 164.128,
+        target = "cc.grb"
+EOF
+cat cc.grb >> tmp.grb
+done
+
+module load cdo
+module load nco
+module load grib_api
+module swap metview/dev
+
+metview -b ~/bin/field_at_solar_time $sim_ymd 12 tmp.grb tmp2.grb
+
+weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
+zcat $static_dir/$weights.gz > $weights
+
+cdo -R -f nc -remap,n$sim_resol,$weights -settime,12:00:00 -setname,cc tmp2.grb cc.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" cc.nc
+
+mkdir -p $sim_dir
+gzip -c cc.nc > $sim_dir/cc.nc.gz

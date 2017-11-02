@@ -1,0 +1,58 @@
+#!/bin/bash -l
+
+%manual
+
+Prepare wind speed forcing fields in NetCDF format
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+%includeonce <static.h>
+
+rm -f ws.grb
+touch ws.grb
+
+for keys in 'step=0,type=an' 'step=3/6/9/12/15/18/21/24,type=fc'; do
+mars << EOF
+    retrieve,
+        source = "${sim_grib_prefix}165.128",
+        date = $sim_ymd,
+        $keys,
+        $sim_mars_stream,
+        $sim_mars_expver,
+        $sim_mars_class,
+        time = 0,
+        levtype = sfc,
+        param = 165.128,
+        fieldset=d_v1
+    retrieve,
+        source="${sim_grib_prefix}166.128",
+        param=166.128,
+        fieldset=d_v2
+    compute,
+        fieldset=dv_00,
+        formula="sqrt(d_v1^2+d_v2^2)"
+    write,
+        fieldset=dv_00,
+        target="ws.grb"
+EOF
+cat ws.grb >> tmp.grb
+done
+
+module load cdo
+module load nco
+module load grib_api
+module swap metview/dev
+
+metview -b ~/bin/field_at_solar_time $sim_ymd 12 tmp.grb tmp2.grb
+
+weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
+zcat $static_dir/$weights.gz > $weights
+
+cdo -R -f nc -remap,n$sim_resol,$weights -settime,12:00:00 -setname,wspeed tmp2.grb ws.nc
+ncatted -O -a version,global,c,c,"$geff_version" ws.nc
+
+mkdir -p $sim_dir
+gzip -c ws.nc > $sim_dir/ws.nc.gz

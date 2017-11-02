@@ -1,0 +1,170 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <static.h>
+%includeonce <geff.h>
+
+module load cdo
+module load nco
+
+
+# NOTE about interpolation:
+#  In the fire forecast script, mars computations were
+# done on the original gaussian reduced grid and then
+# results interpolated to netcdf using cdo 'remapcon'.
+#  In hindcast, mars computations fail for original grid
+# because of variable resolution, so we need to retrieve
+# with interpolation onto regular gaussian grid. Not sure if
+# mars does conservative remapping though.
+#
+# Q: what is target=dpr used for?
+
+
+# generating 'part2a' and 'part2b' parts of mars
+# retrieval which depend on timestep length
+
+dt=3
+
+part2a=''
+for h in $(seq $dt $dt 24); do
+%nopp
+mh=$(( $h % 24 ))
+%end
+part2a="$part2a
+RETRIEVE,
+source=\"${sim_grib_prefix}228.128\",
+param=228.128,
+levtype=sfc,
+$sim_mars_date,
+step=$mh/to/$sim_maxhour/by/24,
+fieldset=a_$h
+"
+done
+
+part2b=''
+for h in $(seq $dt $dt 24); do
+part2b="$part2b
+COMPUTE,
+formula=\"a_$h[2, count(a_$h)]-a_$h[1,count(a_$h)-1]\",
+fieldset=a_all
+WRITE,
+fieldset=a_all,
+target=\"pr.grb\"
+"
+done
+
+numdaysteps=$(( ( 24 - dt ) / dt ))
+
+mars << EOF
+  RETRIEVE,
+    source="${sim_grib_prefix}228.128",
+    param=228.128,
+    levtype=sfc,
+    $sim_mars_stream,
+    $sim_mars_type,
+    $sim_mars_prev_date,
+    $sim_mars_prev_day_steps,
+    fieldset=dm1
+  RETRIEVE,
+    step=$sim_prev_24h_last_step,
+    fieldset=dm1_24
+  RETRIEVE,
+    source="${sim_grib_prefix}228.128",
+    $sim_mars_date,
+    $sim_mars_first_day_steps,
+    fieldset=d
+  COMPUTE,
+    fieldset=dm1_24_new,
+    formula="repeat(dm1_24,$numdaysteps)"
+  COMPUTE,
+    fieldset=daily,
+    formula="d + dm1_24_new - dm1"
+  WRITE,
+    fieldset=daily,
+    target="pr.tmp"
+  WRITE,
+    fieldset=dm1_24,
+    target="pr.tmp"
+  $part2a
+  $part2b
+EOF
+
+
+weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapcon.nc
+zcat $static_dir/$weights.gz > $weights
+
+
+for day in $sim_days; do
+    ymd=$(newdate -D $sim_ymd +$day)
+    # assemble 12 UTC local time field
+    metview -b ~/bin/field_at_solar_time $ymd 12 pr.grb tmp.grb
+    # interpolate to regular grid in netcdf format
+    #TODO: SLOOOW (remapcon)
+    #cdo -R -f nc -remapcon,n$sim_resol -setrtoc,-100,0,0 \
+    #    -mulc,1000 -setname,tp -settime,12:00:00 tmp.grb tmp.nc
+    # mask data over water
+    # TODO: FAILS, there is no "mask.nc"
+    #cdo ifthen $static_dir/mask.nc tmp.nc pr.$day.nc
+    # TODO: temporary code to avoid the above problems
+    cdo -R -f nc -remap,n$sim_resol,$weights -setrtoc,-100,0,0 \
+        -mulc,1000 -setname,tp -settime,12:00:00 tmp.grb pr.$day.nc
+done
+cdo mergetime pr.*.nc pr.nc
+cdo infov pr.nc
+
+# duration of precipitation.
+
+mars << EOF
+  RETRIEVE,
+    source="${sim_grib_prefix}228.128",
+    param=228.128,
+    levtype=sfc,
+    $sim_mars_stream,
+    $sim_mars_type,
+    $sim_mars_date,
+    $sim_mars_steps,
+    $sim_mars_grid,
+    target="_prdur"
+  RETRIEVE,
+    step=0,
+    target="_prdur"
+  RETRIEVE,
+    source="${sim_grib_prefix}228.128",
+    $sim_mars_prev_date,
+    $sim_mars_prev_24h_steps,
+    target="_prdur"
+EOF
+
+# interpolate to regular grid in netcdf format
+# TODO: SLOOOW (remapcon)
+#cdo -R -f nc -remapcon,n$sim_resol -settime,12:00:00 \
+#    -daysum -mulc,$dt -setrtoc2,-1,0.001,0,1 \
+#    -shifttime,-1hour -setname,dp _prdur _prdur1.nc
+# TODO: mask.nc does not exist
+# mask data over water
+#cdo ifthen $static_dir/mask.nc _prdur1.nc _prdur2.nc
+
+# TODO: below is temporary
+cdo -R -f nc -remap,n$sim_resol,$weights -settime,12:00:00 \
+    -daysum -mulc,$dt -setrtoc2,-1,0.001,0,1 \
+    -shifttime,-1hour -setname,dp _prdur _prdur2.nc
+
+
+# check: if cumulated precipitation is less
+# than 1 then duration of precipitation = 0
+cdo -gtc,1 pr.nc _mask_prec.nc
+cdo -mul -setname,dp _mask_prec.nc _prdur2.nc prdur.nc
+
+# add GEFF version to the metadata
+ncatted -O -a version,global,c,c,"$geff_version" pr.nc
+ncatted -O -a version,global,c,c,"$geff_version" prdur.nc
+
+rm -f _*
+
+pids=''
+for v in pr prdur; do
+  gzip -c $v.nc > $sim_dir/$v.nc.gz &
+  pids="$pids $!"
+done
+wait $pids

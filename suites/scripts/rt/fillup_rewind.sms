@@ -1,0 +1,104 @@
+#!/bin/bash -l
+%manual
+
+If there is new era-interim restart file available
+then rewind /%SUITE%/fillup YMD loop to recalculate fillup.
+
+ * Fetch initial conditions for the fillup from
+   the working directory of the GEFF-RE suite.
+
+ * Re-set the /%SUITE%/fillup:YMD variable
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+%includeonce <fillup.h>
+
+module load cdo
+
+
+# Query GEFF-RE suite to get the date of most recent restart file.
+
+re_suite_path=<?config.get('geff_re_suite.name')?>
+re_suite_host=<?config.get('geff_re_suite.host')?>
+re_suite_port=<?config.get('geff_re_suite.port', type=int)?>
+
+# Get date of the most recent reanalysis restart file.
+# This is done by querying 'GEFF-RE' suite.
+
+python -c "
+import ecflow
+cl = ecflow.Client('$re_suite_host', $re_suite_port)
+cl.ping()
+cl.sync_local()
+defs = cl.get_defs()
+node = defs.find_abs_node('$re_suite_path')
+print node.find_variable('latest').value()
+" > re_latest
+re_latest=$(cat re_latest)
+
+need_fillup=true
+if [[ $re_latest -ge $ens_prev_ymd ]]; then
+    re_latest=$ens_prev_ymd
+    need_fillup=false
+fi
+
+# start ymd is the start date of the fillup
+# (or forecast if there is no fillup)
+fillup_start=$(newdate -D $re_latest +1)
+fillup_end=$(newdate -D $ens_ymd -1)
+
+# Get the most recent GEFF-RE restart file.
+# If fillup is needed, this restart file will
+# be used to initialize fillup.
+# If fillup is not needed, this restart file
+# will be used to initialize forecast directly.
+
+# Retrieve the restart file
+
+geff_re_dir=<?config.get('geff_re_dir')?>
+geff_re_arch_dir=<?config.get('geff_re_arch_dir')?>
+
+if scp $geff_re_dir/$re_latest/next_run_ic.nc.gz ./
+then
+    gunzip next_run_ic.nc.gz
+else
+    y=${re_latest:0:4}
+    m=${re_latest:4:2}
+    d=${re_latest:6:2}
+    ecp $geff_re_arch_dir/$y/$m/restartfile_${re_latest}_era.nc next_run_ic.nc
+fi
+
+# Store restart file in a fake fillup
+# directory which has a date preceeding the first
+# fillup/forecast date.
+
+destdir=$fillup_dirs/$re_latest
+mkdir -p $destdir
+gzip -c next_run_ic.nc > $destdir/next_run_ic.nc.gz
+
+# Rewind the fillup YMD loop (but check if
+# start is in range of YMD loop dates)
+if [[ $fillup_start -ge <?config.get('first_fillup')?> ]]; then
+    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup
+fi
+
+# fast-forward 'fillup_forcings' loop if it lags behind most recent restart file
+if [[ $fillup_start -gt %start_ymd% ]]; then
+    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
+fi
+
+# Update '/geff_rt:re_ymd' variable; it indicates
+# what is the most recent GEFF-RE restart file used.
+
+ecflow_client --alter change variable ic_ymd $re_latest /%SUITE%
+ecflow_client --alter change label ic_ymd $re_latest /%SUITE%
+
+# Also update '/geff_rt:start_ymd' variable.
+# It is just equal to ic_ymd+1, we have it for convenience.
+
+ecflow_client --alter change variable start_ymd $fillup_start /%SUITE%
+ecflow_client --alter change label start_ymd $fillup_start /%SUITE%
+
+sleep 10

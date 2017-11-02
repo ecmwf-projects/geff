@@ -1,0 +1,109 @@
+#!/bin/bash -l
+
+# copied from FDG Fire SMS suite
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+%includeonce <const.h>
+
+module load cdo
+
+ymd=%YMD%
+prev_ymd=$(dateincr $ymd -1)
+
+
+# prepare a list with subset of ensemble members for this worker
+function join { typeset IFS="$1"; shift; echo "$*"; }
+nworkers=%NWORKERS%
+worker=%WORKER%
+members=$(echo {0..50} | tr ' ' '\n' | /home/ma/ma9/bin/partition $nworkers $worker)
+first_member=$(echo "$members" | head -1)
+if [[ $first_member == 0 ]]; then
+  # remove first member (control forecast) from the list
+  members=$(echo "$members" | sed 1d)
+fi
+mars_members=$(join / $members)
+mars_members="number=$mars_members"
+
+
+
+export MARS_MULTITARGET_STRICT_FORMAT=1
+mkdir -p $ens_grib_dir
+
+
+
+if [[ $first_member == 0 ]]; then
+
+mars << EOF
+
+RETRIEVE,
+    $ens_mars_date,
+    $ens_mars_steps,
+    $ens_mars_expver,
+    $ens_mars_class,
+    stream = enfo,
+    levtype = sfc,
+    type = cf,
+    param = 164.128/165.128/166.128/167.128/141.128/168.128/201.128,
+    target = "cf.[param]"
+
+RETRIEVE,
+    $ens_mars_steps,
+    param = 228.128,
+    target = "cf.[param]"
+
+RETRIEVE,
+    $ens_mars_prev_date,
+    $ens_mars_first_24h_steps,
+    param = 228.128,
+    target = "cf.[param]"
+EOF
+
+
+fi
+
+
+
+mars << EOF
+
+RETRIEVE,
+    $mars_members,
+    $ens_mars_date,
+    $ens_mars_steps,
+    $ens_mars_expver,
+    $ens_mars_class,
+    stream = enfo,
+    levtype = sfc,
+    type = pf,
+    param = 164.128/165.128/166.128/167.128/141.128/168.128/201.128,
+    target = "pf.[number].[param]"
+
+RETRIEVE,
+    $ens_mars_steps,
+    param = 228.128,
+    target = "pf.[number].[param]"
+
+RETRIEVE,
+    $ens_mars_prev_date,
+    $ens_mars_first_24h_steps,
+    param = 228.128,
+    target = "pf.[number].[param]"
+EOF
+
+
+
+mkdir -p $ens_grib_dir
+
+if [[ $first_member -eq 0 ]]; then
+    for f in cf.*; do
+        param=$(echo $f | cut -f 2-3 -d '.')
+        cp $f $ens_grib_dir/00.$param
+    done
+fi
+
+for f in pf.*; do
+    n=$(echo $f | cut -f 2 -d '.')
+    nn=$(printf '%%02d' $n)
+    param=$(echo $f | cut -f 3-4 -d '.')
+    mv $f $ens_grib_dir/$nn.$param
+done

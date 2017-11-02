@@ -1,0 +1,129 @@
+# At each grid point of the output file, write datum
+# as it was there at a given Mean Solar Time.
+#
+# Usage:
+#   metview -b field_at_solar_time SOLAR_DATE SOLAR_HOUR INPUT_GRIB OUTPUT_GRIB
+#
+# Input grib should contain a full day
+# (hours 00 to 24 UTC) of input fields.
+#
+# WARNING: does not fail if input grib
+# doesn't have all 24 hours of data.
+# Make sure your input grib is complete!
+#
+# Output grib will have a single field
+# with "date" and "time" keys corresponding
+# to the desired solar time and with "step" = 0.
+#
+# Based on 'timeint.metview' script.
+#
+# Copyright 2016 ECMWF
+#
+
+
+
+# ====================
+# main
+# ====================
+
+
+
+argv = arguments()
+if count(argv) <> 4 then
+   fail("usage: metview -b field_at_solar_time SOLAR_DATE SOLAR_HOUR INPUT_GRIB OUTPUT_GRIB")
+else
+   solar_date = argv[1]
+   solar_hour = argv[2]
+   input_path = argv[3]
+   output_path = argv[4]
+end if
+
+
+fields_at_utc = read(input_path)
+solar_time = date(solar_date) + hour(solar_hour)
+field_at_solar_time = get_field_at_solar_time(fields_at_utc, solar_time)
+write (output_path, field_at_solar_time)
+
+
+# ====================
+# functions
+# ====================
+
+
+function julian_date(base:date)
+    valh   = hour(base)
+    valjul = juldate(base) + valh/24
+    return valjul
+end julian_date
+
+
+function get_field_at_solar_time(data:fieldset, solar_time:date)
+    lon = longitudes(data[1])
+    # make sure longitutes are in (0-360) range
+    lon = lon + (lon < 0.0) * 360.0
+    # get list of valid dates
+    valid_utc = get_valid_date(data)
+    # For each grid point, calculate UTC that
+    # corresponds to the local Mean Solar Time.
+    # UTC times are 'wrapped around'
+    dt = (lon - (lon > (15*hour(solar_time))) * 360.0) / 360.0
+    wanted_utc = julian_date(solar_time) - dt
+    # For each grid point, choose datum whose valid_utc
+    # is nearest to the wanted_utc at that point.
+    wanted_utc_field = data[1]
+    wanted_utc_field = set_values(wanted_utc_field, wanted_utc)
+    field_at_solar_time = get_nearest_point(valid_utc, wanted_utc_field, data)
+    field_at_solar_time = grib_set_long(
+         field_at_solar_time,
+         [
+             "date", yyyymmdd(solar_time),
+             "time", hhmm(solar_time),
+             "stepInHours", 0
+         ]
+    )
+    return field_at_solar_time
+end get_field_at_solar_time
+
+
+# Returns the valid date for each field in julian format
+function get_valid_date(fs:fieldset)
+    vdl = nil
+    for i = 1 to count(fs) do
+        date1  = grib_get_long(fs[i], "date")
+        time1  = grib_get_long(fs[i], "time")
+        step   = grib_get_long(fs[i], "stepInHours")
+        vald   = date(date1) + hour(time1/100) + hour(step)
+        valjul = julian_date(vald)
+        vdl    = vdl & |valjul|
+    end for
+    return vdl
+end get_valid_date
+
+
+# Search the nearest value in a vector and returns its index
+function get_nearest_point(avail_utc:vector, wanted_utc:fieldset, data:fieldset)
+    # print some diagnostics (utc times of available fields)
+    for i = 1 to count(avail_utc) do
+        print(date(avail_utc[i]))
+    end for
+    # get longitudes vector for diagnostics
+    lons = longitudes(wanted_utc)
+    # create a new field of indexes into the vector of dates
+    step_id_map = indexes(wanted_utc, avail_utc)
+    step_id_list = unique(values(step_id_map))
+    # use this to create a new field with the
+    # values taken from the correct input fields.
+    result = wanted_utc[1] - wanted_utc[1] # initialise result to zero field
+    for i = 1 to count(step_id_list) do
+        step_id = step_id_list[i]
+        mask_ = (step_id_map = step_id)
+        # print some diagnostics: min and max longitude of the strip
+        masked_lons = filter(lons, values(mask_) = 1)
+        print('[', minvalue(masked_lons), ', ', maxvalue(masked_lons), ']  --  ', date(avail_utc[step_id+1]))
+        # get a subset of data for a longitude strip
+        step_data = data[step_id + 1] # +1 because id is 0-based
+        masked_step_data = mask_ * step_data
+        result = result + masked_step_data
+    end for
+    return result
+end get_nearest_point

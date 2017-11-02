@@ -1,0 +1,37 @@
+#!/bin/bash -l
+%manual
+
+Clean forecast directories.
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+
+ymd=$ens_ymd
+
+oldest=$(newdate -D $ymd -2)
+
+
+# clean old forcings
+
+if cd $ens_grib_dirs; then
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd  -
+fi
+
+
+# clean old model output
+
+if cd $ens_dirs; then
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd -
+fi
