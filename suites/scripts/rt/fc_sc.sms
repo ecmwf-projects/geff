@@ -1,0 +1,42 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+%includeonce <const.h>
+
+
+mars << EOF
+    retrieve,
+        source = "${sim_grib_prefix}141.128",
+        $sim_mars_date,
+        $sim_mars_steps,
+        $sim_mars_type,
+        $sim_mars_stream,
+        $sim_mars_expver,
+        $sim_mars_class,
+        levtype = sfc,
+        param = 141.128,
+        target = "sc.grb"
+EOF
+
+module load cdo
+module load nco
+module load grib_api
+module swap metview/dev
+
+zcat $const_dir/remapbil.nc.gz > remapbil.nc
+
+for day in $sim_days; do
+    ymd=$(newdate -D $sim_ymd +$day)
+    metview -b ~/bin/field_at_solar_time $ymd 12 sc.grb tmp.grb
+    cdo -R -f nc -remap,n$sim_resol,remapbil.nc -setname,snow -gtc,0.001 -settime,12:00:00 tmp.grb sc.$day.nc
+done
+
+cdo mergetime sc.*.nc sc.nc
+rm -f sc.*.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" sc.nc
+
+mkdir -p $sim_dir
+gzip -c sc.nc > $sim_dir/sc.nc.gz

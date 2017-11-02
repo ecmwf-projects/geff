@@ -1,0 +1,64 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+%includeonce <const.h>
+
+
+mars << EOF
+    retrieve,
+        source = "${sim_grib_prefix}167.128",
+        $sim_mars_date,
+        $sim_mars_steps,
+        $sim_mars_type,
+        $sim_mars_stream,
+        $sim_mars_expver,
+        $sim_mars_class,
+        levtype = sfc,
+        param = 167.128,
+        fieldset = T
+    write,
+        fieldset = T,
+        target = "tt.grb"
+EOF
+
+module load cdo
+module load nco
+module load grib_api
+module swap metview/dev
+
+# maximum and minimum temperature for the day
+
+zcat $const_dir/remapbil.nc.gz > remapbil.nc
+
+for day in $sim_days; do
+    ymd=$(newdate -D $sim_ymd +$day)
+    for h in 3 6 9 12 15 18 21; do
+        hh=$(printf '%%02d' $h)
+        metview -b ~/bin/field_at_solar_time $ymd $hh tt.grb tt.$hh.grb
+        cdo -R -f nc -remap,n$sim_resol,remapbil.nc -settime,$hh:00:00 -setname,tt tt.$hh.grb tt.$day.$hh.nc
+    done
+done
+
+cdo mergetime tt.*.12.nc tt.tmp.nc
+cdo mergetime tt.*.??.nc tt.all.tmp.nc
+rm -f tt.*.??.nc
+
+date=$(date -d $sim_ymd +%%F)
+
+cdo -setname,t2 -seltime,12:00:00 tt.tmp.nc tt.nc
+rm -f tt.tmp.nc
+
+cdo -settime,12:00:00 -setname,maxt2 -daymax tt.all.tmp.nc ttmax.nc
+cdo -settime,12:00:00 -setname,mint2 -daymin tt.all.tmp.nc ttmin.nc
+rm -f tt.all.tmp.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" tt.nc
+ncatted -O -a version,global,c,c,"$geff_version" ttmin.nc
+ncatted -O -a version,global,c,c,"$geff_version" ttmax.nc
+
+mkdir -p $sim_dir
+gzip -c tt.nc > $sim_dir/tt.nc.gz
+gzip -c ttmax.nc > $sim_dir/ttmax.nc.gz
+gzip -c ttmin.nc > $sim_dir/ttmin.nc.gz

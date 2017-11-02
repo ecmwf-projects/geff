@@ -1,0 +1,37 @@
+#!/bin/bash -l
+%manual
+
+Clean fillup directories.
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <fillup.h>
+
+ymd=%YMD%
+
+oldest=$(newdate -D $ymd -2)
+
+
+# clean old fillup model outputs
+
+if cd $fillup_dirs; then
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd  -
+fi
+
+
+# clean old fillup forcings
+
+if cd $fillup_grib_dirs; then
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd -
+fi

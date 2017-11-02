@@ -1,0 +1,62 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+%includeonce <geff.h>
+
+fctype=%FCTYPE%
+subset=%SUBSET%
+
+case $subset in
+    mark5 ) vars='kbdi mdf mros mfdi' ;;
+    cfwis ) vars='ffwi ffmc fdmc fdc fisi fbui fdsr fdri' ;;
+    nfdrs ) vars='nros nsc nerc nbi nic' ;;
+    *     ) echo 'unexpected subset'; false ;;
+esac
+
+
+pad4str='----'
+pad4 () { src=$1; printf "%%s%%s" $src "${pad4str:${#src}}"; }
+
+
+tarname=${subset}_${ens_ymd}_1200_${fctype}
+mkdir -p $tarname
+
+
+case $fctype in
+
+    en )
+
+        for srcdir in $(ls -d -1 $ens_dirs/$ens_ymd/?? | grep '[[:digit:]]\{2\}$'); do
+            member_id=${srcdir##*/}
+            for var in $vars; do
+                cp $srcdir/${subset}_$(pad4 $var)_*.nc.gz $tarname/
+            done
+        done
+        ;;
+
+    hr )
+
+        member_id=hr
+        for var in $vars; do
+            cp $ens_dirs/$ens_ymd/hr/${subset}_$(pad4 $var)_*.nc.gz  $tarname/
+        done
+        ;;
+
+    * )
+        echo unexpected forecast type; fail
+        ;;
+
+esac
+
+
+tar cvf $tarname.tar $tarname
+
+ls -lh
+
+yyyy=${ens_ymd:0:4}
+mm=${ens_ymd:4:2}
+export ECUMASK=022
+archdir=ec:/$USER/geff/$geff_version/rt/$yyyy/$mm/
+emkdir -p $archdir
+ecp $tarname.tar $archdir/

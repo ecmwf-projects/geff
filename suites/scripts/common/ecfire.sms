@@ -1,0 +1,159 @@
+#!/bin/bash -l
+
+%manual
+
+Run GEFF model.
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <const.h>
+%includeonce <static.h>
+%includeonce <lib.h>
+%includeonce <geff.h>
+
+#mkdir -p /home/ma/ma9/tmp/ecfire
+#cd /home/ma/ma9/tmp/ecfire
+
+module load cdo
+module load nco
+
+date1=$sim_ymd
+date2=$(dateincr $sim_ymd +$sim_numdays)
+
+mkdir -p input
+
+if [[ $sim_cold_start -ne 1 ]]; then
+    init_file='initcond.nc'
+else
+    init_file='none'
+fi
+
+cat << EOF > input/ecfire.namelist
+&CONTROL
+output_file='ecfire.nc',
+rundir='./',
+date1=$date1,
+date2=$date2,
+nday=$sim_numdays,
+time=12,
+init_file='$init_file',
+lstick=.FALSE.,
+now='$date1',
+version='$geff_version'
+/
+&CLIMATE
+tempfile='tt.nc',
+maxtempfile='ttmax.nc',
+mintempfile='ttmin.nc',
+rhfile='rh.nc',
+maxrhfile='rhmax.nc',
+minrhfile='rhmin.nc',
+rainfile='pr.nc',
+ccfile='cc.nc',
+wspeedfile='ws.nc',
+snowfile='sc.nc',
+dpfile='prdur.nc',
+vsfile='vs.nc',
+/
+&CONSTDATA
+lsmfile='lm.nc',
+crfile='cr.nc',
+fmfile='fm.nc',
+slopefile='slope.nc',
+cvfile='vc.nc',
+rainclimfile='prclim.nc'
+/
+EOF
+
+#cdo -R -f nc -remapbil,n$sim_resol $sim_inidir/$sim_inifile input/restart.nc
+
+
+if [[ $sim_cold_start -ne 1 ]]; then
+    zcat $sim_ic_dir/ic.nc.gz > input/initcond.nc
+fi
+
+for v in vs lm slope vc; do
+  zcat $const_dir/$v.nc.gz > input/$v.nc
+done
+
+#cp $static_dir/Koeppen_CRU_GPCCVASClimO_Late_d_reduced_NFDRS_n$sim_resol.nc input/cr.nc
+zcat $const_dir/koeppen.nc.gz > input/cr.nc
+
+cdo -R -f nc -remapbil,n$sim_resol $static_dir/$static_fuelmodel_file input/fm.nc
+cdo -R -f nc -remapbil,n$sim_resol $static_dir/$static_precclim_file input/prclim.nc
+
+pids=''
+for v in tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur; do
+  zcat $sim_dir/$v.nc.gz > input/$v.nc &
+  pids="$pids $!"
+done
+wait $pids
+
+ls -l input/
+ls -l ./
+
+mkdir -p output
+
+
+# ================================
+# execute GEFF binary
+# ================================
+
+geff_exe
+
+
+ls -l input/
+ls -l output/
+ls -l ./
+
+cp output/ecfire.out $sim_dir/
+ncatted -O -a version,global,c,c,"$geff_version" input/restart_ecfire.nc
+gzip -c input/restart_ecfire.nc > $sim_dir/next_run_ic.nc.gz
+
+mark5_distvar='kbdi mdf mros mfdi'
+nfdrs_distvar='nros nsc nerc nbi nic'
+fwi_distvar='ffwi ffmc fdmc fdc fisi fbui fdsr fdri'
+
+
+# Add 'version' attribute to the NetCDF output
+
+ncatted -O -a version,global,c,c,"$geff_version" ecfire.nc
+
+
+# Transfer NetCDF output from local
+# node disk to the shared file system.
+
+pad4str='----'
+pad4 () { src=$1; printf "%%s%%s" $src "${pad4str:${#src}}"; }
+
+pids=''
+for var in $mark5_distvar; do
+  (name=mark5_$(pad4 $var)_${sim_ymd}_1200_${sim_id}
+  cdo -selvar,$var ecfire.nc $name.nc
+  ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+  gzip -c $name.nc > $sim_dir/$name.nc.gz) &
+  pids="$pids $!"
+done
+wait $pids
+pids=''
+for var in $nfdrs_distvar; do
+  (name=nfdrs_$(pad4 $var)_${sim_ymd}_1200_${sim_id}
+  cdo -selvar,$var ecfire.nc $name.nc
+  ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+  gzip -c $name.nc > $sim_dir/$name.nc.gz) &
+  pids="$pids $!"
+done
+wait $pids
+pids=''
+for var in $fwi_distvar; do
+  (name=cfwis_$(pad4 $var)_${sim_ymd}_1200_${sim_id}
+  cdo -selvar,$var ecfire.nc $name.nc
+  ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+  gzip -c $name.nc > $sim_dir/$name.nc.gz) &
+  pids="$pids $!"
+done
+wait $pids
+
+ls -l $sim_dir

@@ -1,0 +1,26 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <fo.h>
+%includeonce <sim.h>
+%includeonce <geff.h>
+
+module load cdo
+module load nco
+
+input=$fo_dir/$sim_ymd/163.128
+cdo -R -f nc -remapbil,n$sim_resol -setname,slope $input tmp.nc
+
+cdo -setrtoc,0.0,0.005,0 \
+    -setrtoc,0.005,0.02,1 \
+    -setrtoc,0.02,0.04,2 \
+    -setrtoc,0.04,0.06,3 \
+    -setrtoc,0.06,0.1,4  \
+    -setrtoc,0.15,0.25,5 \
+    tmp.nc \
+    slope.nc
+
+ncatted -O -a version,global,c,c,"$geff_version" slope.nc
+
+mkdir -p $sim_dir
+gzip -c slope.nc > $sim_dir/slope.nc.gz

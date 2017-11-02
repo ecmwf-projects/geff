@@ -1,0 +1,32 @@
+#!/bin/bash -l
+%manual
+
+Clean old files
+
+%end
+
+%include <ecflow_bash.h>
+%include <sim.h>
+%include <suite.h>
+
+# remove old input gribs
+
+oldest=$(newdate -D $sim_ymd -2)
+cd $suite_workdir/ei
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd  -
+
+# remove old results
+
+oldest=$(newdate -D $sim_ymd -2)
+cd $suite_workdir/sim
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd  -

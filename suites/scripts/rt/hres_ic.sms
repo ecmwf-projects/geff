@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+%manual
+
+Prepare initial conditions for deterministic forecast
+
+%end
+
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <fillup.h>
+
+module load cdo
+
+mkdir -p $sim_dir
+
+zcat $fillup_dir/next_run_ic.nc.gz > tmp.nc
+cdo -remapbil,n$sim_resol tmp.nc ic.nc
+gzip -c ic.nc > $sim_dir/ic.nc.gz

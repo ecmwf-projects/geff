@@ -1,0 +1,21 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <suite.h>
+
+srcdir=<?config.get('packages.geff.srcdir')?>
+
+blddir=$suite_dir/build/geff
+
+mkdir -p $blddir
+
+rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $blddir
+
+cd $blddir
+
+module load netcdf4
+make
+
+mkdir -p $suite_dir/bin
+cp $blddir/geff_exe $suite_dir/bin/
+chmod 755 $suite_dir/bin/geff_exe

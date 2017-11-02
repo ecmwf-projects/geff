@@ -1,4 +1,5 @@
 *~
 *.o
 *.mod
+*.pyc
 geff_exe
