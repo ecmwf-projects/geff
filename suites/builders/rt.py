@@ -27,18 +27,17 @@ class Builder(BaseBuilder):
     def build(self):
 
         cfg = self.config
-        self.suite.add_limit('limit', 10)
+        # get initial dates and other stuff from the deploy config file
+        first_fillup  = cfg.get('first_fillup')
+        first_fc      = cfg.get('first_fc')
+        last_date     = cfg.get('last_date', default='20200101')
+        first_barrier = cfg.get('first_barrier', default=last_date)
+        with_ens      = cfg.get('with_ens', type=config.boolean, default=True)
+        jobs_limit    = cfg.get('jobs.limit', type=int, default=10)
+
+        self.suite.add_limit('limit', jobs_limit)
         self.suite.add_inlimit('limit')
-
-        first_fillup = cfg.get('first_fillup')
-        first_fc = cfg.get('first_fc')
-        first_barrier = cfg.get('first_barrier', first_fc)
-        last_date = cfg.get('last_date', '20200101')
-        suite_name = cfg.get('name')
-        with_ens = cfg.get('with_ens', type=config.boolean, default=True)
-
         self.suite.add_variable('COLD_START', 0)
-
         self.suite.add_variable('hres_resol', '')
         self.suite.add_variable('ens_resol', '')
 
@@ -57,6 +56,7 @@ class Builder(BaseBuilder):
 
         n_build = Family('build')
         n_build.add_task('build_geff')
+        n_build.add_task('install_scripts')
 
         n_setup = Family('setup')
         n_setup.add(n_build)
@@ -70,7 +70,7 @@ class Builder(BaseBuilder):
         n_barrier = CronDateRefresh(
                 'barrier',
                 time = '10:30',
-                base = Date.from_ymd(first_fc),
+                base = Date.from_ymd(first_barrier),
                 base_shift = 0)
         barrier_ymd = n_barrier.ymd
 
@@ -94,6 +94,7 @@ class Builder(BaseBuilder):
         forecast_ymd = RepeatDate('YMD', int(first_fc), int(last_date))
         n_fillup_rewind = Task('fillup_rewind')
         n_fillup_rewind.trigger = forecast_ymd <= barrier_ymd
+        n_fillup_rewind.trigger &= n_build.complete
 
 
 

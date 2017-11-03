@@ -4,6 +4,7 @@
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <const.h>
+%includeonce <suite.h>
 
 
 mars << EOF
@@ -29,7 +30,7 @@ zcat $const_dir/remapbil.nc.gz > remapbil.nc
 
 for day in $sim_days; do
     ymd=$(newdate -D $sim_ymd +$day)
-    metview -b ~/bin/field_at_solar_time $ymd 12 sc.grb tmp.grb
+    metview -b $suite_dir/bin/field_at_solar_time $ymd 12 sc.grb tmp.grb
     cdo -R -f nc -remap,n$sim_resol,remapbil.nc -setname,snow -gtc,0.001 -settime,12:00:00 tmp.grb sc.$day.nc
 done
 

@@ -3,7 +3,7 @@
 %includeonce <ecflow_bash.h>
 %includeonce <suite.h>
 
-srcdir=<?config.get('packages.geff.srcdir')?>
+srcdir=<?config.get('packages.model.srcdir')?>
 
 blddir=$suite_dir/build/geff
 
