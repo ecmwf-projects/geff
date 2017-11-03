@@ -1,2 +1,2 @@
 module unload cdo || :
-module load cdo/1.9.1
+module load cdo/1.8.2
