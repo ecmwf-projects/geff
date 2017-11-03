@@ -4,6 +4,7 @@
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <const.h>
+%includeonce <suite.h>
 
 
 mars << EOF
@@ -36,7 +37,7 @@ for day in $sim_days; do
     ymd=$(newdate -D $sim_ymd +$day)
     for h in 3 6 9 12 15 18 21; do
         hh=$(printf '%%02d' $h)
-        metview -b ~/bin/field_at_solar_time $ymd $hh tt.grb tt.$hh.grb
+        metview -b $suite_dir/bin/field_at_solar_time $ymd $hh tt.grb tt.$hh.grb
         cdo -R -f nc -remap,n$sim_resol,remapbil.nc -settime,$hh:00:00 -setname,tt tt.$hh.grb tt.$day.$hh.nc
     done
 done

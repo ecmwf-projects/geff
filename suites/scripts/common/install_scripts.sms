@@ -6,7 +6,6 @@
 srcdir=<?config.get('packages.scripts.srcdir')?>
 
 blddir=$suite_dir/build/scripts
-
 mkdir -p $blddir
 
 rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $blddir
@@ -14,6 +13,4 @@ rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $bl
 # install scripts in suite's bin/ directory
 mkdir -p $suite_dir/bin
 
-for src in '
-cp $blddir/ $suite_dir/bin/
-chmod 755 $suite_dir/bin/geff_exe
+cp $blddir/field_at_solar_time $suite_dir/bin/

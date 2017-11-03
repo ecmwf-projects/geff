@@ -10,6 +10,7 @@ Prepare precipitation forcings fields in NetCDF format.
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <static.h>
+%includeonce <suite.h>
 
 prev_ymd=$(newdate -D $sim_ymd -1)
 mars << EOF
@@ -67,7 +68,7 @@ fi
 weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapcon.nc
 zcat $static_dir/$weights.gz > $weights
 
-metview -b ~/bin/field_at_solar_time $sim_ymd 12 pr.merged.grb tmp.grb
+metview -b $suite_dir/bin/field_at_solar_time $sim_ymd 12 pr.merged.grb tmp.grb
 cdo -R -f nc -remap,n$sim_resol,$weights -setrtoc,-100,0,0 \
     -mulc,1000 -setname,tp -settime,12:00:00 tmp.grb pr.nc
 
