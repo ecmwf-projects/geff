@@ -13,7 +13,7 @@
 %includeonce <ens.h>
 %includeonce <const.h>
 
-module load cdo
+%includeonce <cdo.h>
 
 ymd=%YMD%
 prev_ymd=$(newdate -D $ymd -1)

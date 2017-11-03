@@ -4,10 +4,11 @@
 %includeonce <sim.h>
 %includeonce <const.h>
 %includeonce <geff.h>
-%includeonce <suite.h>
+%includeonce <scripts.h>
 
-module load cdo
-module load nco
+
+%includeonce <cdo.h>
+%includeonce <nco.h>
 
 
 mars << EOF
@@ -144,7 +145,7 @@ zcat $const_dir/remapcon.nc.gz > remapcon.nc
 for day in $sim_days; do
     ymd=$(newdate -D $sim_ymd +$day)
     # assemble 12 UTC local time field
-    metview -b $suite_dir/bin/field_at_solar_time $ymd 12 pr.grb tmp.grb
+    metview -b $scripts_dir/field_at_solar_time $ymd 12 pr.grb tmp.grb
     # interpolate to regular grid in netcdf format
     # mask data over water
     # TODO: FAILS, there is no "mask.nc"

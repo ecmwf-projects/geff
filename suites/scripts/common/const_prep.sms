@@ -11,8 +11,8 @@ Prepare fields which are shared by all ensemble members.
 %includeonce <const.h>
 
 
-module load cdo
-module load nco
+%includeonce <cdo.h>
+%includeonce <nco.h>
 
 export MARS_MULTITARGET_STRICT_FORMAT=1
 

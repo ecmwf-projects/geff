@@ -14,3 +14,6 @@ rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $bl
 mkdir -p $suite_dir/bin
 
 cp $blddir/field_at_solar_time $suite_dir/bin/
+
+cp $blddir/partition $suite_dir/bin/
+chmod u+x $suite_dir/bin/partition

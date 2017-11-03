@@ -30,9 +30,9 @@ mars << EOF
 EOF
 
 
-module load cdo
-module load nco
-module load grib_api
+%includeonce <cdo.h>
+%includeonce <nco.h>
+%includeonce <eccodes.h>
 
 cdo -R -f nc -remapbil,n$sim_resol -settime,12:00:00 -setname,cv vc.grb vc.nc
 
