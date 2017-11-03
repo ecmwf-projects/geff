@@ -15,7 +15,8 @@ then rewind /%SUITE%/fillup YMD loop to recalculate fillup.
 %includeonce <ens.h>
 %includeonce <fillup.h>
 
-module load cdo
+
+%includeonce <cdo.h>
 
 
 # Query GEFF-RE suite to get the date of most recent restart file.

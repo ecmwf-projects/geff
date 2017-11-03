@@ -10,7 +10,7 @@ Prepare wind speed forcing fields in NetCDF format
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <static.h>
-%includeonce <suite.h>
+%includeonce <scripts.h>
 
 rm -f ws.grb
 touch ws.grb
@@ -42,12 +42,12 @@ EOF
 cat ws.grb >> tmp.grb
 done
 
-module load cdo
-module load nco
-module load grib_api
-module swap metview/dev
+%includeonce <cdo.h>
+%includeonce <nco.h>
+%includeonce <eccodes.h>
+%includeonce <metview.h>
 
-metview -b $suite_dir/bin/field_at_solar_time $sim_ymd 12 tmp.grb tmp2.grb
+metview -b $scripts_dir/field_at_solar_time $sim_ymd 12 tmp.grb tmp2.grb
 
 weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
 zcat $static_dir/$weights.gz > $weights

@@ -10,7 +10,7 @@ Prepare initial conditions for ensemble forecast
 %includeonce <ens.h>
 %includeonce <fillup.h>
 
-module load cdo
+%includeonce <cdo.h>
 
 mkdir -p $ens_dir
 zcat $fillup_dir/next_run_ic.nc.gz > tmp.nc

@@ -13,7 +13,7 @@ rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $bl
 
 cd $blddir
 
-module load netcdf4
+%includeonce <netcdf4.h>
 make
 
 mkdir -p $suite_dir/bin

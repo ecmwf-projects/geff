@@ -6,7 +6,8 @@
 %includeonce <ens.h>
 %includeonce <const.h>
 
-module load cdo
+%includeonce <cdo.h>
+%includeonce <scripts.h>
 
 ymd=%YMD%
 prev_ymd=$(dateincr $ymd -1)
@@ -16,7 +17,7 @@ prev_ymd=$(dateincr $ymd -1)
 function join { typeset IFS="$1"; shift; echo "$*"; }
 nworkers=%NWORKERS%
 worker=%WORKER%
-members=$(echo {0..50} | tr ' ' '\n' | /home/ma/ma9/bin/partition $nworkers $worker)
+members=$(echo {0..50} | tr ' ' '\n' | partition $nworkers $worker)
 first_member=$(echo "$members" | head -1)
 if [[ $first_member == 0 ]]; then
   # remove first member (control forecast) from the list

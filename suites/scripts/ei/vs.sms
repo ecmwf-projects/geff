@@ -5,9 +5,9 @@
 %includeonce <sim.h>
 %includeonce <geff.h>
 
-module load cdo
-module load nco
-module load grib_api
+%includeonce <cdo.h>
+%includeonce <nco.h>
+%includeonce <eccodes.h>
 
 
 md=${sim_ymd:4:4}

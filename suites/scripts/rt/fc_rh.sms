@@ -4,7 +4,7 @@
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <const.h>
-%includeonce <suite.h>
+%includeonce <scripts.h>
 
 
 mars << EOF
@@ -37,10 +37,10 @@ mars << EOF
         target="rh.grb"
 EOF
 
-module load cdo
-module load nco
-module load grib_api
-module swap metview/dev
+%includeonce <cdo.h>
+%includeonce <nco.h>
+%includeonce <eccodes.h>
+%includeonce <metview.h>
 
 zcat $const_dir/remapbil.nc.gz > remapbil.nc
 
@@ -49,7 +49,7 @@ for day in $sim_days; do
     ymd=$(newdate -D $sim_ymd +$day)
     for h in 3 6 9 12 15 18 21; do
         hh=$(printf '%%02d' $h)
-        metview -b $suite_dir/bin/field_at_solar_time $ymd $hh rh.grb rh.$hh.grb
+        metview -b $scripts_dir/field_at_solar_time $ymd $hh rh.grb rh.$hh.grb
         cdo -R -f nc -remap,n$sim_resol,remapbil.nc -settime,$hh:00:00 -setname,rh rh.$hh.grb rh.$day.$hh.nc
     done
 done

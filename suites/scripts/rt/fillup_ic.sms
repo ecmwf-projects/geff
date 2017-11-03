@@ -10,7 +10,7 @@ Prepare initial conditions for fillup
 %includeonce <sim.h>
 %includeonce <fillup.h>
 
-module load cdo
+%includeonce <cdo.h>
 
 mkdir -p $sim_dir
 

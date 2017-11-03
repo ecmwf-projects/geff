@@ -10,7 +10,7 @@ Prepare temperature forcing fields in NetCDF format.
 %includeonce <geff.h>
 %includeonce <sim.h>
 %includeonce <static.h>
-%includeonce <suite.h>
+%includeonce <scripts.h>
 
 rm -f tmp.grb
 touch tmp.grb
@@ -35,10 +35,10 @@ EOF
 cat tt.grb >> tmp.grb
 done
 
-module load cdo
-module load nco
-module load grib_api
-module swap metview/dev
+%includeonce <cdo.h>
+%includeonce <nco.h>
+%includeonce <eccodes.h>
+%includeonce <metview.h>
 
 weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
 zcat $static_dir/$weights.gz > $weights
@@ -46,7 +46,7 @@ zcat $static_dir/$weights.gz > $weights
 # maximum and minimum temperature for the day
 for h in 3 6 9 12 15 18 21; do
     hh=$(printf '%%02d' $h)
-    metview -b $suite_dir/bin/field_at_solar_time $sim_ymd $hh tmp.grb tt.$hh.grb
+    metview -b $scripts_dir/field_at_solar_time $sim_ymd $hh tmp.grb tt.$hh.grb
     cdo -R -f nc -remap,n$sim_resol,$weights -settime,$hh:00:00 -setname,tt tt.$hh.grb tt.$hh.nc
 done
 

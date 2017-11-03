@@ -10,7 +10,7 @@ Prepare relative humidity forcing fields in NetCDF format
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <static.h>
-%includeonce <suite.h>
+%includeonce <scripts.h>
 
 rm -f tmp.grb
 touch tmp.grb
@@ -48,10 +48,10 @@ EOF
 cat rh.grb >> tmp.grb
 done
 
-module load cdo
-module load nco
-module load grib_api
-module swap metview/dev
+%includeonce <cdo.h>
+%includeonce <nco.h>
+%includeonce <eccodes.h>
+%includeonce <metview.h>
 
 weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
 zcat $static_dir/$weights.gz > $weights
@@ -59,7 +59,7 @@ zcat $static_dir/$weights.gz > $weights
 # maximum and minimum RH
 for h in 3 6 9 12 15 18 21; do
     hh=$(printf '%%02d' $h)
-    metview -b $suite_dir/bin/field_at_solar_time $sim_ymd $hh tmp.grb rh.$hh.grb
+    metview -b $scripts_dir/field_at_solar_time $sim_ymd $hh tmp.grb rh.$hh.grb
     cdo -R -f nc -remap,n$sim_resol,$weights -settime,$hh:00:00 -setname,rh rh.$hh.grb rh.$hh.nc
 done
 

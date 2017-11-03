@@ -5,8 +5,8 @@
 %includeonce <sim.h>
 %includeonce <geff.h>
 
-module load cdo
-module load nco
+%includeonce <cdo.h>
+%includeonce <nco.h>
 
 input=$fo_dir/$sim_ymd/163.128
 cdo -R -f nc -remapbil,n$sim_resol -setname,slope $input tmp.nc

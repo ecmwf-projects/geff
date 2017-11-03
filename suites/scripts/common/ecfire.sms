@@ -13,11 +13,8 @@ Run GEFF model.
 %includeonce <lib.h>
 %includeonce <geff.h>
 
-#mkdir -p /home/ma/ma9/tmp/ecfire
-#cd /home/ma/ma9/tmp/ecfire
-
-module load cdo
-module load nco
+%includeonce <cdo.h>
+%includeonce <nco.h>
 
 date1=$sim_ymd
 date2=$(dateincr $sim_ymd +$sim_numdays)
