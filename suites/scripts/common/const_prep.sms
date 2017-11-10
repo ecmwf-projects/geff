@@ -19,7 +19,7 @@ export MARS_MULTITARGET_STRICT_FORMAT=1
 case %CONTEXT% in
   hres   ) str='type=fc, stream=oper' ;;
   ens    ) str='type=cf, stream=enfo, number=0' ;;
-  fillup ) str='type=fc, stream=enfo' ;;
+  fillup ) str='type=fc, stream=oper' ;;
   *      ) false ;;
 esac
 
