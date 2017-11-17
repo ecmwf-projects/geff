@@ -22,7 +22,7 @@ date2=$(dateincr $sim_ymd +$sim_numdays)
 mkdir -p input
 
 if [[ $sim_cold_start -ne 1 ]]; then
-    init_file='initcond.nc'
+    init_file='rest.nc'
 else
     init_file='none'
 fi
@@ -68,7 +68,7 @@ EOF
 
 
 if [[ $sim_cold_start -ne 1 ]]; then
-    zcat $sim_ic_dir/ic.nc.gz > input/initcond.nc
+    zcat $sim_ic_dir/ic.nc.gz > input/rest.nc
 fi
 
 for v in vs lm slope vc; do
