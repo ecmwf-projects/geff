@@ -73,7 +73,10 @@ mkdir -p $const_dir
 gzip -c remapbil.nc > $const_dir/remapbil.nc.gz
 gzip -c remapcon.nc > $const_dir/remapcon.nc.gz
 
-ecflow_client --alter change variable "%CONTEXT%_resol" $resol /%SUITE%
+case %CONTEXT% in
+    hres | ens ) ecflow_client --alter change variable '%CONTEXT%_resol' $resol /%SUITE% ;;
+    fillup     ) ecflow_client --alter change variable 'hres_resol' $resol /%SUITE% ;;
+esac
 
 
 # slope, land/sea fraction, vegetation cover
