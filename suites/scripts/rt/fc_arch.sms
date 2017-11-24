@@ -57,6 +57,6 @@ ls -lh
 yyyy=${ens_ymd:0:4}
 mm=${ens_ymd:4:2}
 export ECUMASK=022
-archdir=ec:/$USER/geff/$geff_version/rt/$yyyy/$mm/
+archdir=ec:/$USER/geff/$expver/rt/$yyyy/$mm/
 emkdir -p $archdir
 ecp $tarname.tar $archdir/
