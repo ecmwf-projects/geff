@@ -59,4 +59,4 @@ mm=${ens_ymd:4:2}
 export ECUMASK=022
 archdir=ec:/$USER/geff/$expver/rt/$yyyy/$mm/
 emkdir -p $archdir
-ecp $tarname.tar $archdir/
+ecp -o $tarname.tar $archdir/

@@ -37,7 +37,7 @@ defs = cl.get_defs()
 node = defs.find_abs_node('$re_suite_path')
 print node.find_variable('latest').value()
 " > re_latest
-re_latest=$(cat re_latest)
+re_latest=$(cat re_latest | grep -v 'Warning')
 
 need_fillup=true
 if [[ $re_latest -ge $ens_prev_ymd ]]; then
@@ -68,7 +68,7 @@ else
     y=${re_latest:0:4}
     m=${re_latest:4:2}
     d=${re_latest:6:2}
-    ecp $geff_re_arch_dir/$y/$m/restartfile_${re_latest}_era.nc next_run_ic.nc
+    ecp -o $geff_re_arch_dir/$y/$m/restartfile_${re_latest}_era.nc next_run_ic.nc
 fi
 
 # Store restart file in a fake fillup
