@@ -37,7 +37,7 @@ defs = cl.get_defs()
 node = defs.find_abs_node('$re_suite_path')
 print node.find_variable('latest').value()
 " > re_latest
-re_latest=$(cat re_latest)
+re_latest=$(cat re_latest | grep -v 'Warning')
 
 need_fillup=true
 if [[ $re_latest -ge $ens_prev_ymd ]]; then
