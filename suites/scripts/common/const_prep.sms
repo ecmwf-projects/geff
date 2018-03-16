@@ -123,7 +123,16 @@ rm -f vs.d*
 
 
 cdo -R -f nc -remapbil,n$resol -settime,12:00:00 \
-    $static_dir/Koeppen_CRU_GPCCVASClimO_Late_d_reduced_NFDRS_n1280.nc koeppen.nc
+    $static_dir/Koeppen_CRU_GPCCVASClimO_Late_d_reduced_NFDRS_n1280.nc cr.nc
+
+
+# fuel model (fm)
+
+cdo -R -f nc -remapbil,n$resol $static_dir/$static_fuelmodel_file fm.nc
+
+# precip climatology
+
+cdo -R -f nc -remapbil,n$resol $static_dir/$static_precclim_file prclim.nc
 
 
 # compress and store fields on GPFS
@@ -135,4 +144,6 @@ gzip -c lm.nc    > $const_dir/lm.nc.gz
 gzip -c mask.nc  > $const_dir/mask.nc.gz
 gzip -c vc.nc    > $const_dir/vc.nc.gz
 gzip -c vs.nc    > $const_dir/vs.nc.gz
-gzip -c koeppen.nc > $const_dir/koeppen.nc.gz
+gzip -c cr.nc    > $const_dir/cr.nc.gz
+gzip -c fm.nc    > $const_dir/fm.nc.gz
+gzip -c prclim.nc> $const_dir/prclim.nc.gz

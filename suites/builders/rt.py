@@ -34,6 +34,7 @@ class Builder(BaseBuilder):
         first_barrier = cfg.get('first_barrier', default=last_date)
         with_ens      = cfg.get('with_ens', type=config.boolean, default=True)
         jobs_limit    = cfg.get('jobs.limit', type=int, default=10)
+        mars_nworkers = cfg.get('mars_nworkers', type=int, default=1)
 
         self.suite.add_limit('limit', jobs_limit)
         self.suite.add_inlimit('limit')
@@ -204,8 +205,8 @@ class Builder(BaseBuilder):
                 Task('const_prep'),
                 Task('ens_ic').add_trigger('const_prep == complete'))
         n_ens_mars = Family('mars')
-        n_ens_mars.add_variable('NWORKERS', 4)
-        for worker in range(1, 5):
+        n_ens_mars.add_variable('NWORKERS', mars_nworkers)
+        for worker in range(1, mars_nworkers+1):
             n_worker = Family(str(worker))
             n_worker.add_variable('WORKER', worker)
             n_worker.add_task('fc_ens_marsreq')
@@ -255,13 +256,17 @@ class Builder(BaseBuilder):
         n_fc_arch = Family('archive')
         n_forecast_lag.add(n_fc_arch)
 
-        for fctype, trigger in (('hr', n_hres.complete),
-                                ('en',  n_ens.complete)):
+        fctype_trigger_subsets = [
+                ('hr', n_hres.complete, ('mark5', 'nfdrs', 'cfwis', 'ecmwf'))]
+        if with_ens:
+            fctype_trigger_subsets.append(
+                ('en',  n_ens.complete, ('mark5', 'nfdrs', 'cfwis')))
+        for fctype, trigger, subsets in fctype_trigger_subsets:
             n_fctype = Family(fctype)
             n_fctype.trigger = trigger
             n_fctype.add_variable('FCTYPE', fctype)
             n_fc_arch.add(n_fctype)
-            for subset in ('mark5', 'nfdrs', 'cfwis'):
+            for subset in subsets:
                 n_subset = Family(subset)
                 n_subset.add_task('fc_arch')
                 n_subset.add_variable('SUBSET', subset)
