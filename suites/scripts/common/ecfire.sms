@@ -64,22 +64,14 @@ rainclimfile='prclim.nc'
 /
 EOF
 
-#cdo -R -f nc -remapbil,n$sim_resol $sim_inidir/$sim_inifile input/restart.nc
-
 
 if [[ $sim_cold_start -ne 1 ]]; then
     zcat $sim_ic_dir/ic.nc.gz > input/rest.nc
 fi
 
-for v in vs lm slope vc; do
+for v in vs lm slope vc prclim fm cr; do
   zcat $const_dir/$v.nc.gz > input/$v.nc
 done
-
-#cp $static_dir/Koeppen_CRU_GPCCVASClimO_Late_d_reduced_NFDRS_n$sim_resol.nc input/cr.nc
-zcat $const_dir/koeppen.nc.gz > input/cr.nc
-
-cdo -R -f nc -remapbil,n$sim_resol $static_dir/$static_fuelmodel_file input/fm.nc
-cdo -R -f nc -remapbil,n$sim_resol $static_dir/$static_precclim_file input/prclim.nc
 
 pids=''
 for v in tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur; do

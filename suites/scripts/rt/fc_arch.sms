@@ -11,6 +11,7 @@ case $subset in
     mark5 ) vars='kbdi mdf mros mfdi' ;;
     cfwis ) vars='ffwi ffmc fdmc fdc fisi fbui fdsr fdri' ;;
     nfdrs ) vars='nros nsc nerc nbi nic' ;;
+    ecmwf ) vars='tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur  vs lm slope vc prclim fm cr' ;;
     *     ) echo 'unexpected subset'; false ;;
 esac
 
@@ -23,9 +24,9 @@ tarname=${subset}_${ens_ymd}_1200_${fctype}
 mkdir -p $tarname
 
 
-case $fctype in
+case ${fctype}_${subset} in
 
-    en )
+    en_* )
 
         for srcdir in $(ls -d -1 $ens_dirs/$ens_ymd/?? | grep '[[:digit:]]\{2\}$'); do
             member_id=${srcdir##*/}
@@ -35,7 +36,14 @@ case $fctype in
         done
         ;;
 
-    hr )
+    hr_ecmwf )
+
+        for var in $vars; do
+            cp $ens_dirs/$ens_ymd/hr/$var.nc.gz $tarname/
+        done
+        ;;
+
+    hr_* )
 
         member_id=hr
         for var in $vars; do
