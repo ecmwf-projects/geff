@@ -1016,8 +1016,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !        jmonth=4
 !TEST *************************** 
    IF (zrain .GT. 1.5) THEN
-   !   re = 0.92 * zrain - 1.27
-      re = 0.92 * zrain - 1.5
+      re = 0.92 * zrain - 1.27
       moo = 20.0 + EXP(5.6348 -fwi_risk(ix,iy)%dmc / 43.43)
 
       IF  (fwi_risk(ix,iy)%dmc .LE. 33.0) THEN
