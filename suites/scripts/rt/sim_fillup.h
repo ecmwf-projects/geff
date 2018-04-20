@@ -47,3 +47,6 @@ sim_mars_stream='stream=oper'
 
 
 sim_cold_start=%COLD_START:0%
+
+
+sim_id=fillup
