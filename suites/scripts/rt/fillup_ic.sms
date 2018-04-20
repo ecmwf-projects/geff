@@ -14,6 +14,6 @@ Prepare initial conditions for fillup
 
 mkdir -p $sim_dir
 
-zcat $fillup_dir/next_run_ic.nc.gz > tmp.nc
+zcat $fillup_prev_dir/next_run_ic.nc.gz > tmp.nc
 cdo -remapbil,n$sim_resol tmp.nc ic.nc
 gzip -c ic.nc > $sim_dir/ic.nc.gz

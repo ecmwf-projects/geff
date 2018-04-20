@@ -83,12 +83,13 @@ gzip -c next_run_ic.nc > $destdir/next_run_ic.nc.gz
 # start is in range of YMD loop dates)
 if [[ $fillup_start -ge <?config.get('first_fillup')?> ]]; then
     ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup
+    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
 fi
 
 # fast-forward 'fillup_forcings' loop if it lags behind most recent restart file
-if [[ $fillup_start -gt %start_ymd% ]]; then
-    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
-fi
+#if [[ $fillup_start -gt %start_ymd% ]]; then
+#    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
+#fi
 
 # Update '/geff_rt:re_ymd' variable; it indicates
 # what is the most recent GEFF-RE restart file used.
