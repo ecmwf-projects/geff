@@ -28,6 +28,11 @@ ens_days=$(seq 0 $ens_maxday)
 ens_dirs=$suite_dir/ens/runs
 
 
+# Directory with .tar files for archiving/dissemination
+ens_tar_dirs=$suite_dir/ens/tars
+ens_tar_dir=$ens_tar_dirs/$ens_ymd
+
+
 # directory with current and previous ensemble run
 ens_dir=$ens_dirs/$ens_ymd
 ens_prev_dir=$ens_dirs/$ens_prev_ymd

@@ -1,0 +1,66 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+%includeonce <geff.h>
+
+fctype=%FCTYPE%
+subset=%SUBSET%
+
+case $subset in
+    mark5 ) vars='kbdi mdf mros mfdi' ;;
+    cfwis ) vars='ffwi ffmc fdmc fdc fisi fbui fdsr fdri' ;;
+    nfdrs ) vars='nros nsc nerc nbi nic' ;;
+    ecmwf ) vars='tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur  vs lm slope vc prclim fm cr' ;;
+    *     ) echo 'unexpected subset'; false ;;
+esac
+
+
+pad4str='----'
+pad4 () { src=$1; printf "%%s%%s" $src "${pad4str:${#src}}"; }
+
+
+tarname=${subset}_${ens_ymd}_1200_${fctype}
+mkdir -p $tarname
+
+
+case ${fctype}_${subset} in
+
+    en_* )
+
+        for srcdir in $(ls -d -1 $ens_dirs/$ens_ymd/?? | grep '[[:digit:]]\{2\}$'); do
+            member_id=${srcdir##*/}
+            for var in $vars; do
+                cp $srcdir/${subset}_$(pad4 $var)_*.nc.gz $tarname/
+            done
+        done
+        ;;
+
+    hr_ecmwf )
+
+        for var in $vars; do
+            cp $ens_dirs/$ens_ymd/hr/$var.nc.gz $tarname/
+        done
+        ;;
+
+    hr_* )
+
+        member_id=hr
+        for var in $vars; do
+            cp $ens_dirs/$ens_ymd/hr/${subset}_$(pad4 $var)_*.nc.gz  $tarname/
+        done
+        ;;
+
+    * )
+        echo unexpected forecast type; fail
+        ;;
+
+esac
+
+
+tar cvf $tarname.tar $tarname
+
+ls -lh
+
+mkdir -p $ens_tar_dir/
+mv $tarname.tar $ens_tar_dir/
