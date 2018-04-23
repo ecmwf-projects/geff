@@ -10,11 +10,11 @@ Clean forecast directories.
 
 ymd=$ens_ymd
 
-oldest=$(newdate -D $ymd -2)
 
 
 # clean old forcings
 
+oldest=$(newdate -D $ymd -2)
 if cd $ens_grib_dirs; then
 for d in $(ls -d ????????); do
   if [[ $d -lt $oldest ]]; then
@@ -27,7 +27,21 @@ fi
 
 # clean old model output
 
+oldest=$(newdate -D $ymd -2)
 if cd $ens_dirs; then
+for d in $(ls -d ????????); do
+  if [[ $d -lt $oldest ]]; then
+    rm -rf $d
+  fi
+done
+cd -
+fi
+
+
+# clean old tar files
+
+oldest=$(newdate -D $ymd -1)
+if cd $ens_tar_dirs; then
 for d in $(ls -d ????????); do
   if [[ $d -lt $oldest ]]; then
     rm -rf $d

@@ -1,0 +1,9 @@
+#!/bin/bash -l
+
+%includeonce <ecflow_bash.h>
+%includeonce <ens.h>
+%includeonce <geff.h>
+
+for srcpath in $ens_tar_dir/*.tar; do
+    echo $srcpath
+done
