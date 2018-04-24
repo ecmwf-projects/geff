@@ -114,12 +114,9 @@ ncatted -O -a version,global,c,c,"$geff_version" ecfire.nc
 # Transfer NetCDF output from local
 # node disk to the shared file system.
 
-pad4str='----'
-pad4 () { src=$1; printf "%%s%%s" $src "${pad4str:${#src}}"; }
-
 pids=''
 for var in $mark5_distvar; do
-  (name=mark5_$(pad4 $var)_${sim_ymd}_1200_${sim_id}
+  (name=mark5_${var}_${sim_ymd}_1200_${sim_id}
   cdo -selvar,$var ecfire.nc $name.nc
   ncatted -O -a version,global,c,c,"$geff_version" $name.nc
   gzip -c $name.nc > $sim_dir/$name.nc.gz) &
@@ -128,7 +125,7 @@ done
 wait $pids
 pids=''
 for var in $nfdrs_distvar; do
-  (name=nfdrs_$(pad4 $var)_${sim_ymd}_1200_${sim_id}
+  (name=nfdrs_${var}_${sim_ymd}_1200_${sim_id}
   cdo -selvar,$var ecfire.nc $name.nc
   ncatted -O -a version,global,c,c,"$geff_version" $name.nc
   gzip -c $name.nc > $sim_dir/$name.nc.gz) &
@@ -137,7 +134,7 @@ done
 wait $pids
 pids=''
 for var in $fwi_distvar; do
-  (name=cfwis_$(pad4 $var)_${sim_ymd}_1200_${sim_id}
+  (name=cfwis_${var}_${sim_ymd}_1200_${sim_id}
   cdo -selvar,$var ecfire.nc $name.nc
   ncatted -O -a version,global,c,c,"$geff_version" $name.nc
   gzip -c $name.nc > $sim_dir/$name.nc.gz) &
