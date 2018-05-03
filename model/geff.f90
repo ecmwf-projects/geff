@@ -56,6 +56,8 @@ PROGRAM geff
 ! v1.2 AUGUST 2014 - Added the FWI calculation
 ! v1.3 FEB 2017 - Corrected bug in the keetch byram calculation
 !      MAY 2017          Chnaged the way the land see mask is handled to allow for the small islands to be included 
+!      MAY 2018  Introduced an lmask check to reset *only* NFDRS calculation on points where fuel model, climatic regions and 
+!                vegetation stage might not be available
 !============================================================================================
 !
   USE netcdf
@@ -131,6 +133,7 @@ PROGRAM geff
   REAL :: time1=0.0,time2=0.0
   LOGICAL :: lspinup, &          ! spin up period - turn off output
 &            ltimer=.false.      ! turn the cpu timer on for the first timestep
+  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm
 
  
   ! --------------------
@@ -245,13 +248,17 @@ PROGRAM geff
            ! vegetation stage is defined  (this has been removed )
            !---------------------------------------
 
-         !  bounding necessary since the land sea mask in the climatic zone
-          !and the IFS land-sea mask are not the same! 
-           IF (rlsm(ix,iy) .gt. 0.0000001  .AND. icr(ix,iy) .gt. 0 )  THEN
+           ! calculations is performed only on land points for all the indices
+
+           IF (rlsm(ix,iy) .gt. 0.0000001 )  THEN
            
             ! 0- set-up conditions 
    !---------------------------------------------------------------------------
-     ! 0.1 weather type for the pixel 
+    
+
+
+
+    ! 0.1 weather type for the pixel 
 
               IF (zcc .lt. 0.1)                        iweather=0
               IF (zcc .ge. 0.1 .and. zcc .lt. 0.5 )    iweather=1
@@ -260,10 +267,13 @@ PROGRAM geff
 
      ! 0.2 fuel model for the pixel based on the JRC climatological maps
               !accordingly to the pixel fuel model the specific characteristic are loaded
-      
-              CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
-
- 
+              IF ( ifm(ix,iy) .LE. 0) THEN 
+                 lmask_fm=.TRUE. ! record that this point is missing for NFDRS
+              ELSE
+                 lmask_fm=.TRUE.
+                 CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
+              END IF
+              
               !All fuel loadings are converted to pounds per squarefoot by
               !multiplying the tons per acre value by 0.0459137=rtopoundsft2
               ! Only for the NFDRS
@@ -279,17 +289,32 @@ PROGRAM geff
      ! 0.3 climate class for the pixel
               ! we wanto to run also on the artic /climate 
               !bounding necessary since the land sea mask in the climatic zone
-              !and the IFS land-sea mask are not the same! 
-   
-              iclima=icr(ix,iy)
-     ! 0.4 vegetation stage 
+              !and the IFS land-sea mask are not the same and Koplen is a much lower resolution
+              IF ( icr(ix,iy) .LE. 0) THEN 
+                 icr(ix,iy)=1 ! set icr=1 even if is missing data
+                 lmask_cr=.FALSE. ! record that this point is missing for NFDRS
+              ELSE
+                 iclima=icr(ix,iy)
+                 lmask_cr=.TRUE. 
+              END IF
+
+      ! 0.4 vegetation stage 
        
-             CALL  define_vegstage(jvs,vegstage)
-        
-     ! 0.5 mean slope
+               IF ( jvs  .LE. 0) THEN 
+                lmask_vegstage=.FALSE. ! record that this point is missing for NFDRS
+             ELSE
+                CALL  define_vegstage(jvs,vegstage)
+                lmask_vegstage=.TRUE. 
+             END IF
+
+    ! 0.5 mean slope
 
             IF (jslope .EQ. 0) jslope =1 
-           
+
+     
+            ! condition the calculation of NFDRS to the existence of valid climatic fields.
+            !Inconsistence might be present due to different sea-land masks between the climatic fields and IFS 
+            IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)     THEN
 !A)  NFDRS 
 !=======================================================================================================
        
@@ -807,12 +832,32 @@ PROGRAM geff
            mc(ix,iy)%r1hr=35
            mc(ix,iy)%r10hr=35
         END IF
+     ELSE
+! reset NFRDS due to fix field missing value 
+!====================================================
 
+       fire_prop(ix,iy)%ros=rfillvalue
+       fire_prop(ix,iy)%sc=ifillvalue
+       fire_prop(ix,iy)%erc=ifillvalue
+       fire_prop(ix,iy)%bi=ifillvalue
 
-       ! IF (fire_prop(ix,iy)%ros .GT. 200 ) THEN 
-       !    PRINT*,fire_prop(ix,iy)%ros,zrain,lats(ix),lons(iy),ifm(ix,iy),ivs(ix,iy)
-       ! END IF
-           
+       fire_prob(ix,iy)%ic=ifillvalue
+       fire_prob(ix,iy)%mcoi=ifillvalue         
+       fire_prob(ix,iy)%loi=ifillvalue
+       fire_prob(ix,iy)%fli=rfillvalue
+  
+       mc(ix,iy)%r1hr=rfillvalue
+       mc(ix,iy)%r10hr=rfillvalue
+       mc(ix,iy)%r100hr=rfillvalue
+       mc(ix,iy)%r1000hr=rfillvalue
+
+       mc(ix,iy)%rherb=rfillvalue
+       mc(ix,iy)%rwood=rfillvalue
+       mc(ix,iy)%rx1000=rfillvalue
+       mc(ix,iy)%rbndryt=rfillvalue
+
+  
+    END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
 !!B) MARK-5   
 !-----------
         !here we assume that the curing is the one calculated for the nfdrs 
