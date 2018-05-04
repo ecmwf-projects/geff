@@ -250,7 +250,7 @@ PROGRAM geff
 
            ! calculations is performed only on land points for all the indices
 
-           IF (rlsm(ix,iy) .gt. 0.0000001 )  THEN
+           IF (rlsm(ix,iy) .gt. 0.25 )  THEN
            
             ! 0- set-up conditions 
    !---------------------------------------------------------------------------
