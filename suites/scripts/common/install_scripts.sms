@@ -10,10 +10,26 @@ mkdir -p $blddir
 
 rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $blddir
 
-# install scripts in suite's bin/ directory
+
+# install non-executables
+
+scripts='
+field_at_solar_time
+'
 mkdir -p $suite_dir/bin
+for script in $scripts; do
+    cp $blddir/$script $suite_dir/bin/
+done
 
-cp $blddir/field_at_solar_time $suite_dir/bin/
 
-cp $blddir/partition $suite_dir/bin/
-chmod u+x $suite_dir/bin/partition
+# install executables
+
+executables='
+partition
+lz4put
+lz4get
+'
+for executable in $executables; do
+    cp $blddir/$executable $suite_dir/bin/
+    chmod u+x $suite_dir/bin/$executable
+done

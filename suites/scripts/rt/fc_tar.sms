@@ -5,50 +5,22 @@
 %includeonce <geff.h>
 
 fctype=%FCTYPE%
-subset=%SUBSET%
 
-case $subset in
-    mark5 ) vars='kbdi mdf mros mfdi' ;;
-    cfwis ) vars='ffwi ffmc fdmc fdc fisi fbui fdsr fdri' ;;
-    nfdrs ) vars='nros nsc nerc nbi nic' ;;
-    ecmwf ) vars='tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur  vs lm slope vc prclim fm cr' ;;
-    *     ) echo 'unexpected subset'; false ;;
-esac
-
-
-pad4str='----'
-pad4 () { src=$1; printf "%%s%%s" $src "${pad4str:${#src}}"; }
-
-
-tarname=${subset}_${ens_ymd}_1200_${fctype}
+tarname=ECMWF_EFFIS_${ens_ymd}_1200_${fctype}
 mkdir -p $tarname
 
+case ${fctype} in
 
-case ${fctype}_${subset} in
-
-    en_* )
+    en )
 
         for srcdir in $(ls -d -1 $ens_dirs/$ens_ymd/?? | grep '[[:digit:]]\{2\}$'); do
-            member_id=${srcdir##*/}
-            for var in $vars; do
-                cp $srcdir/${subset}_$(pad4 $var)_*.nc.gz $tarname/
-            done
+            cp $srcdir/ECMWF_*_${ens_ymd}_1200_??.nc $tarname/
         done
         ;;
 
-    hr_ecmwf )
+    hr )
 
-        for var in $vars; do
-            cp $ens_dirs/$ens_ymd/hr/$var.nc.gz $tarname/
-        done
-        ;;
-
-    hr_* )
-
-        member_id=hr
-        for var in $vars; do
-            cp $ens_dirs/$ens_ymd/hr/${subset}_$(pad4 $var)_*.nc.gz  $tarname/
-        done
+        cp $ens_dirs/$ens_ymd/hr/ECMWF_*_${ens_ymd}_1200_hr.nc $tarname/
         ;;
 
     * )

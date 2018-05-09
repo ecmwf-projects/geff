@@ -232,21 +232,15 @@ class Builder(BaseBuilder):
         # create tar files for archiving and dissemination
 
         n_tar = Family('tar')
-        fctype_trigger_subsets = [
-                ('hr', n_hres.complete, ('mark5', 'nfdrs', 'cfwis', 'ecmwf'))]
+        fctype_trigger = [('hr', n_hres.complete)]
         if with_ens:
-            fctype_trigger_subsets.append(
-                ('en',  n_ens.complete, ('mark5', 'nfdrs', 'cfwis')))
-        for fctype, trigger, subsets in fctype_trigger_subsets:
+            fctype_trigger.append(('en',  n_ens.complete))
+        for fctype, trigger in fctype_trigger:
             n_fctype = Family(fctype)
             n_fctype.trigger = trigger
             n_fctype.add_variable('FCTYPE', fctype)
             n_tar.add(n_fctype)
-            for subset in subsets:
-                n_subset = Family(subset)
-                n_subset.add_task('fc_tar')
-                n_subset.add_variable('SUBSET', subset)
-                n_fctype.add(n_subset)
+            n_fctype.add_task('fc_tar')
 
         n_forecast.add(forecast_ymd, n_fc, n_tar)
 
@@ -288,15 +282,11 @@ class Builder(BaseBuilder):
         n_fc_arch.trigger =  n_tar.complete
         n_forecast_lag.add(n_fc_arch)
 
-        for fctype, _, subsets in fctype_trigger_subsets:
+        for fctype, _ in fctype_trigger:
             n_fctype = Family(fctype)
             n_fctype.add_variable('FCTYPE', fctype)
             n_fc_arch.add(n_fctype)
-            for subset in subsets:
-                n_subset = Family(subset)
-                n_subset.add_task('fc_arch')
-                n_subset.add_variable('SUBSET', subset)
-                n_fctype.add(n_subset)
+            n_fctype.add_task('fc_arch')
 
         n_forecast_lag.add(DummyEpilog(done = forecast_ymd > forecast_lag_ymd))
         n_lag.add(n_forecast_lag)
