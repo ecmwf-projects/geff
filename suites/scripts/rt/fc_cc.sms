@@ -25,7 +25,7 @@ EOF
 %includeonce <eccodes.h>
 %includeonce <metview.h>
 
-zcat $const_dir/remapbil.nc.gz > remapbil.nc
+lz4get $const_dir/remapbil.nc.lz4 remapbil.nc
 
 for day in $sim_days; do
     ymd=$(newdate -D $sim_ymd +$day)

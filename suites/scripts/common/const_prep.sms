@@ -63,15 +63,31 @@ mars << EOF
 EOF
 
 
-# prepare interpolation table for CDO (interpolation from IFS grid to regular grid)
+# determina resolution and grid type (reduced-gauusian,
+# octahedral) of the IFS model
 
-resol=$(grib_get -pN -wstepRange=0 lm.grib)
-cdo -R genbil,n$resol lm.grib remapbil.nc
-cdo -R gencon,n$resol lm.grib remapcon.nc
+ifs_grid_type=$(grib_get -pisOctahedral lm.grib)
+if [[ $ifs_grid_type -eq 1 ]]; then
+    ifs_grid_type=O
+else
+    ifs_grid_type=N
+fi
+ifs_an_resol=$(grib_get -pN -wstepRange=0 slope.grib)
+ifs_fc_resol=$(grib_get -pN -wstepRange=0 lm.grib)
+# GEFF forecast resolution should follows IFS
+resol=$ifs_fc_resol
+ifs_an_grid=$ifs_grid_type$ifs_an_resol
+ifs_fc_grid=$ifs_grid_type$ifs_fc_resol
+
+
+# get interpolation tables for forcings
 
 mkdir -p $const_dir
-gzip -c remapbil.nc > $const_dir/remapbil.nc.gz
-gzip -c remapcon.nc > $const_dir/remapcon.nc.gz
+cp $static_dir/wgb_${ifs_fc_grid}_to_N${resol}_remapbil.nc.lz4 $const_dir/remapbil.nc.lz4
+cp $static_dir/wgb_${ifs_fc_grid}_to_N${resol}_remapcon.nc.lz4 $const_dir/remapcon.nc.lz4
+
+
+# update resol ecFlow global variable (TODO: do we still need it?)
 
 case %CONTEXT% in
     hres | ens ) ecflow_client --alter change variable '%CONTEXT%_resol' $resol /%SUITE% ;;
@@ -79,24 +95,25 @@ case %CONTEXT% in
 esac
 
 
-# slope, land/sea fraction, vegetation cover
+# interpolate slope and vegetation cover (IFS analysis fields) to GEFF grid
+# interpolate land-sea fraction (IFS control forecast field) to GEFF grid
 
-#src_resol=$(grib_get -pN slope.grib)
-#weights=wgb_N${src_resol}_to_N${resol}_remapbil.nc
-#zcat $static_dir/$weights.gz > $weights
+lz4get $static_dir/wgb_${ifs_an_grid}_to_N${resol}_remapbil.nc.lz4 an_weights.nc
+lz4get $static_dir/wgb_${ifs_fc_grid}_to_N${resol}_remapbil.nc.lz4 fc_weights.nc
 
-
-cdo -R -f nc -remapbil,n$resol -setname,slope -settime,12:00:00 slope.grib tmp.nc
+cdo -R -f nc -remap,n$resol,an_weights.nc -setname,slope -settime,12:00:00 slope.grib tmp.nc
 cdo -setrtoc,0.0,0.005,0 -setrtoc,0.005,0.02,1 -setrtoc,0.02,0.04,2 \
     -setrtoc,0.04,0.06,3 -setrtoc,0.06,0.1,4 -setrtoc,0.15,0.25,5 tmp.nc slope.nc
-cdo -R -f nc -remapbil,n$resol -setname,lsm -settime,12:00:00 lm.grib lm.nc
-cdo -R -f nc -remapbil,n$resol -setname,cv -settime,12:00:00 vc.grib vc.nc
+cdo -R -f nc -remap,n$resol,an_weights.nc -setname,cv  -settime,12:00:00 vc.grib vc.nc
+cdo -R -f nc -remap,n$resol,fc_weights.nc -setname,lsm -settime,12:00:00 lm.grib lm.nc
+
+
 # land/sea mask for removing values over ocean
+
 cdo -gtc,0 lm.nc mask.nc
 for v in slope lm vc mask; do
     ncatted -O -a version,global,c,c,"$geff_version" $v.nc
 done
-
 
 
 # vegetation stage climatology
@@ -109,7 +126,9 @@ for day in $(seq 0 $const_maxday); do
   if [[ $md == '0229' ]]; then
       md='0228'
   fi
-  cdo -O -R -f nc -remapbil,n$resol -seldate,2013$md $static_dir/$static_vegstage_file vs.d$day
+  #cdo -O -R -f nc -remap,n$resol,remapbil_nc_N640.nc \
+  #    -seldate,2013$md $static_dir/$static_vegstage_file vs.d$day
+  cdo -O -R -f nc -seldate,2013$md $static_dir/vs_n$resol.nc vs.d$day
 done
 
 cdo -O -mergetime vs.d* vs.nc
@@ -121,18 +140,17 @@ rm -f vs.d*
 
 # Koeppen (cr)
 
-
-cdo -R -f nc -remapbil,n$resol -settime,12:00:00 \
-    $static_dir/Koeppen_CRU_GPCCVASClimO_Late_d_reduced_NFDRS_n1280.nc cr.nc
+cp $static_dir/climclass_n$resol.nc cr.nc
 
 
 # fuel model (fm)
 
-cdo -R -f nc -remapbil,n$resol $static_dir/$static_fuelmodel_file fm.nc
+cp $static_dir/fm_n$resol.nc fm.nc
+
 
 # precip climatology
 
-cdo -R -f nc -remapbil,n$resol $static_dir/$static_precclim_file prclim.nc
+cp $static_dir/prclim_n$resol.nc prclim.nc
 
 
 # compress and store fields on GPFS
