@@ -139,7 +139,7 @@ EOF
 grib_copy -B "date:l asc, step:l asc" pr.tmp pr.grb
 grib_copy -B "date:l asc, step:l asc" prdur.tmp prdur.grb
 
-zcat $const_dir/remapcon.nc.gz > remapcon.nc
+lz4get $const_dir/remapcon.nc.lz4 remapcon.nc
 
 
 for day in $sim_days; do

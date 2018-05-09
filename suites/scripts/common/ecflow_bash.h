@@ -7,12 +7,13 @@ export ECF_NODE=%ECF_NODE%
 export ECF_NAME=%ECF_NAME%
 export ECF_PASS=%ECF_PASS%
 
+echo $HOST
+
 module load ecflow/%ECF_VERSION%
 
 set -x   # Print every line as it is executed
 set -u   # Exit when there is an undefined variable
          # We don't use "set -e". Instead we trap ERR signal.
-
 
 # Tell ecFlow server we have started
 ecflow_client --init=$$
@@ -59,3 +60,4 @@ if [[ ${BASH:-no} == no ]]; then
 fi
 
 cd $TMPDIR
+

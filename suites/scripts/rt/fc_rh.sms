@@ -42,7 +42,7 @@ EOF
 %includeonce <eccodes.h>
 %includeonce <metview.h>
 
-zcat $const_dir/remapbil.nc.gz > remapbil.nc
+lz4get $const_dir/remapbil.nc.lz4 remapbil.nc
 
 # maximum and minimum RH
 for day in $sim_days; do
