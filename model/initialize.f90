@@ -29,7 +29,7 @@ SUBROUTINE initialize
  
  
   ! initialization options 
-  PRINT*,TRIM(init_file(1:4))
+  PRINT*,"Initialization type: ", TRIM(init_file(1:4))
   SELECT CASE (TRIM(init_file(1:4)))
 
   ! 
@@ -73,9 +73,9 @@ SUBROUTINE initialize
 
     CALL check(NF90_INQ_VARID(ncid, "ffmc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%ffmc))
-    CALL check(NF90_INQ_VARID(ncid, "fdmc", iVarId))
+    CALL check(NF90_INQ_VARID(ncid, "dmc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%dmc))
-    CALL check(NF90_INQ_VARID(ncid, "fdc", iVarId))
+    CALL check(NF90_INQ_VARID(ncid, "dc", iVarId))
     CALL check(NF90_GET_VAR(ncid, iVarId, fwi_risk(:,:)%dc))
 
 
@@ -121,12 +121,14 @@ SUBROUTINE initialize
             fwi_risk(j,i)%ffmc=85
             fwi_risk(j,i)%dmc=6
             fwi_risk(j,i)%dc=15
+
+
          END IF
       ENDDO
    ENDDO
 
 END SELECT
- 
+  print *,'Initialization completed'
 
    RETURN
 END SUBROUTINE initialize

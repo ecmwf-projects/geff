@@ -118,9 +118,9 @@ SUBROUTINE setdown
 
   CALL define_ncdf_output(ncvar_fwi_ffmc,"ffmc", &
       & "Fine Fuel Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dmc,"fdmc", &
+  CALL define_ncdf_output(ncvar_fwi_dmc,"dmc", &
       & "Duff Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dc,"fdc", &
+  CALL define_ncdf_output(ncvar_fwi_dc,"dc", &
       & "Drought Code","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID/) )
 
   
@@ -166,9 +166,9 @@ SUBROUTINE setdown
   print*,"======"
   print*,"ffmc"
   CALL check( nf90_put_var(ncidout, ncvar_fwi_ffmc(1), fwi_risk%ffmc ))
-  print*,"fdmc"
+  print*,"dmc"
   CALL check( nf90_put_var(ncidout, ncvar_fwi_dmc(1), fwi_risk%dmc ))
-  print*,"fdc"
+  print*,"dc"
   CALL check( nf90_put_var(ncidout, ncvar_fwi_dc(1), fwi_risk%dc ))
   CALL check( nf90_close(ncidout))
 

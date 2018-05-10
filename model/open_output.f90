@@ -66,9 +66,9 @@ SUBROUTINE open_output
   CALL check( nf90_put_att(ncidout, timevarid, units, time_units) )
 
   ! define global attributes
-  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "date", now))
-  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "ecfire", version))
-
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "Reference date", now))
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "ECMWF fire model", version))
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "Lincense", "Copernicus"))
 
 
   !---------------------------------------------
@@ -169,15 +169,15 @@ IF(lnc_nfdrs) THEN
         & "Moisture Content herbaceous plant","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
    CALL define_ncdf_output(ncvar_mcwood,"nfdrs_mcwood" , &
         & "Moisture Content shrub(wood) ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-   CALL define_ncdf_output(ncvar_ros,"nros" , &
+   CALL define_ncdf_output(ncvar_ros,"nfdrs_ros" , &
       & "Rate of Spread "," ft /min", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-   CALL define_ncdf_output(ncvar_sc,"nsc" , &
+   CALL define_ncdf_output(ncvar_sc,"sc" , &
       & "Spread component ","ft/min", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-   CALL define_ncdf_output(ncvar_erc,"nerc" , &
+   CALL define_ncdf_output(ncvar_erc,"erc" , &
       & "Energy Release Component","25Btu/ft^2", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-   CALL define_ncdf_output(ncvar_bi,"nbi" , &
+   CALL define_ncdf_output(ncvar_bi,"bi" , &
       & "Burning Index","10ft", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_ic,"nic" , &
+  CALL define_ncdf_output(ncvar_ic,"ic" , &
       & "Ignition Probability","%", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_mcoi,"nfdrs_mcoi", &
       & "Human-caused Fire Occurrence Index","%", "INTEGER",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
@@ -190,41 +190,48 @@ END IF
 IF (lnc_mark5) THEN
   CALL define_ncdf_output(ncvar_mark5_kb,"kbdi" , &
       & "keetch-Byram drought index","inch", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_mark5_df,"mdf", &
+
+
+  CALL define_ncdf_output(ncvar_mark5_df,"df", &
       & "Mark5 drought factor","--", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
+
   CALL define_ncdf_output(ncvar_mark5_mc,"mark5_moist", &
       & "Mark5 moisture content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_mark5_w,"mark5_weight", &
       & "Mark5 fuel weight","tonnes/acres", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
  CALL define_ncdf_output(ncvar_mark5_ros0,"mark5_ros0", &
       & "Mark5 Rate of Spread","km/hr", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
- CALL define_ncdf_output(ncvar_mark5_ros,"mros", &
+
+ CALL define_ncdf_output(ncvar_mark5_ros,"mark5_ros", &
       & "Mark5 Rate of Spread for slope theta","km/hr", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
+
  CALL define_ncdf_output(ncvar_mark5_height,"mark5_height", &
       & "Mark5 flame height","m", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
+
  CALL define_ncdf_output(ncvar_mark5_heightd,"mark5_heightd", &
       & "Mark5 distance at which flame is perceivable","km", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
- CALL define_ncdf_output(ncvar_mark5_fdi,"mfdi", &
+
+ CALL define_ncdf_output(ncvar_mark5_fdi,"fdi", &
       & "Mark5 fire danger index","--", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
 END IF
 
 
 IF (lnc_fwi) THEN
-  CALL define_ncdf_output(ncvar_fwi_fwi,"ffwi" , &
+  CALL define_ncdf_output(ncvar_fwi_fwi,"fwi" , &
       & "Fire Weather Index","-", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
   CALL define_ncdf_output(ncvar_fwi_ffmc,"ffmc", &
       & "Fine Fuel Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dmc,"fdmc", &
+  CALL define_ncdf_output(ncvar_fwi_dmc,"dmc", &
       & "Duff Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dc,"fdc", &
+  CALL define_ncdf_output(ncvar_fwi_dc,"dc", &
       & "Drought Code","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_isi,"fisi", &
+  CALL define_ncdf_output(ncvar_fwi_isi,"isi", &
       & "Initial Spread Index","-", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_bui,"fbui", &
+  CALL define_ncdf_output(ncvar_fwi_bui,"bui", &
       & "Build-up Index","-", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_dsr,"fdsr", &
+  CALL define_ncdf_output(ncvar_fwi_dsr,"dsr", &
       & "Daily Severity Rating","-", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
-  CALL define_ncdf_output(ncvar_fwi_danger_risk,"fdri", &
+  CALL define_ncdf_output(ncvar_fwi_danger_risk,"danger_risk", &
       & "Danger Risk Class","-", "FLOAT",ndiag2d, (/ LonDimId, LatDimID, timeDimID /) )
 
 END IF
