@@ -119,12 +119,13 @@ fwi_risk(:,:)%bui=rfillvalue
 fwi_risk(:,:)%dsr=rfillvalue
 fwi_risk(:,:)%danger_risk=rfillvalue
 
+
    CALL open_input
- 
+   Print*, "Input files: OPENED" 
   CALL initialize
 
   CALL open_output
- 
+  Print*, "Output file: CREATED " 
 
 
 END SUBROUTINE setup
