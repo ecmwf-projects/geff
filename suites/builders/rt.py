@@ -37,8 +37,11 @@ class Builder(BaseBuilder):
         mars_nworkers = cfg.get('mars_nworkers', type=int, default=1)
         with_diss     = cfg.get('with_diss', type=config.boolean, default=False)
 
-        self.suite.add_limit('limit', jobs_limit)
-        self.suite.add_inlimit('limit')
+        self.suite.add_limit('fillup_forcings', 6)
+        self.suite.add_limit('fillup', 1)
+        self.suite.add_limit('forecast', jobs_limit)
+        self.suite.add_limit('lag_fillup', 4)
+        self.suite.add_limit('lag_forecast', 4)
         self.suite.add_variable('COLD_START', 0)
         self.suite.add_variable('hres_resol', '')
         self.suite.add_variable('ens_resol', '')
@@ -110,6 +113,7 @@ class Builder(BaseBuilder):
 
         n_fforc = Family('fillup_forcings')
         n_fforc.add_variable('CONTEXT', 'fillup')
+        n_fforc.add_inlimit('fillup_forcings')
         fforc_ymd = RepeatDate('YMD', int(first_fillup), int(last_date))
         n_fforc.add(fforc_ymd)
 
@@ -140,6 +144,7 @@ class Builder(BaseBuilder):
 
         n_fillup = Family('fillup')
         n_fillup.add_variable('CONTEXT', 'fillup')
+        n_fillup.add_inlimit('fillup')
         fillup_ymd = RepeatDate('YMD', int(first_fillup), int(last_date))
         n_fillup.add(fillup_ymd)
 
@@ -163,6 +168,7 @@ class Builder(BaseBuilder):
 
         n_forecast = Family('forecast')
         n_forecast.add_variable('CONTEXT', 'forecast')
+        n_forecast.add_inlimit('forecast')
 
         # fillup_rewind - initialize /geff_rt/fillup_forcings
         # and /geff_rt/fillup families for computing fillup
@@ -264,6 +270,7 @@ class Builder(BaseBuilder):
         # cleaning of fillup
 
         n_fillup_lag = Family('fillup')
+        n_fillup_lag.add_inlimit('lag_fillup')
         fillup_lag_ymd = RepeatDate('YMD', int(first_fillup), int(last_date))
         n_fillup_lag.add(fillup_lag_ymd)
         n_fillup_clean = Task('fillup_clean')
@@ -274,12 +281,13 @@ class Builder(BaseBuilder):
         # archiving and cleaning of forecast
 
         n_forecast_lag = Family('forecast')
+        n_forecast_lag.add_inlimit('lag_forecast')
         forecast_lag_ymd = RepeatDate('YMD', int(first_fc), int(last_date))
         n_forecast_lag.add(forecast_lag_ymd)
         n_forecast_lag.add_task('fc_clean')
 
         n_fc_arch = Family('archive')
-        n_fc_arch.trigger =  n_tar.complete
+        n_fc_arch.trigger =  n_tar.complete.across('YMD')
         n_forecast_lag.add(n_fc_arch)
 
         for fctype, _ in fctype_trigger:
