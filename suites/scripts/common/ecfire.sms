@@ -101,9 +101,10 @@ cp output/ecfire.out $sim_dir/
 ncatted -O -a version,global,c,c,"$geff_version" input/restart_ecfire.nc
 gzip -c input/restart_ecfire.nc > $sim_dir/next_run_ic.nc.gz
 
-mark5_distvar='kbdi mdf mros mfdi'
-nfdrs_distvar='nros nsc nerc nbi nic'
-fwi_distvar='ffwi ffmc fdmc fdc fisi fbui fdsr fdri'
+mark5_distvar='kbdi,df,mark5_ros,fdi'
+nfdrs_distvar='nfdrs_ros,sc,erc,bi,ic'
+fwi_distvar='fwi,ffmc,dmc,dc,isi,bui,dsr,danger_risk'
+ecmwf_distvar='tt,ttmax,ttmin,rh,rhmax,rhmin,pr,cc,ws,sc,prdur,vs,lm,slope,vc,prclim,fm,cr'
 
 
 # Add 'version' attribute to the NetCDF output
@@ -114,32 +115,27 @@ ncatted -O -a version,global,c,c,"$geff_version" ecfire.nc
 # Transfer NetCDF output from local
 # node disk to the shared file system.
 
-pids=''
-for var in $mark5_distvar; do
-  (name=mark5_${var}_${sim_ymd}_1200_${sim_id}
-  cdo -selvar,$var ecfire.nc $name.nc
-  ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-  gzip -c $name.nc > $sim_dir/$name.nc.gz) &
-  pids="$pids $!"
-done
-wait $pids
-pids=''
-for var in $nfdrs_distvar; do
-  (name=nfdrs_${var}_${sim_ymd}_1200_${sim_id}
-  cdo -selvar,$var ecfire.nc $name.nc
-  ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-  gzip -c $name.nc > $sim_dir/$name.nc.gz) &
-  pids="$pids $!"
-done
-wait $pids
-pids=''
-for var in $fwi_distvar; do
-  (name=cfwis_${var}_${sim_ymd}_1200_${sim_id}
-  cdo -selvar,$var ecfire.nc $name.nc
-  ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-  gzip -c $name.nc > $sim_dir/$name.nc.gz) &
-  pids="$pids $!"
-done
-wait $pids
+name=ECMWF_MARK5_${sim_ymd}_1200_${sim_id}
+cdo -f nc4 -z zip_1 -selvar,$mark5_distvar ecfire.nc $name.nc
+ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+
+name=ECMWF_FWI_${sim_ymd}_1200_${sim_id}
+cdo -f nc4 -z zip_1 -selvar,$fwi_distvar ecfire.nc $name.nc
+ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+
+name=ECMWF_NFDRS_${sim_ymd}_1200_${sim_id}
+cdo -f nc4 -z zip_1 -selvar,$nfdrs_distvar ecfire.nc $name.nc
+ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+
+# save forcings of HRES and CONTROL
+case $sim_id in
+    hr | 00 )
+        name=ECMWF_FO_${sim_ymd}_1200_${sim_id}
+        cdo -f nc4 -z zip_1 -selvar,$ecmwf_distvar ecfire.nc $name.nc
+        ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+        ;;
+esac
+
+mv ECMWF_*.nc $sim_dir/
 
 ls -l $sim_dir
