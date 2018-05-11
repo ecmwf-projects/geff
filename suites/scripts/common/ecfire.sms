@@ -101,9 +101,9 @@ cp output/ecfire.out $sim_dir/
 ncatted -O -a version,global,c,c,"$geff_version" input/restart_ecfire.nc
 gzip -c input/restart_ecfire.nc > $sim_dir/next_run_ic.nc.gz
 
-mark5_distvar='kbdi,df,ros,fdi'
-nfdrs_distvar='ros,sc,erc,bi,ic'
-fwi_distvar='fwi,fmc,dmc,dc,isi,bui,dsr,danger_risk'
+mark5_distvar='kbdi,df,mark5_ros,fdi'
+nfdrs_distvar='nfdrs_ros,sc,erc,bi,ic'
+fwi_distvar='fwi,ffmc,dmc,dc,isi,bui,dsr,danger_risk'
 ecmwf_distvar='tt,ttmax,ttmin,rh,rhmax,rhmin,pr,cc,ws,sc,prdur,vs,lm,slope,vc,prclim,fm,cr'
 
 
@@ -135,5 +135,7 @@ case $sim_id in
         ncatted -O -a version,global,c,c,"$geff_version" $name.nc
         ;;
 esac
+
+mv ECMWF_*.nc $sim_dir/
 
 ls -l $sim_dir

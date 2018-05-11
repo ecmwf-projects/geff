@@ -4,6 +4,7 @@
 %includeonce <ens.h>
 %includeonce <geff.h>
 
-for srcpath in $ens_tar_dir/*.tar; do
-    echo $srcpath
+for srcpath in $ens_tar_dir/ECMWF_*.tar; do
+    destfile=${srcpath##*/}
+    ecpds -destination GEFF_FC -lifetime 10d -source $srcpath -target $destfile -priority 99 -force
 done
