@@ -5,9 +5,7 @@
 %includeonce <geff.h>
 
 fctype=%FCTYPE%
-subset=%SUBSET%
-
-tarname=${subset}_${ens_ymd}_1200_${fctype}
+tarname=ECMWF_EFFIS_${ens_ymd}_1200_${fctype}
 
 yyyy=${ens_ymd:0:4}
 mm=${ens_ymd:4:2}
