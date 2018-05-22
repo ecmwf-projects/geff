@@ -104,7 +104,7 @@ gzip -c input/restart_ecfire.nc > $sim_dir/next_run_ic.nc.gz
 mark5_distvar='kbdi,df,mark5_ros,fdi'
 nfdrs_distvar='nfdrs_ros,sc,erc,bi,ic'
 fwi_distvar='fwi,ffmc,dmc,dc,isi,bui,dsr,danger_risk'
-ecmwf_distvar='tt,ttmax,ttmin,rh,rhmax,rhmin,pr,cc,ws,sc,prdur,vs,lm,slope,vc,prclim,fm,cr'
+ecmwf_distvar='t2,maxt2,mint2,rh,maxrh,minrh,tp,cc,wspeed,snow,dp,vs,lsm,slope,cv,tpclim,fm,cr'
 
 
 # Add 'version' attribute to the NetCDF output

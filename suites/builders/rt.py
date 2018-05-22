@@ -151,7 +151,7 @@ class Builder(BaseBuilder):
         n_fillup_do = Family('do')
         n_fillup_do.trigger = n_fforc_do.complete.across('YMD') & (start_ymd < fillup_ymd)
         #n_fillup_do.defuser = n_fforc_do.complete.across('YMD') & (start_ymd >= fillup_ymd)
-        n_fillup_do.defuser = n_fillup_rewind.complete.across('YMD') & (start_ymd >= fforc_ymd)
+        n_fillup_do.defuser = n_fillup_rewind.complete.across('YMD') & (start_ymd >= fillup_ymd)
 
         n_fillup_ic = Task('fillup_ic')
 
