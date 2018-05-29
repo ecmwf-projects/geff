@@ -79,11 +79,15 @@ destdir=$fillup_dirs/$re_latest
 mkdir -p $destdir
 gzip -c next_run_ic.nc > $destdir/next_run_ic.nc.gz
 
-# Rewind the fillup YMD loop (but check if
-# start is in range of YMD loop dates)
+# Rewind the fillup YMD loop if
+# - start is in range of YMD loop dates and
+# - there is new era interim (no point in re-running
+#   fillup if reanalysis did not change since last time)
 if [[ $fillup_start -ge <?config.get('first_fillup')?> ]]; then
-    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup
-    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
+    if [[ %ic_ymd% -lt $re_latest ]]; then
+        ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup
+        ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
+    fi
 fi
 
 # fast-forward 'fillup_forcings' loop if it lags behind most recent restart file
