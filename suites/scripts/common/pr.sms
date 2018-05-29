@@ -9,7 +9,7 @@ Prepare precipitation forcings fields in NetCDF format.
 %includeonce <ecflow_bash.h>
 %includeonce <sim.h>
 %includeonce <geff.h>
-%includeonce <static.h>
+%includeonce <const.h>
 %includeonce <scripts.h>
 
 prev_ymd=$(newdate -D $sim_ymd -1)
@@ -65,16 +65,15 @@ else
     cp pr.grb pr.merged.grb
 fi
 
-weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapcon.nc
-zcat $static_dir/$weights.gz > $weights
+lz4get $const_dir/remapcon.nc.lz4 remapcon.nc
 
 metview -b $scripts_dir/field_at_solar_time $sim_ymd 12 pr.merged.grb tmp.grb
-cdo -R -f nc -remap,n$sim_resol,$weights -setrtoc,-100,0,0 \
+cdo -R -f nc -remap,n$sim_resol,remapcon.nc -setrtoc,-100,0,0 \
     -mulc,1000 -setname,tp -settime,12:00:00 tmp.grb pr.nc
 
 # duration of precipitation
 
-cdo -R -f nc -remap,n$sim_resol,$weights -settime,12:00:00 \
+cdo -R -f nc -remap,n$sim_resol,remapcon.nc -settime,12:00:00 \
     -daysum -mulc,3 -setrtoc2,-1,0.001,0,1 -shifttime,-1hour \
     -setname,dp dpr.grb tmp.nc
 
