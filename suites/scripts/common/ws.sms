@@ -9,7 +9,7 @@ Prepare wind speed forcing fields in NetCDF format
 %includeonce <ecflow_bash.h>
 %includeonce <sim.h>
 %includeonce <geff.h>
-%includeonce <static.h>
+%includeonce <const.h>
 %includeonce <scripts.h>
 
 rm -f ws.grb
@@ -49,10 +49,9 @@ done
 
 metview -b $scripts_dir/field_at_solar_time $sim_ymd 12 tmp.grb tmp2.grb
 
-weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
-zcat $static_dir/$weights.gz > $weights
+lz4get $const_dir/remapbil.nc.lz4 remapbil.nc
 
-cdo -R -f nc -remap,n$sim_resol,$weights -settime,12:00:00 -setname,wspeed tmp2.grb ws.nc
+cdo -R -f nc -remap,n$sim_resol,remapbil.nc -settime,12:00:00 -setname,wspeed tmp2.grb ws.nc
 ncatted -O -a version,global,c,c,"$geff_version" ws.nc
 
 mkdir -p $sim_dir
