@@ -3,6 +3,7 @@
 from comfies.sdeploy import BaseBuilder
 from comfies import config
 from comfies.ooflow import Task, Family, RepeatDate, Variable
+from comfies.ooflow import Trigger, Defuser, Defstatus, complete
 from suites.parts.idioms import DummyFamily
 from suites.parts.epilogs import DummyEpilog
 from suites.parts.times import Timer, CronDateRefresh
@@ -36,6 +37,7 @@ class Builder(BaseBuilder):
         jobs_limit    = cfg.get('jobs.limit', type=int, default=10)
         mars_nworkers = cfg.get('mars_nworkers', type=int, default=1)
         with_diss     = cfg.get('with_diss', type=config.boolean, default=False)
+        follow_osuite = cfg.get('follow_osuite', type=config.boolean, default=False)
 
         self.suite.add_limit('fillup_forcings', 6)
         self.suite.add_limit('fillup', 1)
@@ -72,12 +74,34 @@ class Builder(BaseBuilder):
         # suite (either has a timer or external dependency on /mc).
         # -----------------------------------------------------------
 
-        n_barrier = CronDateRefresh(
-                'barrier',
-                time = '10:30',
-                base = Date.from_ymd(first_barrier),
-                base_shift = 0)
-        barrier_ymd = n_barrier.ymd
+        if follow_osuite:
+            # Start as soon as ECMWF ensemble forecast finishes.
+            # '/mc' suite must be visible (on the same server).
+            self.defs.add_extern('/mc/main:YMD')
+            self.defs.add_extern('/mc/main/00/fc0015d/fc')
+            n_barrier = Family('barrier')
+            n_barrier.add(
+                Task('run').add(
+                    Defstatus(complete)))
+            n_barrier.add(
+                Family('last').add(
+                    Trigger('(/mc/main:YMD > /{s}/barrier:YMD or '
+                        '/mc/main:YMD == /{s}/barrier:YMD and '
+                        '/mc/main/00/fc0015d/fc == complete) and '
+                        '/{s}/barrier/run == complete'.format(s=cfg.get('name'))),
+                    Task('sleep').add(
+                        Trigger('0==1'),
+                        Defuser('1==1'))))
+            barrier_ymd = RepeatDate('YMD', int(first_barrier), int(last_date))
+            n_barrier.add(barrier_ymd)
+        else:
+            # Start at fixed time
+            n_barrier = CronDateRefresh(
+                    'barrier',
+                    time = '10:30',
+                    base = Date.from_ymd(first_barrier),
+                    base_shift = 0)
+            barrier_ymd = n_barrier.ymd
 
         # 'ic_ymd' and 'start_ymd' are global (suite-level) variables;
         # they are updated at each cycle by 'fillup_rewind' task.
