@@ -38,6 +38,7 @@ class Builder(BaseBuilder):
         mars_nworkers = cfg.get('mars_nworkers', type=int, default=1)
         with_diss     = cfg.get('with_diss', type=config.boolean, default=False)
         follow_osuite = cfg.get('follow_osuite', type=config.boolean, default=False)
+        use_latest_reanalysis = cfg.get('use_latest_reanalysis', type=config.boolean, default=False)
 
         self.suite.add_limit('fillup_forcings', 6)
         self.suite.add_limit('fillup', 1)
@@ -299,7 +300,14 @@ class Builder(BaseBuilder):
         n_fillup_lag.add(fillup_lag_ymd)
         n_fillup_clean = Task('fillup_clean')
         n_fillup_lag.add(n_fillup_clean)
-        n_fillup_lag.add(DummyEpilog(done = start_ymd > fillup_lag_ymd))
+        if use_latest_reanalysis:
+            # fillup forcings should be kept for fillup re-calculations.
+            # (fillup is re-calculated when we have more recent reanalysis)
+            fillup_lag_done = fillup_lag_ymd < start_ymd
+        else:
+            # fillup is never re-calculated so it can be cleaned early
+            fillup_lag_done = fillup_lag_ymd < fillup_ymd
+        n_fillup_lag.add(DummyEpilog(done = fillup_lag_done))
         n_lag.add(n_fillup_lag)
 
         # archiving and cleaning of forecast
