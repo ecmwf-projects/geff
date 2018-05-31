@@ -49,6 +49,7 @@ export MARS_MULTITARGET_STRICT_FORMAT=1
 # 172.128 = land-sea mask
 
 
+date
 
 mars << EOF
 
@@ -75,6 +76,8 @@ mars << EOF
     target = "hr.[param]"
 EOF
 
-
+date
 
 mv hr.* $ens_grib_dir/
+
+date

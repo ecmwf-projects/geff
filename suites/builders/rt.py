@@ -40,8 +40,7 @@ class Builder(BaseBuilder):
         follow_osuite = cfg.get('follow_osuite', type=config.boolean, default=False)
         use_latest_reanalysis = cfg.get('use_latest_reanalysis', type=config.boolean, default=False)
 
-        self.suite.add_limit('fillup_forcings', 6)
-        self.suite.add_limit('fillup', 1)
+        self.suite.add_limit('fillup', 7)
         self.suite.add_limit('forecast', jobs_limit)
         self.suite.add_limit('lag_fillup', 4)
         self.suite.add_limit('lag_forecast', 4)
@@ -133,35 +132,6 @@ class Builder(BaseBuilder):
         # GEFF RT fillup computations
         # -----------------------------------------------------------
 
-
-        # YMD repeat which prepares fillup forcings
-
-        n_fforc = Family('fillup_forcings')
-        n_fforc.add_variable('CONTEXT', 'fillup')
-        n_fforc.add_inlimit('fillup_forcings')
-        fforc_ymd = RepeatDate('YMD', int(first_fillup), int(last_date))
-        n_fforc.add(fforc_ymd)
-
-        n_fforc_do = Family('do')
-        n_fforc_do.trigger = n_fillup_rewind.complete.across('YMD') & (start_ymd < fforc_ymd)
-        n_fforc_do.trigger &= ~n_fillup_rewind.active & (ic_ymd > 19020101)
-        # do not run fillup if there is a restart file for current date
-        n_fforc_do.defuser = n_fillup_rewind.complete.across('YMD') & (start_ymd >= fforc_ymd)
-
-        n_fforc_init = Family('init')
-        n_fforc_init.add(Task('fillup_marsreq'), Task('const_prep'))
-
-        n_fforc_forcings = Family('forcings')
-        n_fforc_forcings.trigger = n_fforc_init.complete
-        for param in 'ws', 'rh', 'tt', 'pr', 'sc', 'cc':
-            n_fforc_forcings.add_task(param)
-
-        n_fforc_do.add(n_fforc_init, n_fforc_forcings)
-
-        n_fforc.add(n_fforc_do)
-        #n_fforc.add(DummyEpilog(done = init_ymd > fforc_ymd))
-        n_fforc.add(DummyEpilog(done = forecast_ymd > fforc_ymd))
-
         # YMD repeat which runs fillup simulation.
         # We rewind this YMD when there is new GEFF-RE output
         # and re-do fillup simulation starting from the
@@ -174,18 +144,29 @@ class Builder(BaseBuilder):
         n_fillup.add(fillup_ymd)
 
         n_fillup_do = Family('do')
-        n_fillup_do.trigger = n_fforc_do.complete.across('YMD') & (start_ymd < fillup_ymd)
-        #n_fillup_do.defuser = n_fforc_do.complete.across('YMD') & (start_ymd >= fillup_ymd)
+        n_fillup_do.trigger = n_fillup_rewind.complete.across('YMD') & (start_ymd < fillup_ymd)
+        n_fillup_do.trigger &= ~n_fillup_rewind.active & (ic_ymd > 19020101)
+        # do not run fillup if there is a restart file for current date
         n_fillup_do.defuser = n_fillup_rewind.complete.across('YMD') & (start_ymd >= fillup_ymd)
 
+        n_fillup_init = Family('init')
+        n_fillup_const_prep = Task('const_prep')
+        n_fillup_marsreq = Task('fillup_marsreq')
+        n_fillup_init.add(n_fillup_const_prep, n_fillup_marsreq)
+
+        n_fillup_forcings = Family('forcings')
+        n_fillup_forcings.trigger = n_fillup_init.complete
+        for param in 'ws', 'rh', 'tt', 'pr', 'sc', 'cc':
+            n_fillup_forcings.add_task(param)
+
         n_fillup_ic = Task('fillup_ic')
-
+        n_fillup_ic.trigger = n_fillup_const_prep.complete
         n_fillup_ecfire = Task('ecfire')
-        n_fillup_ecfire.trigger = n_fillup_ic.complete
+        n_fillup_ecfire.trigger = n_fillup_ic.complete & n_fillup_forcings.complete
 
-        n_fillup_do.add(n_fillup_ic, n_fillup_ecfire)
+        n_fillup_do.add(n_fillup_init, n_fillup_forcings, n_fillup_ic, n_fillup_ecfire)
         n_fillup.add(n_fillup_do)
-        n_fillup.add(DummyEpilog(done = fforc_ymd > fillup_ymd))
+        n_fillup.add(DummyEpilog(done = forecast_ymd > fillup_ymd))
 
         # -----------------------------------------------------------
         # GEFF RT main computations
@@ -283,7 +264,7 @@ class Builder(BaseBuilder):
 
         n_forecast.add(n_forecast_epilog)
 
-        self.suite.add(n_setup, n_barrier, n_fforc, n_fillup, n_forecast)
+        self.suite.add(n_setup, n_barrier, n_fillup, n_forecast)
 
 
         # -----------------------------------------
@@ -300,13 +281,7 @@ class Builder(BaseBuilder):
         n_fillup_lag.add(fillup_lag_ymd)
         n_fillup_clean = Task('fillup_clean')
         n_fillup_lag.add(n_fillup_clean)
-        if use_latest_reanalysis:
-            # fillup forcings should be kept for fillup re-calculations.
-            # (fillup is re-calculated when we have more recent reanalysis)
-            fillup_lag_done = fillup_lag_ymd < start_ymd
-        else:
-            # fillup is never re-calculated so it can be cleaned early
-            fillup_lag_done = fillup_lag_ymd < fillup_ymd
+        fillup_lag_done = fillup_lag_ymd < fillup_ymd
         n_fillup_lag.add(DummyEpilog(done = fillup_lag_done))
         n_lag.add(n_fillup_lag)
 

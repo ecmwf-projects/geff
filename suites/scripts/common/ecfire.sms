@@ -64,14 +64,19 @@ rainclimfile='prclim.nc'
 /
 EOF
 
+date
 
 if [[ $sim_cold_start -ne 1 ]]; then
     zcat $sim_ic_dir/ic.nc.gz > input/rest.nc
 fi
 
+date
+
 for v in vs lm slope vc prclim fm cr; do
   zcat $const_dir/$v.nc.gz > input/$v.nc
 done
+
+date
 
 pids=''
 for v in tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur; do
@@ -79,6 +84,8 @@ for v in tt ttmax ttmin rh rhmax rhmin pr cc ws sc prdur; do
   pids="$pids $!"
 done
 wait $pids
+
+date
 
 ls -l input/
 ls -l ./
@@ -92,50 +99,56 @@ mkdir -p output
 
 geff_exe
 
+date
 
 ls -l input/
 ls -l output/
 ls -l ./
-
-cp output/ecfire.out $sim_dir/
-ncatted -O -a version,global,c,c,"$geff_version" input/restart_ecfire.nc
-gzip -c input/restart_ecfire.nc > $sim_dir/next_run_ic.nc.gz
-
-mark5_distvar='kbdi,df,mark5_ros,fdi'
-nfdrs_distvar='nfdrs_ros,sc,erc,bi,ic'
-fwi_distvar='fwi,ffmc,dmc,dc,isi,bui,dsr,danger_risk'
-ecmwf_distvar='t2,maxt2,mint2,rh,maxrh,minrh,tp,cc,wspeed,snow,dp,vs,lsm,slope,cv,tpclim,fm,cr'
 
 
 # Add 'version' attribute to the NetCDF output
 
 ncatted -O -a version,global,c,c,"$geff_version" ecfire.nc
 
+date
 
-# Transfer NetCDF output from local
-# node disk to the shared file system.
-
-name=ECMWF_MARK5_${sim_ymd}_1200_${sim_id}
-cdo -f nc4 -z zip_1 -selvar,$mark5_distvar ecfire.nc $name.nc
-ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-
-name=ECMWF_FWI_${sim_ymd}_1200_${sim_id}
-cdo -f nc4 -z zip_1 -selvar,$fwi_distvar ecfire.nc $name.nc
-ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-
-name=ECMWF_NFDRS_${sim_ymd}_1200_${sim_id}
-cdo -f nc4 -z zip_1 -selvar,$nfdrs_distvar ecfire.nc $name.nc
-ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-
-# save forcings of HRES and CONTROL
-case $sim_id in
-    hr | 00 )
-        name=ECMWF_FO_${sim_ymd}_1200_${sim_id}
-        cdo -f nc4 -z zip_1 -selvar,$ecmwf_distvar ecfire.nc $name.nc
-        ncatted -O -a version,global,c,c,"$geff_version" $name.nc
-        ;;
+case $sim_id in fillup )
+    # store restart file on shared filesystem
+    cp output/ecfire.out $sim_dir/
+    ncatted -O -a version,global,c,c,"$geff_version" input/restart_ecfire.nc
+    gzip -c input/restart_ecfire.nc > $sim_dir/next_run_ic.nc.gz
+    date
+    ;;
 esac
 
-mv ECMWF_*.nc $sim_dir/
+case $sim_id in hr | 00 )
+    # store forcings of HRES and CONTROL on shared filesystem
+    ecmwf_distvar='t2,maxt2,mint2,rh,maxrh,minrh,tp,cc,wspeed,snow,dp,vs,lsm,slope,cv,tpclim,fm,cr'
+    name=ECMWF_FO_${sim_ymd}_1200_${sim_id}
+    cdo -f nc4 -z zip_1 -selvar,$ecmwf_distvar ecfire.nc $name.nc
+    ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+    mv ECMWF_FO_*.nc $sim_dir/
+    date
+    ;;
+esac
+
+case $sim_id in hr | [0-9][0-9] )
+    # Store GEFF HRES and ENS output on shared file system.
+    mark5_distvar='kbdi,df,mark5_ros,fdi'
+    nfdrs_distvar='nfdrs_ros,sc,erc,bi,ic'
+    fwi_distvar='fwi,ffmc,dmc,dc,isi,bui,dsr,danger_risk'
+    name=ECMWF_MARK5_${sim_ymd}_1200_${sim_id}
+    cdo -f nc4 -z zip_1 -selvar,$mark5_distvar ecfire.nc $name.nc
+    ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+    name=ECMWF_FWI_${sim_ymd}_1200_${sim_id}
+    cdo -f nc4 -z zip_1 -selvar,$fwi_distvar ecfire.nc $name.nc
+    ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+    name=ECMWF_NFDRS_${sim_ymd}_1200_${sim_id}
+    cdo -f nc4 -z zip_1 -selvar,$nfdrs_distvar ecfire.nc $name.nc
+    ncatted -O -a version,global,c,c,"$geff_version" $name.nc
+    mv ECMWF_MARK5_*.nc ECMWF_FWI_*.nc ECMWF_NFDRS_* $sim_dir/
+    date
+    ;;
+esac
 
 ls -l $sim_dir
