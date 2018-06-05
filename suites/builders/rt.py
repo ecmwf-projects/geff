@@ -77,18 +77,30 @@ class Builder(BaseBuilder):
         if follow_osuite:
             # Start as soon as ECMWF ensemble forecast finishes.
             # '/mc' suite must be visible (on the same server).
+            #
+            #            '(/o/main:YMD == /{suite}/barrier:YMD   '
+            #            'and /o/main/{hh}/fc/model == complete) '
+            #            'or (/o/main:YMD > /{suite}/barrier:YMD '
+
             self.defs.add_extern('/mc/main:YMD')
             self.defs.add_extern('/mc/main/00/fc0015d/fc')
+            self.defs.add_extern('/o/main:YMD')
+            self.defs.add_extern('/o/main/00/fc/model')
+            n_run_hr = Task('run_hr').add(
+                    Defstatus(complete))
+            n_run_en = Family('run_en').add(
+                Trigger('(cal::date_to_julian(/mc/main:YMD)+1 > cal::date_to_julian(/{s}/barrier:YMD) or '
+                        'cal::date_to_julian(/mc/main:YMD)+1 == cal::date_to_julian(/{s}/barrier:YMD) and '
+                        '/mc/main/00/fc0015d/fc == complete)'.format(s=cfg.get('name'))))
+            n_run_en.add(Task('dummy').add(Trigger('0==1')).add(Defuser('1==1')))
             n_barrier = Family('barrier')
-            n_barrier.add(
-                Task('run').add(
-                    Defstatus(complete)))
+            n_barrier.add(n_run_hr, n_run_en)
             n_barrier.add(
                 Family('last').add(
-                    Trigger('(/mc/main:YMD > /{s}/barrier:YMD or '
-                        '/mc/main:YMD == /{s}/barrier:YMD and '
-                        '/mc/main/00/fc0015d/fc == complete) and '
-                        '/{s}/barrier/run == complete'.format(s=cfg.get('name'))),
+                    Trigger('(/o/main:YMD > /{s}/barrier:YMD or '
+                        '/o/main:YMD == /{s}/barrier:YMD and '
+                        '/o/main/00/fc/model == complete) and '
+                        '/{s}/barrier/run_en == complete'.format(s=cfg.get('name'))),
                     Task('sleep').add(
                         Trigger('0==1'),
                         Defuser('1==1'))))
@@ -125,8 +137,6 @@ class Builder(BaseBuilder):
         n_fillup_rewind.trigger = forecast_ymd <= barrier_ymd
         n_fillup_rewind.trigger &= n_build.complete
         n_fillup_rewind.add_label('info', '')
-
-
 
         # -----------------------------------------------------------
         # GEFF RT fillup computations
@@ -184,7 +194,6 @@ class Builder(BaseBuilder):
         n_fc = Family('fc')
         n_fc.trigger = n_fillup_do.complete.across('YMD')
 
-
         # Deterministic
 
         def sim_family(name):
@@ -213,6 +222,8 @@ class Builder(BaseBuilder):
         # Ensemble
 
         n_ens = Family('ens')
+        if follow_osuite:
+            n_ens.trigger = n_run_en.complete.across('YMD')
         n_ens.add_variable('CONTEXT', 'ens')
         # const fields, initial conditions and forcings for ensemble
         n_ens_init = Family('init')
@@ -246,21 +257,21 @@ class Builder(BaseBuilder):
         n_tar = Family('tar')
         fctype_trigger = [('hr', n_hres.complete)]
         if with_ens:
-            fctype_trigger.append(('en',  n_ens.complete))
+            fctype_trigger.append(('en', n_ens.complete))
         for fctype, trigger in fctype_trigger:
             n_fctype = Family(fctype)
             n_fctype.trigger = trigger
             n_fctype.add_variable('FCTYPE', fctype)
             n_tar.add(n_fctype)
             n_fctype.add_task('fc_tar')
+            # dissemination task
+            if with_diss:
+                n_diss = Task('fc_diss')
+                n_diss.trigger = 'fc_tar == complete'
+                n_fctype.add(n_diss)
 
         n_forecast.add(forecast_ymd, n_fc, n_tar)
 
-        # dissemination task
-        if with_diss:
-            n_diss = Task('fc_diss')
-            n_diss.trigger = n_tar.complete
-            n_forecast.add(n_diss)
 
         n_forecast.add(n_forecast_epilog)
 
