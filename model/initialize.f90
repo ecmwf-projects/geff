@@ -94,7 +94,7 @@ SUBROUTINE initialize
 
       DO j=1,nlon
          DO i=1,nlat
-            IF (rlsm(j,i) .GT. 0.0 .AND. icr(j,i) .GT. 0.0 )   THEN 
+            IF (rlsm(j,i) .GT. 0.00001 )   THEN 
                mc(j,i)%r100hr=5.0+(5.0*icr(j,i))
                mc(j,i)%r1000hr=10+(5.0*icr(j,i))
                mc(j,i)%rbndryt=10+(5.0*icr(j,i))
