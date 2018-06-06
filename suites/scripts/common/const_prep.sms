@@ -9,6 +9,7 @@ Prepare fields which are shared by all ensemble members.
 %includeonce <static.h>
 %includeonce <geff.h>
 %includeonce <const.h>
+%includeonce <scripts.h>
 
 
 %includeonce <cdo.h>

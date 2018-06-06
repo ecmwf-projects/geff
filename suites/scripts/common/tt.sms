@@ -9,7 +9,7 @@ Prepare temperature forcing fields in NetCDF format.
 %includeonce <ecflow_bash.h>
 %includeonce <geff.h>
 %includeonce <sim.h>
-%includeonce <static.h>
+%includeonce <const.h>
 %includeonce <scripts.h>
 
 rm -f tmp.grb
@@ -40,14 +40,13 @@ done
 %includeonce <eccodes.h>
 %includeonce <metview.h>
 
-weights=wgb_N${sim_grib_resol}_to_N${sim_resol}_remapbil.nc
-zcat $static_dir/$weights.gz > $weights
+lz4get $const_dir/remapbil.nc.lz4 remapbil.nc
 
 # maximum and minimum temperature for the day
 for h in 3 6 9 12 15 18 21; do
     hh=$(printf '%%02d' $h)
     metview -b $scripts_dir/field_at_solar_time $sim_ymd $hh tmp.grb tt.$hh.grb
-    cdo -R -f nc -remap,n$sim_resol,$weights -settime,$hh:00:00 -setname,tt tt.$hh.grb tt.$hh.nc
+    cdo -R -f nc -remap,n$sim_resol,remapbil.nc -settime,$hh:00:00 -setname,tt tt.$hh.grb tt.$hh.nc
 done
 
 cdo mergetime tt.??.nc tmp.nc

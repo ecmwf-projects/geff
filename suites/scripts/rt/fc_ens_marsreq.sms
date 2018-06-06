@@ -31,7 +31,7 @@ mars_members="number=$mars_members"
 export MARS_MULTITARGET_STRICT_FORMAT=1
 mkdir -p $ens_grib_dir
 
-
+date
 
 if [[ $first_member == 0 ]]; then
 
@@ -63,7 +63,7 @@ EOF
 
 fi
 
-
+date
 
 mars << EOF
 
@@ -91,7 +91,7 @@ RETRIEVE,
     target = "pf.[number].[param]"
 EOF
 
-
+date
 
 mkdir -p $ens_grib_dir
 
@@ -108,3 +108,5 @@ for f in pf.*; do
     param=$(echo $f | cut -f 3-4 -d '.')
     mv $f $ens_grib_dir/$nn.$param
 done
+
+date
