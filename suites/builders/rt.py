@@ -77,11 +77,6 @@ class Builder(BaseBuilder):
         if follow_osuite:
             # Start as soon as ECMWF ensemble forecast finishes.
             # '/mc' suite must be visible (on the same server).
-            #
-            #            '(/o/main:YMD == /{suite}/barrier:YMD   '
-            #            'and /o/main/{hh}/fc/model == complete) '
-            #            'or (/o/main:YMD > /{suite}/barrier:YMD '
-
             self.defs.add_extern('/mc/main:YMD')
             self.defs.add_extern('/mc/main/00/fc0015d/fc')
             self.defs.add_extern('/o/main:YMD')
@@ -121,7 +116,9 @@ class Builder(BaseBuilder):
         # start_ymd: start of the fillup (or forecast if no fillup)
 
         ic_ymd = Variable('ic_ymd', '19010101')
-        self.suite.add(ic_ymd)
+        # 'latest' is for production suite (pretend to be renalysis suite)
+        latest = Variable('latest', '19010101')
+        self.suite.add(ic_ymd, latest)
         self.suite.add_label('ic_ymd', '19010101')
 
         start_ymd = Variable('start_ymd', '19010102')
@@ -202,9 +199,10 @@ class Builder(BaseBuilder):
             n_forcings = Family('forcings')
             for param in ['fc_ws', 'fc_rh', 'fc_tt', 'fc_pr', 'fc_sc', 'fc_cc']:
                 n_forcings.add_task(param)
+            n_sim.add(n_forcings)
             n_ecfire = Task('ecfire')
             n_ecfire.trigger = n_forcings.complete
-            n_sim.add(n_forcings, n_ecfire)
+            n_sim.add(n_ecfire)
             return n_sim
 
         n_hres = Family('hres')
@@ -214,9 +212,17 @@ class Builder(BaseBuilder):
                 Task('const_prep'),
                 Task('hres_ic').add_trigger('const_prep == complete'),
                 Task('fc_hres_marsreq'))
+        n_hres.add(n_hres_init)
         n_hres_fc = sim_family('hr')
         n_hres_fc.trigger = n_hres_init.complete
-        n_hres.add(n_hres_init, n_hres_fc)
+        n_hres.add(n_hres_fc)
+        n_hres_tar = Task('fc_tar')
+        n_hres_tar.trigger = n_hres_fc.complete
+        n_hres.add(n_hres_tar)
+        if with_diss:
+            n_hres_diss = Task('fc_diss')
+            n_hres_diss.trigger = n_hres_tar.complete
+            n_hres.add(n_hres_diss)
         n_fc.add(n_hres)
 
         # Ensemble
@@ -244,6 +250,15 @@ class Builder(BaseBuilder):
         n_ens_ens = Family('ens')
         n_ens_ens.trigger = n_ens_init.complete
         n_ens.add(n_ens_ens)
+        # create tar for archiving and dissemination
+        n_ens_tar = Task('fc_tar')
+        n_ens_tar.trigger = n_ens_ens.complete
+        n_ens.add(n_ens_tar)
+        if with_diss:
+            # dissemination
+            n_ens_diss = Task('fc_diss')
+            n_ens_diss.trigger = n_ens_tar.complete
+            n_ens.add(n_ens_diss)
         for member in [str(x).zfill(2) for x in range(0, 51)]:
             n_mem = sim_family(member)
             n_ens_ens.add(n_mem)
@@ -254,23 +269,7 @@ class Builder(BaseBuilder):
 
         # create tar files for archiving and dissemination
 
-        n_tar = Family('tar')
-        fctype_trigger = [('hr', n_hres.complete)]
-        if with_ens:
-            fctype_trigger.append(('en', n_ens.complete))
-        for fctype, trigger in fctype_trigger:
-            n_fctype = Family(fctype)
-            n_fctype.trigger = trigger
-            n_fctype.add_variable('FCTYPE', fctype)
-            n_tar.add(n_fctype)
-            n_fctype.add_task('fc_tar')
-            # dissemination task
-            if with_diss:
-                n_diss = Task('fc_diss')
-                n_diss.trigger = 'fc_tar == complete'
-                n_fctype.add(n_diss)
-
-        n_forecast.add(forecast_ymd, n_fc, n_tar)
+        n_forecast.add(forecast_ymd, n_fc)
 
 
         n_forecast.add(n_forecast_epilog)
@@ -304,15 +303,18 @@ class Builder(BaseBuilder):
         n_forecast_lag.add(forecast_lag_ymd)
         n_forecast_lag.add_task('fc_clean')
 
-        n_fc_arch = Family('archive')
-        n_fc_arch.trigger =  n_tar.complete.across('YMD')
-        n_forecast_lag.add(n_fc_arch)
-
-        for fctype, _ in fctype_trigger:
+        def fctype_arch(fctype):
             n_fctype = Family(fctype)
             n_fctype.add_variable('FCTYPE', fctype)
-            n_fc_arch.add(n_fctype)
             n_fctype.add_task('fc_arch')
+            return n_fctype
+
+        n_fc_arch = Family('archive')
+        n_fc_arch.add(fctype_arch('hr'))
+        if with_ens:
+            n_fc_arch.add(fctype_arch('en'))
+        n_fc_arch.trigger =  n_forecast.complete.across('YMD')
+        n_forecast_lag.add(n_fc_arch)
 
         n_forecast_lag.add(DummyEpilog(done = forecast_ymd > forecast_lag_ymd))
         n_lag.add(n_forecast_lag)
