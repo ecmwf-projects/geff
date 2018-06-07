@@ -207,6 +207,7 @@ class Builder(BaseBuilder):
 
         n_hres = Family('hres')
         n_hres.add_variable('CONTEXT', 'hres')
+        n_hres.add_variable('FCTYPE', 'hr')
         n_hres_init = Family('init')
         n_hres_init.add(
                 Task('const_prep'),
@@ -231,6 +232,7 @@ class Builder(BaseBuilder):
         if follow_osuite:
             n_ens.trigger = n_run_en.complete.across('YMD')
         n_ens.add_variable('CONTEXT', 'ens')
+        n_ens.add_variable('FCTYPE', 'en')
         # const fields, initial conditions and forcings for ensemble
         n_ens_init = Family('init')
         n_ens_init.add(
