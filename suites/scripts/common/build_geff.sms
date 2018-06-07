@@ -14,6 +14,7 @@ rsync -aip --chmod=ug+rw,o+r --exclude '.svn/*' --exclude '.git/*' $srcdir/* $bl
 cd $blddir
 
 %includeonce <netcdf4.h>
+make clean
 make
 
 mkdir -p $suite_dir/bin
