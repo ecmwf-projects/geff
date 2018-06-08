@@ -1,5 +1,14 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+  * fetch various scripts from the source directory
+  * install them in the suite directory
+
+%end
+
 %includeonce <ecflow_bash.h>
 %includeonce <suite.h>
 

@@ -5,9 +5,10 @@ Clean old files
 
 %end
 
-%include <ecflow_bash.h>
-%include <sim.h>
-%include <suite.h>
+%includeonce <ecflow_bash.h>
+%includeonce <sim.h>
+%includeonce <suite.h>
+%includeonce <newdate.h>
 
 # remove old input gribs
 

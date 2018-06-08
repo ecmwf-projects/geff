@@ -1,5 +1,14 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+    * fetch source code of fire model
+    * compile and install it in the suites directory
+
+%end
+
 %includeonce <ecflow_bash.h>
 %includeonce <suite.h>
 

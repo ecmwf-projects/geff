@@ -1,21 +1,67 @@
 #!/bin/bash -l
 %manual
 
-If there is new era-interim restart file available
-then rewind /%SUITE%/fillup YMD loop to recalculate fillup.
+DESCRIPTION
 
- * Fetch initial conditions for the fillup from
-   the working directory of the GEFF-RE suite.
+    If there is new era-interim restart file available
+    then rewind /%SUITE%/fillup YMD loop to recalculate fillup.
 
- * Re-set the /%SUITE%/fillup:YMD variable
+     * Fetch initial conditions for the fillup from
+       the working directory of the GEFF-RE suite.
+
+     * Re-set the /%SUITE%/fillup:YMD variable
+
+    This task checks what are the most recent initial
+    conditions ("restart file") for the fire forecast.
+
+    These initial conditions are calculated offline
+    by running fire model with ECMWF ERA-INTERIM fields
+    as input.
+
+    Because ERA-INTERIM lags behind real-time, there
+    will always be a gap between latest initial
+    conditions and start of the forecast
+    (currently two-three months)
+
+    This gap needs to be filled with something.
+    We run a "fillup" which is a series of 24-hour
+    long fire model runs:
+
+      /geff_rt/fillup
+
+    First 24-h fillup run is initialized with most recent
+    ERA Interim initial conditions and each
+    subsequent 24-h run continues from the previous one.
+
+    When there is new ERA Interim restart file, the entire
+    fillup series is re-run starting from the new restart
+    file up to the beginning of the forecast.
+
+    This task checks if there is a new restart file;
+    if there is new file, this task rewinds the YMD loop
+      /geff_rt/fillup:YMD
+    so that the entire fillup series is re-run.
+
+    Otherwise the YMD loop is not altered and the fillup
+    sequence is extended by a single 24-hour fillup run.
+
+
+ANALYSTS
+
+    No known problems/solutions yet.
+
+
+OPERATORS
+
+    Try re-running couple of times.
+    Call Integration Team analyst.
 
 %end
 
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
 %includeonce <fillup.h>
-
-
+%includeonce <newdate.h>
 %includeonce <cdo.h>
 
 
@@ -103,15 +149,9 @@ if [[ $use_latest_reanalysis == True ]]; then
     if [[ $fillup_start -ge <?config.get('first_fillup')?> ]]; then
         if [[ %ic_ymd% -lt $re_latest ]]; then
             ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup
-            ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
         fi
     fi
 fi
-
-# fast-forward 'fillup_forcings' loop if it lags behind most recent restart file
-#if [[ $fillup_start -gt %start_ymd% ]]; then
-#    ecflow_client --alter change repeat $fillup_start /%SUITE%/fillup_forcings
-#fi
 
 # Update '/geff_rt:re_ymd' variable; it indicates
 # what is the most recent GEFF-RE restart file used.

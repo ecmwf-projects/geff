@@ -1,11 +1,17 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+%end
+
 %includeonce <ecflow_bash.h>
 %includeonce <sim.h>
 %includeonce <geff.h>
 %includeonce <const.h>
 %includeonce <scripts.h>
-
+%includeonce <newdate.h>
 
 mars << EOF
     retrieve,

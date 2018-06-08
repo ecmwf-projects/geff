@@ -1,12 +1,34 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+  Calculate 10-day forecast of daily (?) precipitation.
+  To be used as input for 10-day fire forecast.
+
+
+ANALYSTS
+
+  No known problems/solutions yet.
+
+
+OPERATORS
+
+  Try re-running couple of times.
+  Call Integration Team analyst.
+
+%end
+
+
 %includeonce <ecflow_bash.h>
 %includeonce <sim.h>
 %includeonce <const.h>
 %includeonce <geff.h>
 %includeonce <scripts.h>
-
-
+%includeonce <newdate.h>
+%includeonce <eccodes.h>
+%includeonce <metview.h>
 %includeonce <cdo.h>
 %includeonce <nco.h>
 

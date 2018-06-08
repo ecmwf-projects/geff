@@ -1,6 +1,7 @@
 #!/bin/bash -l
 
 %includeonce <ecflow_bash.h>
+%includeonce <newdate.h>
 
 ymd=$(newdate -D %YMD% +1)
 

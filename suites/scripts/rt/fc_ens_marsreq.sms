@@ -5,7 +5,7 @@
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
 %includeonce <const.h>
-
+%includeonce <eclib.h>
 %includeonce <cdo.h>
 %includeonce <scripts.h>
 
