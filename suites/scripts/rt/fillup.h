@@ -1,4 +1,5 @@
 %includeonce <suite.h>
+%includeonce <newdate.h>
 
 # YMD corresponds to the end of 24h fillup simulation
 # The nominal date of YMD is YMD minus 24h.

@@ -2,7 +2,20 @@
 
 %manual
 
-Prepare wind speed forcing fields in NetCDF format
+DESCRIPTION
+
+  Calculate wind speed, to be used as input for the fire model.
+
+
+ANALYSTS
+
+  No known problems/soluitons yet.
+
+
+OPERATORS
+
+  Try re-running once;
+  Call Integration Team analyst.
 
 %end
 

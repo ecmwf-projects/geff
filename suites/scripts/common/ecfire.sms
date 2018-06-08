@@ -2,7 +2,21 @@
 
 %manual
 
-Run GEFF model.
+DESCRIPTION
+
+  Run GEFF model
+  and prepare model input and output for archiving/dissemination.
+
+
+ANALYSTS
+
+  No known problems/solutions yet.
+
+
+OPERATORS
+
+  Try re-running once.
+  Call Integration Team analyst.
 
 %end
 
@@ -12,7 +26,7 @@ Run GEFF model.
 %includeonce <static.h>
 %includeonce <lib.h>
 %includeonce <geff.h>
-
+%includeonce <eclib.h>
 %includeonce <cdo.h>
 %includeonce <nco.h>
 

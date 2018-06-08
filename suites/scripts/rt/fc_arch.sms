@@ -1,5 +1,24 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+  Archives .tar files with Fire forecast output (and input)
+  prepared by /geff_rt/forecast/fc/hres/%FCTYPE%/fc_tar task.
+
+ANALYSTS
+
+  No known problems/solutions yet.
+
+OPERATORS
+
+  Try re-running couple of times, otherwise
+  leave aborted and inform Integration Team
+  analyst next working day.
+
+%end
+
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
 %includeonce <geff.h>

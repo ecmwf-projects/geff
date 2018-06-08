@@ -1,12 +1,25 @@
 #!/bin/bash -l
 %manual
 
-Clean forecast directories.
+DESCRIPTION
+
+  Deletes old forecasts.
+
+ANALYSTS
+
+  No known problems/solutions
+
+OPERATORS
+
+  Try rerunning couple of times
+  otherwise set complete and inform
+  Integration Team analyst next working day.
 
 %end
 
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
+%includeonce <newdate.h>
 
 ymd=$ens_ymd
 

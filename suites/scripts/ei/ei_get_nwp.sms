@@ -10,6 +10,7 @@
 
 %includeonce <ecflow_bash.h>
 %includeonce <fo.h>
+%includeonce <newdate.h>
 
 module load comfies
 

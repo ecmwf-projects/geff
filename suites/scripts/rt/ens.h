@@ -4,6 +4,7 @@
 # not individual ensemble members).
 
 %includeonce <suite.h>
+%includeonce <newdate.h>
 
 # nominal date of the ensemble run
 ens_ymd=%YMD%

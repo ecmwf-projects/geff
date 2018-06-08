@@ -1,4 +1,5 @@
 %includeonce <suite.h>
+%includeonce <newdate.h>
 
 sim_ymd=%YMD%
 sim_prev_ymd=$(newdate -D $sim_ymd -1)

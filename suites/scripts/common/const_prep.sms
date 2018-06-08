@@ -1,7 +1,25 @@
 #!/bin/bash -l
 %manual
 
-Prepare fields which are shared by all ensemble members.
+DESCRIPTION
+
+    Prepare assets for todays run based on
+    the grid type/resolution of ECMWF HRES and ENS:
+
+      - interpolation tables for 'cdo remapbil' command
+      - climatology fields (vegetation, precipitation, fuel model etc.)
+      - static fields from IFS analysis (land/sea mask, slope).
+
+
+ANALYSTS:
+
+    No known problem / solution yet.
+
+
+OPERATORS:
+
+    Try re-running a couple of times,
+    call Integration Team analyst if didnt work.
 
 %end
 
@@ -10,8 +28,8 @@ Prepare fields which are shared by all ensemble members.
 %includeonce <geff.h>
 %includeonce <const.h>
 %includeonce <scripts.h>
-
-
+%includeonce <newdate.h>
+%includeonce <eccodes.h>
 %includeonce <cdo.h>
 %includeonce <nco.h>
 

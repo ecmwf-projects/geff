@@ -2,7 +2,21 @@
 
 %manual
 
-Prepare cloud cover forcings fields in NetCDF format
+DESCRIPTION
+
+  Prepare cloud cover forcing fields,
+  to be used as input for the fire model.
+
+
+ANALYSTS
+
+  No known problems/soluitons yet.
+
+
+OPERATORS
+
+  Try re-running once;
+  Call Integration Team analyst.
 
 %end
 

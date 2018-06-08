@@ -19,7 +19,8 @@ The value of the YMD variable is calculated as follows:
 
 %end
 
-%include <ecflow_bash.h>
+%includeonce <ecflow_bash.h>
+%includeonce <newdate.h>
 
 module load comfies
 

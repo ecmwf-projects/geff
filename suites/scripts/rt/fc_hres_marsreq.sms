@@ -5,14 +5,25 @@
   DESCRIPTION
 
     Retrieve 10-day ECMWF deterministic forecast.
-    Det. Forecast is one of ensemble members in the GEFF model.
+
+    Will be used as input for the 10-day
+    deterministic fire forecat.
+
+  ANALYSTS
+
+    No known problems/solutions yet
+
+  OPERATORS
+
+    Try re-running a couple of times.
+    Call integration Team analyst.
 
 %end
 
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
 %includeonce <const.h>
-
+%includeonce <newdate.h>
 %includeonce <cdo.h>
 
 ymd=%YMD%

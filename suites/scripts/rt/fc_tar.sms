@@ -1,5 +1,22 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+  Prepare .tar files for archiving and dissemination.
+
+ANALYSTS
+
+  No known problems/solutions yet.
+
+OPERATORS
+
+  Try rerunning couple of times.
+  Call Integration Team analyst.
+
+%end
+
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
 %includeonce <geff.h>

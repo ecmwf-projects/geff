@@ -1,12 +1,27 @@
 #!/bin/bash -l
 %manual
 
-Clean fillup directories.
+DESCRIPTION
+
+  Clean old fillup data.
+
+
+ANALYSTS
+
+  No known problems/solutions yet.
+
+
+OPERATORS
+
+  Try re-running otherwise set
+  complete and inform Integration
+  Team analyst next working day.
 
 %end
 
 %includeonce <ecflow_bash.h>
 %includeonce <fillup.h>
+%includeonce <newdate.h>
 
 ymd=%YMD%
 

@@ -1,8 +1,27 @@
 #!/bin/bash -l
 
+%manual
+
+DESCRIPTION
+
+  Send fire forecast to JRC.
+
+ANALYSTS
+
+  No known problems/solutions yet.
+
+
+OPERATORS
+
+  Try re-running couple of times.
+  Call Integration Team analyst.
+
+%end
+
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
 %includeonce <geff.h>
+%includeonce <ecpds.h>
 
 fctype=%FCTYPE%
 

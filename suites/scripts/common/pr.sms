@@ -2,7 +2,21 @@
 
 %manual
 
-Prepare precipitation forcings fields in NetCDF format.
+DESCRIPTION
+
+  Calculate precipitation forcings fields,
+  to be used as input for the fire model.
+
+
+ANALYSTS
+
+  No known problems/soluitons yet.
+
+
+OPERATORS
+
+  Try re-running once;
+  Call Integration Team analyst.
 
 %end
 
@@ -11,6 +25,7 @@ Prepare precipitation forcings fields in NetCDF format.
 %includeonce <geff.h>
 %includeonce <const.h>
 %includeonce <scripts.h>
+%includeonce <newdate.h>
 
 prev_ymd=$(newdate -D $sim_ymd -1)
 mars << EOF

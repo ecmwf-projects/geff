@@ -2,9 +2,24 @@
 
 %manual
 
-  DESCRIPTION
+DESCRIPTION
 
-    Retrieve one day of fillup forcings.
+  Retrieve one day of fillup forcings;
+  these are further processed by
+  /geff_rt/fillup/do/forcings family
+  and then used as input to the 24-hour
+  fire model simulation:
+  /geff_rt/fillup/do/ecfire
+
+ANALYSTS
+
+  No known problems/solutions yet
+
+
+OPERATORS
+
+  Try re-running couple of times.
+  Call Integration Team analyst.
 
 %end
 

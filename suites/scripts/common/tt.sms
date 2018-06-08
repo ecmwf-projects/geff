@@ -2,7 +2,21 @@
 
 %manual
 
-Prepare temperature forcing fields in NetCDF format.
+DESCRIPTION
+
+  Calculate temperature forcing fields, to be used as input for the fire model.
+
+
+ANALYSTS
+
+  No known problems/soluitons yet.
+
+
+OPERATORS
+
+  Try re-running once;
+  Call Integration Team analyst.
+
 
 %end
 
