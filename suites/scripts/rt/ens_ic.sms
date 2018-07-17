@@ -14,5 +14,5 @@ Prepare initial conditions for ensemble forecast
 
 mkdir -p $ens_dir
 zcat $fillup_dir/next_run_ic.nc.gz > tmp.nc
-cdo -remapbil,n$ens_resol tmp.nc ic.nc
+cdo -remapnn,n$ens_resol tmp.nc ic.nc
 gzip -c ic.nc > $ens_dir/ic.nc.gz

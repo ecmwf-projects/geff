@@ -30,6 +30,8 @@ OPERATORS
 
 mkdir -p $sim_dir
 
-zcat $fillup_dir/next_run_ic.nc.gz > tmp.nc
-cdo -remapbil,n$sim_resol tmp.nc ic.nc
-gzip -c ic.nc > $sim_dir/ic.nc.gz
+#zcat $fillup_dir/next_run_ic.nc.gz > tmp.nc
+#cdo -remapnn,n$sim_resol tmp.nc ic.nc
+#gzip -c ic.nc > $sim_dir/ic.nc.gz
+
+cp $fillup_dir/next_run_ic.nc.gz $sim_dir/ic.nc.gz
