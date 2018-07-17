@@ -1,2 +1,2 @@
 module unload metview || :
-module load metview/dev
+module load metview/5.1.0
