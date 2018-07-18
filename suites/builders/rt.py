@@ -315,7 +315,7 @@ class Builder(BaseBuilder):
         n_fc_arch.add(fctype_arch('hr'))
         if with_ens:
             n_fc_arch.add(fctype_arch('en'))
-        n_fc_arch.trigger =  n_forecast.complete.across('YMD')
+        n_fc_arch.trigger =  n_fc.complete.across('YMD')
         n_forecast_lag.add(n_fc_arch)
 
         n_forecast_lag.add(DummyEpilog(done = forecast_ymd > forecast_lag_ymd))
