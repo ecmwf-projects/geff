@@ -153,12 +153,16 @@ case $sim_id in hr | [0-9][0-9] )
     fwi_distvar='fwi,ffmc,dmc,dc,isi,bui,dsr,danger_risk'
     name=ECMWF_MARK5_${sim_ymd}_1200_${sim_id}
     cdo -f nc4 -z zip_1 -selvar,$mark5_distvar ecfire.nc $name.nc
+    cdo -varname, mark5_ros,ros $name.nc tmp.nc 
+    mv tmp.nc  $name.nc
     ncatted -O -a version,global,c,c,"$geff_version" $name.nc
     name=ECMWF_FWI_${sim_ymd}_1200_${sim_id}
     cdo -f nc4 -z zip_1 -selvar,$fwi_distvar ecfire.nc $name.nc
     ncatted -O -a version,global,c,c,"$geff_version" $name.nc
     name=ECMWF_NFDRS_${sim_ymd}_1200_${sim_id}
     cdo -f nc4 -z zip_1 -selvar,$nfdrs_distvar ecfire.nc $name.nc
+    cdo -varname,nfdrs_ros,ros $name.nc tmp.nc 
+    mv tmp.nc  $name.nc
     ncatted -O -a version,global,c,c,"$geff_version" $name.nc
     mv ECMWF_MARK5_*.nc ECMWF_FWI_*.nc ECMWF_NFDRS_* $sim_dir/
     date
