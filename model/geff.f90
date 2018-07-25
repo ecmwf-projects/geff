@@ -1114,27 +1114,27 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !TEST ***************************
 
     IF (zrain .GT. 2.8) THEN 
-      !  rd = 0.83 * zrain - 1.27
-      rd = 0.83 * zrain -  2.8 
-      Qo = MIN(800.0 * EXP(-fwi_risk(ix,iy)%dc / 400.0),800.0)
-        Qr = Qo + 3.937 * rd
-        Dr = 400.0 * LOG(800.0 / Qr)
-        
-        IF (Dr .GT. 0.0) THEN
-            fwi_risk(ix,iy)%dc = Dr
-         ELSE
-            fwi_risk(ix,iy)%dc = 0.0
-         ENDIF
+       rd = 0.83 * zrain - 1.27
+       ! rd = 0.83 * zrain -  2.8 
+       Qo = 800.0 * EXP(-fwi_risk(ix,iy)%dc / 400.0)
+       Qr = Qo + 3.937 * rd
+       Dr = 400.0 * LOG(800.0 / Qr)
+       
+       IF (Dr .GT. 0.0) THEN
+          fwi_risk(ix,iy)%dc = Dr
+       ELSE
+          fwi_risk(ix,iy)%dc = 0.0
        ENDIF
+    ENDIF
 
-      CALL DryingFactor(zlat,jmonth,Lf)
-      IF ((ztemp-r0CtoK) .GT. -2.8)THEN 
-        vv = 0.36 * ((ztemp-r0CtoK)+2.8) + Lf
-      ELSE
-        vv = Lf
-      ENDIF
+    CALL DryingFactor(zlat,jmonth,Lf)
+    IF ((ztemp-r0CtoK) .GT. -2.8)THEN 
+       vv = 0.36 * ((ztemp-r0CtoK)+2.8) + Lf
+    ELSE
+       vv = Lf
+    ENDIF
 
-      fwi_risk(ix,iy)%dc=MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0)
+    fwi_risk(ix,iy)%dc=MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0)
 
 !       WRITE (9,*) 'fwi_risk(ix,iy)%dc',fwi_risk(ix,iy)%dc,'19.013999999999999 '
 ! 4   Initial Spread Index
@@ -1156,7 +1156,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
    
     m = 147.2 * (101.0 - fwi_risk(ix,iy)%ffmc) /(59.5 + fwi_risk(ix,iy)%ffmc)
 
-    ff = 91.9 *EXP(-0.1386 * m) * (1.0 + m**(5.31) / 49300000.0)
+    ff = 91.9 *EXP(-0.1386 * m) * (1.0 + m**(5.31) /4.93e7)
 
     fwi_risk(ix,iy)%isi= 0.208 * fWIND * ff
 
