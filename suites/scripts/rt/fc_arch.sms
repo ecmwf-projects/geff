@@ -21,7 +21,7 @@ OPERATORS
 
 %includeonce <ecflow_bash.h>
 %includeonce <ens.h>
-%includeonce <geff.h>
+%includeonce <suite.h>
 
 fctype=%FCTYPE%
 tarname=ECMWF_EFFIS_${ens_ymd}_1200_${fctype}
@@ -29,6 +29,6 @@ tarname=ECMWF_EFFIS_${ens_ymd}_1200_${fctype}
 yyyy=${ens_ymd:0:4}
 mm=${ens_ymd:4:2}
 export ECUMASK=022
-archdir=ec:/$USER/geff/$expver/rt/$yyyy/$mm/
+archdir=ec:/$USER/geff/$suite_expver/rt/$yyyy/$mm/
 emkdir -p $archdir
 ecp -o $ens_tar_dir/$tarname.tar $archdir/
