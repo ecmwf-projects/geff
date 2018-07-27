@@ -1,9 +1,0 @@
-#!/bin/bash -l
-
-%includeonce <ecflow_bash.h>
-%includeonce <newdate.h>
-
-ymd=$(newdate -D %YMD% +1)
-
-ecflow_client --alter change variable ymd $ymd %ECF_NAME%
-ecflow_client --label=ymd $ymd

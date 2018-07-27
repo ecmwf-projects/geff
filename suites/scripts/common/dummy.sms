@@ -1,7 +1,0 @@
-#!/bin/bash -l
-
-%include <ecflow_bash.h>
-
-echo "doing nothing"
-
-sleep %SLEEP:10%
