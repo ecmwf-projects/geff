@@ -1,4 +1,4 @@
-# ![Logo](https://software.ecmwf.int/stash/projects/CEMSF/repos/geff/browse/src/common/images/flames-logo_thumb.png) Global ECMWF Fire Forecasting (GEFF) model
+# ![Logo](src/common/images/flames-logo_thumb.png) Global ECMWF Fire Forecasting (GEFF) model
 
 > Fire danger indices from the FWI, NFDRS and MARK5 systems
 > Maintainer: [Francesca Di Giuseppe](https://www.ecmwf.int/en/about/who-we-are/staff-profiles/francesca-di-giuseppe) francesca.digiuseppe@ecmwf.in
