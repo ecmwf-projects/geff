@@ -1,4 +1,4 @@
-# Global ECMWF Fire Forecasting (GEFF) model
+# ![Logo](https://software.ecmwf.int/stash/projects/CEMSF/repos/geff/browse/src/common/images/flames-logo_thumb.png) Global ECMWF Fire Forecasting (GEFF) model
 
 > Fire danger indices from the FWI, NFDRS and MARK5 systems
 > Maintainer: [Francesca Di Giuseppe](https://www.ecmwf.int/en/about/who-we-are/staff-profiles/francesca-di-giuseppe) francesca.digiuseppe@ecmwf.in
@@ -9,12 +9,11 @@ While it was principally designed for gridded data, it can operate with any kind
 GEFF is available under an APACHE-2 license.
 
 ## Content:
-docs/ documentation
-src/ source code
-tests/ script for launching an example run 
-data/ sample input data (please note, ERA-Interim and other inputs will need to be locally available)
 
---
+- docs/ documentation
+- src/ source code
+- tests/ script for launching an example run 
+- data/ sample input data (please note, ERA-Interim and other inputs will need to be locally available)
 
 ## Meta:
 
