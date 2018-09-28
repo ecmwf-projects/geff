@@ -19,7 +19,7 @@ GEFF is available under an APACHE-2 license.
 -   This software and functions herein are part of an experimental open-source project. They are provided as is, without any guarantee.
 -   Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
 -   License: [APACHE-2](LICENSE)
--   If you use this software, please cite the following paper:<br/><br/>
+-   If you use this software, please cite the following paper:<br/>
     Di Giuseppe, F., Pappenberger, F., Wetterhall, F., Krzeminski, B., Camia, A., Libertá, G. and San Miguel, J., 2016. 
     **The potential predictability of fire danger provided by numerical weather prediction**. Journal of Applied Meteorology and Climatology, 55(11), pp.2469-2491.
     https://journals.ametsoc.org/doi/abs/10.1175/JAMC-D-15-0297.1
