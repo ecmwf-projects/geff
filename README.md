@@ -7,14 +7,14 @@ It implements the Fire Weather Index, the National Fire Danger Rating System and
 While it was principally designed for gridded data, it can operate with any kind of inputs.
 GEFF is available under an APACHE-2 license.
 
-## Content:
+### Content:
 
 - docs/ documentation
 - src/ source code
 - tests/ script for launching an example run 
 - data/ sample input data (please note, ERA-Interim and other inputs will need to be locally available)
 
-## Meta:
+### Meta:
 
 -   This software and functions herein are part of an experimental open-source project. They are provided as is, without any guarantee.
 -   Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
