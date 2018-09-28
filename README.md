@@ -5,7 +5,6 @@
 The Global ECMWF Fire Forecasting (GEFF) model is a Fortran-95 program to calculate fire danger indices from atmospheric inputs. 
 It implements the Fire Weather Index, the National Fire Danger Rating System and the Mc-Arthur ratings in one single infrastructure. 
 While it was principally designed for gridded data, it can operate with any kind of inputs.
-GEFF is available under an APACHE-2 license.
 
 ### Content:
 
