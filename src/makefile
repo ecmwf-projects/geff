@@ -29,7 +29,7 @@ INCLUDE      = ${NETCDF_INCLUDE}
 
 FORT = mo_constants.f90 mo_control.f90 mo_fire.f90 mo_namelist.f90	\
 mo_ncdf_tools.f90 mo_nfdrs.f90 mo_mark5.f90 mo_fwi.f90  mo_vegstage.f90 mo_fuelmodel.f90		\
-initialize.f90 set_grid.f90 getdata.f90 setup.f90 setdown.f90 open_output.f90	\
+initialize.f90 set_grid.f90 getdata.f90 setup.f90 dump_restart.f90 setdown.f90 open_output.f90	\
 open_input.f90 geff.f90
 
 

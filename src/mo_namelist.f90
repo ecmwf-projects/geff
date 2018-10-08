@@ -15,7 +15,7 @@ MODULE mo_namelist
   IMPLICIT NONE
 
 ! program control namelist
-  NAMELIST /control/output_file,rundir,date1,date2,nday,time,init_file, lstick,now,version
+  NAMELIST /control/output_file,rundir,date1,date2,nday,time,init_file,lstick,restart_day,now,version
 
 ! climate data namelist 
   NAMELIST /climate/tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile

@@ -34,7 +34,7 @@ MODULE mo_control
   REAL, PARAMETER :: dt =24./24.       ! timestep in days, ~HAS TO BE DAILY FOR MOMENT =1
   ! move derived parameters to setup.f90
   INTEGER :: nstep ! =nday/dt ! length of run in timesteps ASSUME DT=1 for moment
-  
+  INTEGER :: restart_day !number of timestep before dumping a restart file 
 
  
 ! netcdf and input file indices

@@ -268,7 +268,7 @@ PROGRAM geff
      ! 0.2 fuel model for the pixel based on the JRC climatological maps
               !accordingly to the pixel fuel model the specific characteristic are loaded
               IF ( ifm(ix,iy) .LE. 0) THEN 
-                 lmask_fm=.TRUE. ! record that this point is missing for NFDRS
+                 lmask_fm=.FALSE. ! record that this point is missing for NFDRS
               ELSE
                  lmask_fm=.TRUE.
                  CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
@@ -818,7 +818,7 @@ PROGRAM geff
 
   !   2.3 Mask outputs for wet/snow/dew  conditions 
         
-        ! Raining but no now /ice on the ground
+        ! Raining but no snow /ice on the ground
         IF (zsnow .EQ. 1.0 .OR. zrain .GT. 1.5  ) THEN
            fire_prop(ix,iy)%ros=0.0
            fire_prop(ix,iy)%sc=0
@@ -860,11 +860,13 @@ PROGRAM geff
     END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
 !!B) MARK-5   
 !-----------
+       IF ( fctcur .gt.0 ) THEN	 
         !here we assume that the curing is the one calculated for the nfdrs 
         mark5_fuel(ix,iy)%curing=fctcur*100.
-
-        ! Net-rainfall 
-
+     ELSE 
+         mark5_fuel(ix,iy)%curing=30. !fix curing
+         ! Net-rainfall 
+     END IF 
    
 
        !Keetch-Byram drough factor in SI unit from Crane (1982) [0,203]
@@ -1348,7 +1350,11 @@ IF (lnc_fwi) THEN
 
 
    END IF
-
+   IF ( istep .EQ. restart_day ) THEN 
+   
+      CALL dump_restart
+      
+   ENDIF
 
 
 ENDDO ! date loop
