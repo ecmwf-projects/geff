@@ -25,7 +25,25 @@ SUBROUTINE dump_restart
   INTEGER :: nlatcheck, nloncheck, ndaycheck
   INTEGER :: i,j
   REAL, DIMENSION(nlon,nlat)::  meanrbndryt
+  INTEGER, PARAMETER :: ncd_ps=2
   
+  INTEGER :: ncd_mc1(ncd_ps)
+  INTEGER :: ncd_mc10(ncd_ps)
+  INTEGER :: ncd_mc100(ncd_ps)
+  INTEGER :: ncd_mc1000(ncd_ps)
+  INTEGER :: ncd_x1000(ncd_ps)
+  INTEGER :: ncd_rbndryt(ncd_ps)
+  INTEGER :: ncd_mcherb(ncd_ps)
+  INTEGER :: ncd_mcwood(ncd_ps)
+  INTEGER :: ncd_fwi_fwi(ncd_ps)
+  INTEGER :: ncd_fwi_ffmc(ncd_ps)
+  INTEGER :: ncd_fwi_dmc(ncd_ps)
+  INTEGER :: ncd_fwi_dc(ncd_ps)
+  INTEGER :: ncd_mark5_kb(ncd_ps)
+  INTEGER :: ncd_mark5_tsr(ncd_ps)
+
+
+
   print *,'- now dump restart'
 
   ! dump restart file:
@@ -68,41 +86,41 @@ SUBROUTINE dump_restart
 
  ndiag2d=0 ! dummy variable
 
-   CALL define_ncdf_output(ncidrest,ncvar_mc1,"mc1" , &
+   CALL define_ncdf_output(ncidrest,ncd_mc1,"mc1" , &
         & "Moisture Content 1h- ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID/) )
 
 
-   CALL define_ncdf_output(ncidrest,ncvar_mc10,"mc10" , &
+   CALL define_ncdf_output(ncidrest,ncd_mc10,"mc10" , &
         & "Moisture Content 10h- ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-   CALL define_ncdf_output(ncidrest,ncvar_mc100,"mc100" , &
+   CALL define_ncdf_output(ncidrest,ncd_mc100,"mc100" , &
         & "Moisture Content 100h- ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-   CALL define_ncdf_output(ncidrest,ncvar_mc1000,"mc1000" , &
+   CALL define_ncdf_output(ncidrest,ncd_mc1000,"mc1000" , &
         & "Moisture Content 1000h- ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-   CALL define_ncdf_output(ncidrest,ncvar_rbndryt,"rbndryt" , &
+   CALL define_ncdf_output(ncidrest,ncd_rbndryt,"rbndryt" , &
         & "Mean of moisture Content 1000h- previous 6 days","frac", "FLOAT",ndiag2d, (/LonDimId, LatDimID /) )
 
 
-   CALL define_ncdf_output(ncidrest,ncvar_x1000,"x1000" , &
+   CALL define_ncdf_output(ncidrest,ncd_x1000,"x1000" , &
         & "Moisture Content correction of herbaceous 1000h- ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-   CALL define_ncdf_output(ncidrest,ncvar_mcherb,"mcherb" , &
+   CALL define_ncdf_output(ncidrest,ncd_mcherb,"mcherb" , &
         & "Moisture Content herbaceous plant","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-   CALL define_ncdf_output(ncidrest,ncvar_mcwood,"mcwood" , &
+   CALL define_ncdf_output(ncidrest,ncd_mcwood,"mcwood" , &
         & "Moisture Content shrub(wood) ","frac", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
 
  
 
-  CALL define_ncdf_output(ncidrest,ncvar_fwi_ffmc,"ffmc", &
+  CALL define_ncdf_output(ncidrest,ncd_fwi_ffmc,"ffmc", &
       & "Fine Fuel Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-  CALL define_ncdf_output(ncidrest,ncvar_fwi_dmc,"dmc", &
+  CALL define_ncdf_output(ncidrest,ncd_fwi_dmc,"dmc", &
       & "Duff Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
-  CALL define_ncdf_output(ncidrest,ncvar_fwi_dc,"dc", &
+  CALL define_ncdf_output(ncidrest,ncd_fwi_dc,"dc", &
       & "Drought Code","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID/) )
 print*,"ciao"
-   CALL define_ncdf_output(ncidrest,ncvar_mark5_kb,"kbdi" , &
+   CALL define_ncdf_output(ncidrest,ncd_mark5_kb,"kbdi" , &
          & "keetch-Byram drought index","inch", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
 
 
-   CALL define_ncdf_output(ncidrest,ncvar_mark5_tsr,"mark5_timesincerain", &
+   CALL define_ncdf_output(ncidrest,ncd_mark5_tsr,"mark5_timesincerain", &
         & "Time since rain","number", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
  
   CALL check(NF90_ENDDEF(ncidrest))
@@ -120,37 +138,37 @@ print*,"ciao"
  print*,"======"
 
   print*,"mc1"
-  CALL check( nf90_put_var(ncidrest, ncvar_mc1(1)   , mc%r1hr ))
+  CALL check( nf90_put_var(ncidrest, ncd_mc1(1)   , mc%r1hr ))
   print*,"mc10"
-  CALL check( nf90_put_var(ncidrest, ncvar_mc10(1)  , mc%r10hr ))
+  CALL check( nf90_put_var(ncidrest, ncd_mc10(1)  , mc%r10hr ))
   print*,"mc100"
-  CALL check( nf90_put_var(ncidrest, ncvar_mc100(1) , mc%r100hr  ))
+  CALL check( nf90_put_var(ncidrest, ncd_mc100(1) , mc%r100hr  ))
   print*,"mc1000"
-  CALL check( nf90_put_var(ncidrest, ncvar_mc1000(1) , mc%r1000hr  ))
+  CALL check( nf90_put_var(ncidrest, ncd_mc1000(1) , mc%r1000hr  ))
   print*,"mc-herb"
-  CALL check( nf90_put_var(ncidrest, ncvar_mcherb(1)  , mc%rherb  ))
+  CALL check( nf90_put_var(ncidrest, ncd_mcherb(1)  , mc%rherb  ))
   print*,"mc-wood"
-  CALL check( nf90_put_var(ncidrest, ncvar_mcwood(1)  , mc%rwood  ))
+  CALL check( nf90_put_var(ncidrest, ncd_mcwood(1)  , mc%rwood  ))
   print*,"x1000"
-  CALL check( nf90_put_var(ncidrest, ncvar_x1000(1)  , mc%rx1000  ))
+  CALL check( nf90_put_var(ncidrest, ncd_x1000(1)  , mc%rx1000  ))
   print*,"meanrbndryt"
-  CALL check( nf90_put_var(ncidrest, ncvar_rbndryt(1)  , mc%rbndryt ))
+  CALL check( nf90_put_var(ncidrest, ncd_rbndryt(1)  , mc%rbndryt ))
   
   print*,"MARK-5"
   print*,"======"
   print*,"kbdi"
-  CALL check( nf90_put_var(ncidrest, ncvar_mark5_kb(1)  , mark5_fuel%kb_drought_index  ))
+  CALL check( nf90_put_var(ncidrest, ncd_mark5_kb(1)  , mark5_fuel%kb_drought_index  ))
   print*,"timesincerain"
-  CALL check( nf90_put_var(ncidrest, ncvar_mark5_tsr(1)  , mark5_fuel%timesincerain  ))
+  CALL check( nf90_put_var(ncidrest, ncd_mark5_tsr(1)  , mark5_fuel%timesincerain  ))
  
   print*,"FWI"
   print*,"======"
   print*,"ffmc"
-  CALL check( nf90_put_var(ncidrest, ncvar_fwi_ffmc(1), fwi_risk%ffmc ))
+  CALL check( nf90_put_var(ncidrest, ncd_fwi_ffmc(1), fwi_risk%ffmc ))
   print*,"dmc"
-  CALL check( nf90_put_var(ncidrest, ncvar_fwi_dmc(1), fwi_risk%dmc ))
+  CALL check( nf90_put_var(ncidrest, ncd_fwi_dmc(1), fwi_risk%dmc ))
   print*,"dc"
-  CALL check( nf90_put_var(ncidrest, ncvar_fwi_dc(1), fwi_risk%dc ))
+  CALL check( nf90_put_var(ncidrest, ncd_fwi_dc(1), fwi_risk%dc ))
   CALL check( nf90_close(ncidrest))
 
   RETURN

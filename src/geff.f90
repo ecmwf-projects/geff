@@ -269,10 +269,10 @@ PROGRAM geff
               !accordingly to the pixel fuel model the specific characteristic are loaded
               IF ( ifm(ix,iy) .LE. 0) THEN 
                  lmask_fm=.FALSE. ! record that this point is missing for NFDRS
-              ELSE
-                 lmask_fm=.TRUE.
-                 CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
+                 ifm(ix,iy)=19 ! grass calculate as a grass point 
               END IF
+              CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
+                 
               
               !All fuel loadings are converted to pounds per squarefoot by
               !multiplying the tons per acre value by 0.0459137=rtopoundsft2
@@ -293,20 +293,18 @@ PROGRAM geff
               IF ( icr(ix,iy) .LE. 0) THEN 
                  icr(ix,iy)=1 ! set icr=1 even if is missing data
                  lmask_cr=.FALSE. ! record that this point is missing for NFDRS
-              ELSE
-                 iclima=icr(ix,iy)
-                 lmask_cr=.TRUE. 
               END IF
+              iclima=icr(ix,iy)
+              
 
       ! 0.4 vegetation stage 
        
                IF ( jvs  .LE. 0) THEN 
-                lmask_vegstage=.FALSE. ! record that this point is missing for NFDRS
-             ELSE
-                CALL  define_vegstage(jvs,vegstage)
-                lmask_vegstage=.TRUE. 
-             END IF
-
+                  lmask_vegstage=.FALSE. ! record that this point is missing for NFDRS
+                  jvs = 1
+               END IF
+               CALL  define_vegstage(jvs,vegstage)
+               
     ! 0.5 mean slope
 
             IF (jslope .EQ. 0) jslope =1 
@@ -314,7 +312,7 @@ PROGRAM geff
      
             ! condition the calculation of NFDRS to the existence of valid climatic fields.
             !Inconsistence might be present due to different sea-land masks between the climatic fields and IFS 
-            IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)     THEN
+       !     IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)     THEN
 !A)  NFDRS 
 !=======================================================================================================
        
@@ -832,32 +830,32 @@ PROGRAM geff
            mc(ix,iy)%r1hr=35
            mc(ix,iy)%r10hr=35
         END IF
-     ELSE
+ !    ELSE
 ! reset NFRDS due to fix field missing value 
 !====================================================
+!
+!       fire_prop(ix,iy)%ros=rfillvalue
+!       fire_prop(ix,iy)%sc=ifillvalue
+!       fire_prop(ix,iy)%erc=ifillvalue
+!       fire_prop(ix,iy)%bi=ifillvalue
+!
+!       fire_prob(ix,iy)%ic=ifillvalue
+!       fire_prob(ix,iy)%mcoi=ifillvalue         
+!       fire_prob(ix,iy)%loi=ifillvalue
+!       fire_prob(ix,iy)%fli=rfillvalue
+!  
+!       mc(ix,iy)%r1hr=rfillvalue
+!       mc(ix,iy)%r10hr=rfillvalue
+!       mc(ix,iy)%r100hr=rfillvalue
+!       mc(ix,iy)%r1000hr=rfillvalue
+!
+!       mc(ix,iy)%rherb=rfillvalue
+!       mc(ix,iy)%rwood=rfillvalue
+!       mc(ix,iy)%rx1000=rfillvalue
+!       mc(ix,iy)%rbndryt=rfillvalue
+!
 
-       fire_prop(ix,iy)%ros=rfillvalue
-       fire_prop(ix,iy)%sc=ifillvalue
-       fire_prop(ix,iy)%erc=ifillvalue
-       fire_prop(ix,iy)%bi=ifillvalue
-
-       fire_prob(ix,iy)%ic=ifillvalue
-       fire_prob(ix,iy)%mcoi=ifillvalue         
-       fire_prob(ix,iy)%loi=ifillvalue
-       fire_prob(ix,iy)%fli=rfillvalue
-  
-       mc(ix,iy)%r1hr=rfillvalue
-       mc(ix,iy)%r10hr=rfillvalue
-       mc(ix,iy)%r100hr=rfillvalue
-       mc(ix,iy)%r1000hr=rfillvalue
-
-       mc(ix,iy)%rherb=rfillvalue
-       mc(ix,iy)%rwood=rfillvalue
-       mc(ix,iy)%rx1000=rfillvalue
-       mc(ix,iy)%rbndryt=rfillvalue
-
-  
-    END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
+ !   END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
 !!B) MARK-5   
 !-----------
        IF ( fctcur .gt.0 ) THEN	 
