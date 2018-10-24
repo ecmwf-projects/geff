@@ -381,7 +381,7 @@ PROGRAM geff
        mc(ix,iy)%r1000hr= mc(ix,iy)%r1000hr + ( mc(ix,iy)%rbndryt -  mc(ix,iy)%r1000hr)*(1.00-0.82*EXP(-0.168))
    
        mc(ix,iy)%rx1000=MAX( mc(ix,iy)%rx1000,0.0)
-
+       mc(ix,iy)%r1000hr=MAX( mc(ix,iy)%r1000hr,0.0)
  
     !  write(11,*) vegstage%green_up,vegstage%green, vegstage%transition, vegstage%cured
        !1.5 --- herbaceous and wood 
@@ -863,8 +863,7 @@ PROGRAM geff
         mark5_fuel(ix,iy)%curing=fctcur*100.
      ELSE 
          mark5_fuel(ix,iy)%curing=30. !fix curing
-         ! Net-rainfall 
-     END IF 
+      END IF
    
 
        !Keetch-Byram drough factor in SI unit from Crane (1982) [0,203]
@@ -930,9 +929,9 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         ! from 0 to 10], which estimates the proportion of fine fuels
         ! available for the forward spread of a fire.
  
-        mark5_fuel(ix,iy)%drought_factor=MIN(0.191*(mark5_fuel(ix,iy)%kb_drought_index+104.0)* &
+        mark5_fuel(ix,iy)%drought_factor=MAX(MIN(0.191*(mark5_fuel(ix,iy)%kb_drought_index+104.0)* &
              & ((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))/ &
-             & (3.52*((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0)
+             & (3.52*((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0),0.0)
 
  
 
@@ -1236,7 +1235,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
 
  ELSE  ! not a valid point for calculation 
-
+!NFDRS
        fire_prop(ix,iy)%ros=rfillvalue
        fire_prop(ix,iy)%sc=ifillvalue
        fire_prop(ix,iy)%erc=ifillvalue
@@ -1256,9 +1255,16 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
        mc(ix,iy)%rwood=rfillvalue
        mc(ix,iy)%rx1000=rfillvalue
        mc(ix,iy)%rbndryt=rfillvalue
+!MARK-5
 
+
+       mark5_fuel(ix,iy)%kb_drought_index=rfillvalue
+       mark5_fuel(ix,iy)%drought_factor=rfillvalue
+       mark5_fuel(ix,iy)%timesincerain=ifillvalue
+       mark5_prob(ix,iy)%fire_danger_index=rfillvalue
+  
        rdiag2d(ix,iy,:)=rfillvalue
-
+!FWI
        fwi_risk(ix,iy)%fwi=rfillvalue        
        fwi_risk(ix,iy)%ffmc=rfillvalue       
        fwi_risk(ix,iy)%dmc=rfillvalue        
