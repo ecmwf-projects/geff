@@ -669,6 +669,9 @@ PROGRAM geff
        !rate of spread
     
        fire_prop(ix,iy)%ros=ir *zeta *(1+phislp+phiwnd)/MAX(htsink ,reps) !ft/min 
+      
+       if (ISNAN(fire_prop(ix,iy)%ros) ) fire_prop(ix,iy)%ros=0.0 
+
     !   if (ISNAN(fire_prop(ix,iy)%ros) .OR.fire_prop(ix,iy)%ros .GT. 200. )  print*,mc(ix,iy)%rherb,mc(ix,iy)%rwood,ir, zeta,mc(ix,iy)%r1hr,fuelmodel%herb_type
        ! spread component 
        fire_prop(ix,iy)%sc=NINT(fire_prop(ix,iy)%ros)
@@ -1133,7 +1136,10 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         vv = Lf
       ENDIF
 
-      fwi_risk(ix,iy)%dc=MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0)
+      !upper limit the DC as it can get to very large numbers that 
+      !are outside the limits of single precision 
+
+      fwi_risk(ix,iy)%dc=MIN(MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0),10000.0)
 
 !       WRITE (9,*) 'fwi_risk(ix,iy)%dc',fwi_risk(ix,iy)%dc,'19.013999999999999 '
 ! 4   Initial Spread Index
