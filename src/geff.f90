@@ -1095,7 +1095,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
   ! increments
 
-     fwi_risk(ix,iy)%dmc=MAX(fwi_risk(ix,iy)%dmc,0.0)+ 100.0 * k
+     !DMC is bounded between 0 and 10,000 (DMC could get to infinity and it will get to very high values over desereted areas where no fires can happens as there is no fuel )
+     fwi_risk(ix,iy)%dmc=MIN(MAX(fwi_risk(ix,iy)%dmc + 100.0 * k,0.0),10000.0)
 !     WRITE (9,*) 'fwi_risk(ix,iy)%dmc',fwi_risk(ix,iy)%dmc,' 8.5450511359999997'
 ! 3  The Drought Code 
 !==========================================================================
@@ -1138,6 +1139,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
       !upper limit the DC as it can get to very large numbers that 
       !are outside the limits of single precision 
+      !DC is bounded between 0 and 10,000 
 
       fwi_risk(ix,iy)%dc=MIN(MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0),10000.0)
 
