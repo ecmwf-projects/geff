@@ -359,8 +359,7 @@ PROGRAM geff
        !duration of daylight
        CALL CAL_DAYLIT (zlat,actualdate,daylit)
     
-       ! weighted 24-hour average EMC
-     
+       ! weighted 24-hour average EMC     
        zemcbar=(daylit*zminem +(24.0-daylit)*zmaxem)/24.0
        zbndryh=((24-zdp)*zemcbar+zdp*(0.5*zdp+41.0))/24.0
     
@@ -1027,7 +1026,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
            IF (mo .LT.  ew) THEN 
               kl0 = 1-((100-zrh)/100)**(1.7)
-              kl1 = (zrh)**(0.5)
+              kl1 = (zwspeed*tokmhr)**(0.5)
               kl2 = 1-((100-zrh)/100)**(8)
               kl = 0.424 * kl0 + 0.0694 * kl1 * kl2
               kw = kl*0.581*EXP(0.0365*(ztemp-r0CtoK))
@@ -1117,8 +1116,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !TEST ***************************
 
     IF (zrain .GT. 2.8) THEN 
-      !  rd = 0.83 * zrain - 1.27
-      rd = 0.83 * zrain -  2.8 
+        rd = 0.83 * zrain - 1.27
+      ! rd = 0.83 * zrain -  2.8 
       Qo = MIN(800.0 * EXP(-fwi_risk(ix,iy)%dc / 400.0),800.0)
         Qr = Qo + 3.937 * rd
         Dr = 400.0 * LOG(800.0 / Qr)
