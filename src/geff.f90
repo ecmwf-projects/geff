@@ -1134,9 +1134,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
       ELSE
         vv = Lf
       ENDIF
-      ! vv cannot be negative so if this is the case reset to zero
-        vv=max(vv,0.0) 
-      !upper limit the DC as it can get to very large numbers that 
+            !upper limit the DC as it can get to very large numbers that 
       !are outside the limits of single precision 
       !DC is bounded between 0 and 10,000 
 
