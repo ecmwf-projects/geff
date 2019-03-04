@@ -46,16 +46,16 @@ CONTAINS
 ! local 
     REAL:: dl
 
-!  original formulation 
-!
-!    IF (lat .GE. 15) THEN 
-!       df = LfN(mm)
-!       !  Use Equatorial numbers 
-!    ELSE IF (lat .LT. 15 .AND. lat .GE. -15) THEN
-!       df= 1.39
-!    ELSE IF (lat .LT. -15) THEN
-!       df = LfS(mm)
-!    ENDIF
+  original formulation 
+
+    IF (lat .GE. 15) THEN 
+       df = LfN(mm)
+       !  Use Equatorial numbers 
+    ELSE IF (lat .LT. 15 .AND. lat .GE. -15) THEN
+       df= 1.39
+    ELSE IF (lat .LT. -15) THEN
+       df = LfS(mm)
+    ENDIF
 !
 ! New global implementation 
 !Australian fire weather as represented by the 
@@ -67,9 +67,9 @@ CONTAINS
 ! equation A25
 !
 
-    CALL DayLength(lat,mm,dl)
+!    CALL DayLength(lat,mm,dl)
 
-    df = max (1.43*dl-4.25, -1.6)
+!    df = max (1.43*dl-4.25, -1.6)
 
  END SUBROUTINE  DryingFactor
 
