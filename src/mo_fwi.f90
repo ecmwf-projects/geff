@@ -46,7 +46,7 @@ CONTAINS
 ! local 
     REAL:: dl
 
-  original formulation 
+ ! original formulation 
 
     IF (lat .GE. 15) THEN 
        df = LfN(mm)
