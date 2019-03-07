@@ -1218,12 +1218,12 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     ENDIF
 !    WRITE (9,*) 'fwi_risk(ix,iy)%fwi',fwi_risk(ix,iy)%fwi,'10.096371392382368 '
 
-! mask snow points (do we have to mask for heavy precipitation ?)
-       IF (zsnow .EQ. 1 ) THEN
-           fwi_risk(ix,iy)%bui=0.0
-           fwi_risk(ix,iy)%isi=0.0
-           fwi_risk(ix,iy)%fwi=0.0
-        END IF
+! IF YOU WANT TO MASK FOR SNOW uncomment these three lines 
+   !    IF (zsnow .EQ. 1 ) THEN
+   !        fwi_risk(ix,iy)%bui=0.0
+   !        fwi_risk(ix,iy)%isi=0.0
+   !        fwi_risk(ix,iy)%fwi=0.0
+   !     END IF
 
 
 
@@ -1235,12 +1235,6 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     IF (fwi_risk(ix,iy)%fwi .GT. 50.0                                   ) fwi_risk(ix,iy)%danger_risk=6.0
 
     fwi_risk(ix,iy)%dsr=0.0272*(fwi_risk(ix,iy)%fwi**(1.77))
-
-
-
-
-
-
 
  ELSE  ! not a valid point for calculation 
 !NFDRS

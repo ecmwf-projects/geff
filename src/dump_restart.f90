@@ -115,8 +115,7 @@ SUBROUTINE dump_restart
       & "Duff Moisture Content","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
   CALL define_ncdf_output(ncidrest,ncd_fwi_dc,"dc", &
       & "Drought Code","%", "FLOAT",ndiag2d, (/ LonDimId, LatDimID/) )
-print*,"ciao"
-   CALL define_ncdf_output(ncidrest,ncd_mark5_kb,"kbdi" , &
+  CALL define_ncdf_output(ncidrest,ncd_mark5_kb,"kbdi" , &
          & "keetch-Byram drought index","inch", "FLOAT",ndiag2d, (/ LonDimId, LatDimID /) )
 
 
