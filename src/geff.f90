@@ -250,8 +250,7 @@ PROGRAM geff
 
            ! calculations is performed only on land points for all the indices
            !
-           IF (rlsm(ix,iy) .gt. 0.00001 .and. zlat .gt. -60.0 )  THEN
-           
+      IF (rlsm(ix,iy) .gt. 0.0001 .and. zlat .gt. -60.0 )  THEN      
             ! 0- set-up conditions 
    !---------------------------------------------------------------------------
     
@@ -268,11 +267,11 @@ PROGRAM geff
      ! 0.2 fuel model for the pixel based on the JRC climatological maps
               !accordingly to the pixel fuel model the specific characteristic are loaded
               IF ( ifm(ix,iy) .LE. 0) THEN 
-                 lmask_fm=.TRUE. ! record that this point is missing for NFDRS
-              ELSE
-                 lmask_fm=.TRUE.
-                 CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
+                 lmask_fm=.FALSE. ! record that this point is missing for NFDRS
+                 ifm(ix,iy)=19 ! grass calculate as a grass point 
               END IF
+              CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
+                 
               
               !All fuel loadings are converted to pounds per squarefoot by
               !multiplying the tons per acre value by 0.0459137=rtopoundsft2
@@ -293,20 +292,18 @@ PROGRAM geff
               IF ( icr(ix,iy) .LE. 0) THEN 
                  icr(ix,iy)=1 ! set icr=1 even if is missing data
                  lmask_cr=.FALSE. ! record that this point is missing for NFDRS
-              ELSE
-                 iclima=icr(ix,iy)
-                 lmask_cr=.TRUE. 
               END IF
+              iclima=icr(ix,iy)
+              
 
       ! 0.4 vegetation stage 
        
                IF ( jvs  .LE. 0) THEN 
-                lmask_vegstage=.FALSE. ! record that this point is missing for NFDRS
-             ELSE
-                CALL  define_vegstage(jvs,vegstage)
-                lmask_vegstage=.TRUE. 
-             END IF
-
+                  lmask_vegstage=.FALSE. ! record that this point is missing for NFDRS
+                  jvs = 1
+               END IF
+               CALL  define_vegstage(jvs,vegstage)
+               
     ! 0.5 mean slope
 
             IF (jslope .EQ. 0) jslope =1 
@@ -314,7 +311,7 @@ PROGRAM geff
      
             ! condition the calculation of NFDRS to the existence of valid climatic fields.
             !Inconsistence might be present due to different sea-land masks between the climatic fields and IFS 
-            IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)     THEN
+       !     IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)     THEN
 !A)  NFDRS 
 !=======================================================================================================
        
@@ -361,8 +358,7 @@ PROGRAM geff
        !duration of daylight
        CALL CAL_DAYLIT (zlat,actualdate,daylit)
     
-       ! weighted 24-hour average EMC
-     
+       ! weighted 24-hour average EMC     
        zemcbar=(daylit*zminem +(24.0-daylit)*zmaxem)/24.0
        zbndryh=((24-zdp)*zemcbar+zdp*(0.5*zdp+41.0))/24.0
     
@@ -383,7 +379,7 @@ PROGRAM geff
        mc(ix,iy)%r1000hr= mc(ix,iy)%r1000hr + ( mc(ix,iy)%rbndryt -  mc(ix,iy)%r1000hr)*(1.00-0.82*EXP(-0.168))
    
        mc(ix,iy)%rx1000=MAX( mc(ix,iy)%rx1000,0.0)
-
+       mc(ix,iy)%r1000hr=MAX( mc(ix,iy)%r1000hr,0.0)
  
     !  write(11,*) vegstage%green_up,vegstage%green, vegstage%transition, vegstage%cured
        !1.5 --- herbaceous and wood 
@@ -671,6 +667,9 @@ PROGRAM geff
        !rate of spread
     
        fire_prop(ix,iy)%ros=ir *zeta *(1+phislp+phiwnd)/MAX(htsink ,reps) !ft/min 
+      
+       if (ISNAN(fire_prop(ix,iy)%ros) ) fire_prop(ix,iy)%ros=0.0 
+
     !   if (ISNAN(fire_prop(ix,iy)%ros) .OR.fire_prop(ix,iy)%ros .GT. 200. )  print*,mc(ix,iy)%rherb,mc(ix,iy)%rwood,ir, zeta,mc(ix,iy)%r1hr,fuelmodel%herb_type
        ! spread component 
        fire_prop(ix,iy)%sc=NINT(fire_prop(ix,iy)%ros)
@@ -818,7 +817,7 @@ PROGRAM geff
 
   !   2.3 Mask outputs for wet/snow/dew  conditions 
         
-        ! Raining but no now /ice on the ground
+        ! Raining but no snow /ice on the ground
         IF (zsnow .EQ. 1.0 .OR. zrain .GT. 1.5  ) THEN
            fire_prop(ix,iy)%ros=0.0
            fire_prop(ix,iy)%sc=0
@@ -832,39 +831,40 @@ PROGRAM geff
            mc(ix,iy)%r1hr=35
            mc(ix,iy)%r10hr=35
         END IF
-     ELSE
+ !    ELSE
 ! reset NFRDS due to fix field missing value 
 !====================================================
+!
+!       fire_prop(ix,iy)%ros=rfillvalue
+!       fire_prop(ix,iy)%sc=ifillvalue
+!       fire_prop(ix,iy)%erc=ifillvalue
+!       fire_prop(ix,iy)%bi=ifillvalue
+!
+!       fire_prob(ix,iy)%ic=ifillvalue
+!       fire_prob(ix,iy)%mcoi=ifillvalue         
+!       fire_prob(ix,iy)%loi=ifillvalue
+!       fire_prob(ix,iy)%fli=rfillvalue
+!  
+!       mc(ix,iy)%r1hr=rfillvalue
+!       mc(ix,iy)%r10hr=rfillvalue
+!       mc(ix,iy)%r100hr=rfillvalue
+!       mc(ix,iy)%r1000hr=rfillvalue
+!
+!       mc(ix,iy)%rherb=rfillvalue
+!       mc(ix,iy)%rwood=rfillvalue
+!       mc(ix,iy)%rx1000=rfillvalue
+!       mc(ix,iy)%rbndryt=rfillvalue
+!
 
-       fire_prop(ix,iy)%ros=rfillvalue
-       fire_prop(ix,iy)%sc=ifillvalue
-       fire_prop(ix,iy)%erc=ifillvalue
-       fire_prop(ix,iy)%bi=ifillvalue
-
-       fire_prob(ix,iy)%ic=ifillvalue
-       fire_prob(ix,iy)%mcoi=ifillvalue         
-       fire_prob(ix,iy)%loi=ifillvalue
-       fire_prob(ix,iy)%fli=rfillvalue
-  
-       mc(ix,iy)%r1hr=rfillvalue
-       mc(ix,iy)%r10hr=rfillvalue
-       mc(ix,iy)%r100hr=rfillvalue
-       mc(ix,iy)%r1000hr=rfillvalue
-
-       mc(ix,iy)%rherb=rfillvalue
-       mc(ix,iy)%rwood=rfillvalue
-       mc(ix,iy)%rx1000=rfillvalue
-       mc(ix,iy)%rbndryt=rfillvalue
-
-  
-    END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
+ !   END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
 !!B) MARK-5   
 !-----------
+       IF ( fctcur .gt.0 ) THEN	 
         !here we assume that the curing is the one calculated for the nfdrs 
         mark5_fuel(ix,iy)%curing=fctcur*100.
-
-        ! Net-rainfall 
-
+     ELSE 
+         mark5_fuel(ix,iy)%curing=30. !fix curing
+      END IF
    
 
        !Keetch-Byram drough factor in SI unit from Crane (1982) [0,203]
@@ -930,9 +930,9 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         ! from 0 to 10], which estimates the proportion of fine fuels
         ! available for the forward spread of a fire.
  
-        mark5_fuel(ix,iy)%drought_factor=MIN(0.191*(mark5_fuel(ix,iy)%kb_drought_index+104.0)* &
+        mark5_fuel(ix,iy)%drought_factor=MAX(MIN(0.191*(mark5_fuel(ix,iy)%kb_drought_index+104.0)* &
              & ((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))/ &
-             & (3.52*((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0)
+             & (3.52*((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0),0.0)
 
  
 
@@ -1025,7 +1025,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
            IF (mo .LT.  ew) THEN 
               kl0 = 1-((100-zrh)/100)**(1.7)
-              kl1 = (zrh)**(0.5)
+              kl1 = (zwspeed*tokmhr)**(0.5)
               kl2 = 1-((100-zrh)/100)**(8)
               kl = 0.424 * kl0 + 0.0694 * kl1 * kl2
               kw = kl*0.581*EXP(0.0365*(ztemp-r0CtoK))
@@ -1093,7 +1093,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
   ! increments
 
-     fwi_risk(ix,iy)%dmc=MAX(fwi_risk(ix,iy)%dmc,0.0)+ 100.0 * k
+     !DMC is bounded between 0 and 10,000 (DMC could get to infinity and it will get to very high values over desereted areas where no fires can happens as there is no fuel )
+     fwi_risk(ix,iy)%dmc=MIN(MAX(fwi_risk(ix,iy)%dmc + 100.0 * k,0.0),10000.0)
 !     WRITE (9,*) 'fwi_risk(ix,iy)%dmc',fwi_risk(ix,iy)%dmc,' 8.5450511359999997'
 ! 3  The Drought Code 
 !==========================================================================
@@ -1114,8 +1115,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !TEST ***************************
 
     IF (zrain .GT. 2.8) THEN 
-      !  rd = 0.83 * zrain - 1.27
-      rd = 0.83 * zrain -  2.8 
+        rd = 0.83 * zrain - 1.27
+      ! rd = 0.83 * zrain -  2.8 
       Qo = MIN(800.0 * EXP(-fwi_risk(ix,iy)%dc / 400.0),800.0)
         Qr = Qo + 3.937 * rd
         Dr = 400.0 * LOG(800.0 / Qr)
@@ -1133,8 +1134,14 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
       ELSE
         vv = Lf
       ENDIF
+      IF (vv .LT. 0 ) THEN 
+      	vv=0.0
+      END IF
+            !upper limit the DC as it can get to very large numbers that 
+      !are outside the limits of single precision 
+      !DC is bounded between 0 and 10,000 
 
-      fwi_risk(ix,iy)%dc=MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0)
+      fwi_risk(ix,iy)%dc=MIN(MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0),10000.0)
 
 !       WRITE (9,*) 'fwi_risk(ix,iy)%dc',fwi_risk(ix,iy)%dc,'19.013999999999999 '
 ! 4   Initial Spread Index
@@ -1211,12 +1218,12 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     ENDIF
 !    WRITE (9,*) 'fwi_risk(ix,iy)%fwi',fwi_risk(ix,iy)%fwi,'10.096371392382368 '
 
-! mask snow points (do we have to mask for heavy precipitation ?)
-       IF (zsnow .EQ. 1 ) THEN
-           fwi_risk(ix,iy)%bui=0.0
-           fwi_risk(ix,iy)%isi=0.0
-           fwi_risk(ix,iy)%fwi=0.0
-        END IF
+! IF YOU WANT TO MASK FOR SNOW uncomment these three lines 
+   !    IF (zsnow .EQ. 1 ) THEN
+   !        fwi_risk(ix,iy)%bui=0.0
+   !        fwi_risk(ix,iy)%isi=0.0
+   !        fwi_risk(ix,iy)%fwi=0.0
+   !     END IF
 
 
 
@@ -1229,14 +1236,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
     fwi_risk(ix,iy)%dsr=0.0272*(fwi_risk(ix,iy)%fwi**(1.77))
 
-
-
-
-
-
-
  ELSE  ! not a valid point for calculation 
-
+!NFDRS
        fire_prop(ix,iy)%ros=rfillvalue
        fire_prop(ix,iy)%sc=ifillvalue
        fire_prop(ix,iy)%erc=ifillvalue
@@ -1256,9 +1257,16 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
        mc(ix,iy)%rwood=rfillvalue
        mc(ix,iy)%rx1000=rfillvalue
        mc(ix,iy)%rbndryt=rfillvalue
+!MARK-5
 
+
+       mark5_fuel(ix,iy)%kb_drought_index=rfillvalue
+       mark5_fuel(ix,iy)%drought_factor=rfillvalue
+       mark5_fuel(ix,iy)%timesincerain=ifillvalue
+       mark5_prob(ix,iy)%fire_danger_index=rfillvalue
+  
        rdiag2d(ix,iy,:)=rfillvalue
-
+!FWI
        fwi_risk(ix,iy)%fwi=rfillvalue        
        fwi_risk(ix,iy)%ffmc=rfillvalue       
        fwi_risk(ix,iy)%dmc=rfillvalue        
@@ -1348,7 +1356,11 @@ IF (lnc_fwi) THEN
 
 
    END IF
-
+   IF ( istep .EQ. restart_day ) THEN 
+   
+      CALL dump_restart
+      
+   ENDIF
 
 
 ENDDO ! date loop

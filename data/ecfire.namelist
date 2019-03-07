@@ -1,0 +1,39 @@
+  !
+  ! this is the namelist file for the geff  model
+  !
+  ! F. Di GIUSEPPE 2014, ECMWF
+  !
+&CONTROL
+output_file='geff.nc',
+rundir='./',
+date1=20170404,
+date2=20170413
+nday=10,
+time=12,
+init_file='restart_EU.nc',
+lstick=.FALSE.,
+now='20170404',
+version='1.4'
+/
+&CLIMATE
+tempfile='tt_EU.nc',
+maxtempfile='ttmax_EU.nc',
+mintempfile='ttmin_EU.nc',
+rhfile='rh_EU.nc',
+maxrhfile='rhmax_EU.nc',
+minrhfile='rhmin_EU.nc',
+rainfile='pr_EU.nc',
+ccfile='cc_EU.nc',
+wspeedfile='ws_EU.nc',
+snowfile='sc_EU.nc',
+dpfile='prdur_EU.nc',
+vsfile='vs_EU.nc',
+/
+&CONSTDATA
+lsmfile='lm_EU.nc',
+crfile='cr_EU.nc',
+fmfile='fm_EU.nc',
+slopefile='slope_EU.nc',
+cvfile='vc_EU.nc',
+rainclimfile='prclim_EU.nc'
+/

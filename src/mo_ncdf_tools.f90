@@ -26,30 +26,31 @@ SUBROUTINE check(status)
 END SUBROUTINE check
 
 
-SUBROUTINE define_ncdf_output(ivarid,name,title,iunits,type,ndiag,idarray)
+SUBROUTINE define_ncdf_output(ncidx,ivarid,name,title,iunits,type,ndiag,idarray)
+
   USE netcdf
   USE mo_control
   USE mo_fire
 
   IMPLICIT NONE
 
-  INTEGER, INTENT(in) :: idarray(:) ! flexible vector to set coordinate dimensions
+  INTEGER, INTENT(in) :: ncidx,idarray(:) ! flexible vector to set coordinate dimensions
   INTEGER, INTENT(inout) :: ivarid(2), ndiag
   CHARACTER (len=*), INTENT(IN) :: name, title, iunits,type
   SELECT CASE (type)
 
   CASE ("FLOAT") 
-     CALL check(NF90_DEF_VAR(ncidout, name, nf90_FLOAT, idarray , iVarID(1)))
-     CALL check(NF90_PUT_ATT(ncidout, iVarID(1), "title", title) )
-     CALL check(NF90_PUT_ATT(ncidout, iVarID(1), "units", iunits) )
-     CALL check(NF90_PUT_ATT(ncidout, iVarID(1), "_FillValue", rfillvalue) )
+     CALL check(NF90_DEF_VAR(ncidx, name, nf90_FLOAT, idarray , iVarID(1)))
+     CALL check(NF90_PUT_ATT(ncidx, iVarID(1), "title", title) )
+     CALL check(NF90_PUT_ATT(ncidx, iVarID(1), "units", iunits) )
+     CALL check(NF90_PUT_ATT(ncidx, iVarID(1), "_FillValue", rfillvalue) )
      ndiag=ndiag+1   ! increase the diagnostic counter
      iVarid(2)=ndiag
   CASE ("INTEGER") 
-     CALL check(NF90_DEF_VAR(ncidout, name, nf90_INT, idarray , iVarID(1)))
-     CALL check(NF90_PUT_ATT(ncidout, iVarID(1), "title", title) )
-     CALL check(NF90_PUT_ATT(ncidout, iVarID(1), "units", iunits) )
-     CALL check(NF90_PUT_ATT(ncidout, iVarID(1), "_FillValue", ifillvalue) )
+     CALL check(NF90_DEF_VAR(ncidx, name, nf90_INT, idarray , iVarID(1)))
+     CALL check(NF90_PUT_ATT(ncidx, iVarID(1), "title", title) )
+     CALL check(NF90_PUT_ATT(ncidx, iVarID(1), "units", iunits) )
+     CALL check(NF90_PUT_ATT(ncidx, iVarID(1), "_FillValue", ifillvalue) )
      ndiag=ndiag+1   ! increase the diagnostic counter
      iVarid(2)=ndiag
   END SELECT

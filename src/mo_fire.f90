@@ -68,6 +68,8 @@ MODULE mo_fire
 ! --------------------------
   INTEGER :: ndaydiag ! diagnostics every n days
   INTEGER :: ncidout  ! ncdf file id for output
+  INTEGER :: ncidrest  ! ncdf file id for restart
+
   INTEGER :: LonDimID, LatDimID, timeDimId
 
 ! ncids and indices for 2d output fields
