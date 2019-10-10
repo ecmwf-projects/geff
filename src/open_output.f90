@@ -68,7 +68,7 @@ SUBROUTINE open_output
   ! define global attributes
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "Reference date", now))
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "ECMWF fire model", version))
-  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "Lincense", "Copernicus"))
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "License", "Copernicus"))
 
 
   !---------------------------------------------
