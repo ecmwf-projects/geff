@@ -17,16 +17,15 @@ MODULE mo_fire
   INTEGER  :: nlat,nlon
  
   ! time dimensions 
-  INTEGER :: nday        ! total integration time in days
-  INTEGER :: start_date ! start date yyyymmdd
-
+  INTEGER :: ntimestep        ! total integration time as read from input files 
+ 
   ! region data
   REAL :: lon,dlon,lat,dlat
   REAL, ALLOCATABLE :: lons(:), lats(:) ! lon lat values
   
   ! meteorological variables
 
-  INTEGER, ALLOCATABLE  :: ndate(:)      ! ndate(nstep)         !          integer date
+  INTEGER, ALLOCATABLE  :: nhours(:)      ! nhours(ntimestep)         !          integer date
   REAL, ALLOCATABLE :: rtemp (:,:)       ! rtemp(nx,ny)      ! (K)      T2m     as a function of  space for one slice at time 
   REAL, ALLOCATABLE :: rmaxtemp (:,:)    ! rtempmax(nx,ny)   ! (K)      T2m max as a function of  space for one slice at time
   REAL, ALLOCATABLE :: rmintemp (:,:)    ! rtempmin(nx,ny)   ! (K)      T2m min as a function of  space for one slice at time
@@ -60,8 +59,7 @@ MODULE mo_fire
   INTEGER :: ndiag2d=0 ! number of diagnostics (defined in setup)
 
 
-! derived variable
-  INTEGER ::  nrun ! length of run in timesteps
+
 
 ! --------------------------
 ! output diagnostics control

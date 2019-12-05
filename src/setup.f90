@@ -33,8 +33,6 @@ SUBROUTINE setup
  CALL read_namelists
  CALL set_grid
 
-
-  start_date=date1
   !
   ! allocate arrays
   !

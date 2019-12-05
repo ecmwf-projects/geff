@@ -21,10 +21,10 @@ SUBROUTINE setdown
   USE mo_fwi
   IMPLICIT NONE
 
-  INTEGER :: latvarid, lonvarid, timevarid, unlimdimid
-  INTEGER :: nlatcheck, nloncheck, ndaycheck
-  INTEGER :: i,j
-  REAL, DIMENSION(nlon,nlat)::  meanrbndryt
+ ! INTEGER :: latvarid, lonvarid, timevarid, unlimdimid
+ ! INTEGER :: nlatcheck, nloncheck, ndaycheck
+ ! INTEGER :: i,j
+ ! REAL, DIMENSION(nlon,nlat)::  meanrbndryt
   !---
   ! 1. close down the netcdf input and output files
   !---

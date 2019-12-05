@@ -1,4 +1,4 @@
-SUBROUTINE getdata(iday)
+SUBROUTINE getdata(istep)
 !--------------------------------------------------------- 
 ! ECFIRE: EC-Fire model .
 !
@@ -17,7 +17,7 @@ SUBROUTINE getdata(iday)
 
   IMPLICIT NONE
 
-  INTEGER, INTENT(IN) :: iday
+  INTEGER, INTENT(IN) :: istep
 
   !---------------------------------------------------------------------------
   !  meteorology variables read in from analysis, obs or forecast, or constant
@@ -30,19 +30,19 @@ SUBROUTINE getdata(iday)
   !------------------------------------------------------------------------
  
  
-  CALL check(NF90_GET_VAR(ncid_rain,   VarId_rain, rrain, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_temp, VarId_temp, rtemp, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_maxtemp, VarId_maxtemp, rmaxtemp, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_mintemp, VarId_mintemp, rmintemp, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_rh, VarId_rh, rrh, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_maxrh, VarId_maxrh, rmaxrh, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_minrh, VarId_minrh, rminrh, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_cc, VarId_cc, rcc, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_wspeed, VarId_wspeed, rwspeed, start=(/1,1,iday/),count=(/nlon,nlat,1/)))
-  CALL check(NF90_GET_VAR(ncid_snow, VarId_snow, rsnow, start=(/1,1,iday/),count=(/nlon,nlat,1/))) 
-  CALL check(NF90_GET_VAR(ncid_dp, VarId_dp, rdp, start=(/1,1,iday/),count=(/nlon,nlat,1/))) 
-  CALL check(NF90_GET_VAR(ncid_vs, VarId_vs, ivs, start=(/1,1,iday/),count=(/nlon,nlat,1/))) 
-! CALL check(NF90_GET_VAR(ncid_lal, VarId_lal, ilal, start=(/1,1,iday/),count=(/nlon,nlat,1/))) 
+  CALL check(NF90_GET_VAR(ncid_rain,   VarId_rain, rrain, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_temp, VarId_temp, rtemp, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_maxtemp, VarId_maxtemp, rmaxtemp, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_mintemp, VarId_mintemp, rmintemp, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_rh, VarId_rh, rrh, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_maxrh, VarId_maxrh, rmaxrh, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_minrh, VarId_minrh, rminrh, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_cc, VarId_cc, rcc, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_wspeed, VarId_wspeed, rwspeed, start=(/1,1,istep/),count=(/nlon,nlat,1/)))
+  CALL check(NF90_GET_VAR(ncid_snow, VarId_snow, rsnow, start=(/1,1,istep/),count=(/nlon,nlat,1/))) 
+  CALL check(NF90_GET_VAR(ncid_dp, VarId_dp, rdp, start=(/1,1,istep/),count=(/nlon,nlat,1/))) 
+  CALL check(NF90_GET_VAR(ncid_vs, VarId_vs, ivs, start=(/1,1,istep/),count=(/nlon,nlat,1/))) 
+! CALL check(NF90_GET_VAR(ncid_lal, VarId_lal, ilal, start=(/1,1,istep/),count=(/nlon,nlat,1/))) 
 
   IF (lrain_latreverse)        rrain=rrain(:,nlat:1:-1)
   IF (ltemp_latreverse)        rtemp=rtemp(:,nlat:1:-1)

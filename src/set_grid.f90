@@ -22,7 +22,7 @@ SUBROUTINE set_grid
   INTEGER :: istatus,i
   
   ! netcdf vars - only needed locally
-  INTEGER :: nlatcheck, nloncheck, ndaycheck
+  INTEGER :: nlatcheck, nloncheck
   REAL, ALLOCATABLE :: latscheck(:)
 !---------------------------------------------------------------------------
 !  meteorological  variables read in from analysis, obs or forecast
@@ -41,7 +41,7 @@ SUBROUTINE set_grid
     CALL check(NF90_INQ_DIMID(ncid_lsm, "lon", LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_lsm, LonDimID, len = nloncheck))
    
-    ! here we check that the rherature file has the same number of days as the rain file
+    ! here we check that the rh and temperature files have the same number of  as the rain file
     nlon=nloncheck
     nlat=nlatcheck 
 

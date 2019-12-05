@@ -76,7 +76,7 @@ PROGRAM geff
   TYPE (fuelmodel_type):: fuelmodel
   TYPE (vegstage_type) :: vegstage
   ! local integers 
-  INTEGER :: istep,icheck,idate,iday,ix,iy,ii
+  INTEGER :: istep,icheck,idate,ix,iy,ii
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate 
   REAL:: daylit
@@ -127,13 +127,13 @@ PROGRAM geff
  !
   ! local integer  scalars
   INTEGER :: jfueltype,jvs
-  INTEGER :: jyear,jmonth,jday
+  INTEGER :: jyear,jmonth,jday,jhh
 
 ! fortran timer functions
   REAL :: time1=0.0,time2=0.0
   LOGICAL :: lspinup, &          ! spin up period - turn off output
 &            ltimer=.false.      ! turn the cpu timer on for the first timestep
-  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm
+  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm, lrestart=.TRUE.
 
  
   ! --------------------
@@ -144,22 +144,20 @@ PROGRAM geff
 
   CALL setup ! initial conditions for arrays
 
-  DO istep=1,nrun
+  DO istep=1,ntimestep
 
      IF (ltimer) CALL timer('go  ',icheck,time1,time2) !set up timer
 
-     idate=ndate(istep)
-     iday=istep*dt
+     CALL ADD_DAY (inidate,nhours(istep),actualdate)
 
-     CALL ADD_DAY (date1,idate,actualdate)
+     jyear=INT(actualdate/10000.)
+     jmonth=INT((actualdate-jyear*10000.)/100.)
+     jday=INT((actualdate-jyear*10000.)-jmonth*100.)
+     jhh=MOD((nhours(istep)),24)
 
-     jyear=INT(actualdate/10000)
-     jmonth=INT((actualdate-jyear*10000)/100.)
-     jday=INT((actualdate-jyear*10000)-jmonth*100)
-
-     PRINT*,'step ',istep, "actualdate", actualdate
+     PRINT*,'step ',istep, "actualdate", actualdate, "time (hours)",jhh
   
-     IF (MOD(iday,ndaydiag)==0) WRITE(iounit,*) 'date ',idate,"actualdate", actualdate
+     IF (MOD(istep,ndaydiag)==0) WRITE(iounit,*) 'date ',idate,"actualdate", actualdate
 
      ! read in met data timeslice
      !---------------------------
@@ -955,12 +953,15 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
         !time since rain (The threshold for rain is set at 5 mm/day for consistency with the 
         ! Keetch-Byram drough index)
-         IF (zrain .LT. 5.) THEN
-            mark5_fuel(ix,iy)%timesincerain=mark5_fuel(ix,iy)%timesincerain + 1.
-         ELSE
-       
-           mark5_fuel(ix,iy)%timesincerain=0
-        ENDIF
+        ! Also we only increment the counter at the end of the day and not every hours.
+        
+        IF (jhh .EQ. initime) THEN 
+           IF (zrain .LT. 5. ) THEN
+              mark5_fuel(ix,iy)%timesincerain=mark5_fuel(ix,iy)%timesincerain + 1.
+           ELSE
+              mark5_fuel(ix,iy)%timesincerain=0
+           ENDIF
+        END IF
 
         
         IF ((zsnow .EQ. 1 .OR. zrain .GT. 1.5)) THEN
@@ -1288,55 +1289,55 @@ ENDDO !nlat
 !!D)    NCDF OUTPUT
 !------------
 
-IF (lnc_rain) CALL check( nf90_put_var(ncidout, ncvar_rain(1), rrain, start=(/ 1, 1, iday /) ))
-IF (lnc_temp) CALL check( nf90_put_var(ncidout, ncvar_temp(1), rtemp, start=(/ 1, 1, iday /) ))
-IF (lnc_maxtemp) CALL check( nf90_put_var(ncidout, ncvar_maxtemp(1), rmaxtemp, start=(/ 1, 1, iday /) ))
-IF (lnc_mintemp) CALL check( nf90_put_var(ncidout, ncvar_mintemp(1), rmintemp, start=(/ 1, 1, iday /) ))
-IF (lnc_rh) CALL check( nf90_put_var(ncidout, ncvar_rh(1), rrh, start=(/ 1, 1, iday /) ))
-IF (lnc_maxrh) CALL check( nf90_put_var(ncidout, ncvar_maxrh(1), rmaxrh, start=(/ 1, 1, iday /) ))
-IF (lnc_minrh) CALL check( nf90_put_var(ncidout, ncvar_minrh(1), rminrh, start=(/ 1, 1, iday /) ))
-IF (lnc_cc) CALL check( nf90_put_var(ncidout, ncvar_cc(1), rcc, start=(/ 1, 1, iday /) ))
-IF (lnc_snow) CALL check( nf90_put_var(ncidout, ncvar_snow(1), rsnow, start=(/ 1, 1, iday /) ))
-IF (lnc_wspeed) CALL check( nf90_put_var(ncidout, ncvar_wspeed(1), rwspeed, start=(/ 1, 1, iday /) ))
-IF (lnc_dp) CALL check( nf90_put_var(ncidout, ncvar_dp(1), rdp, start=(/ 1, 1, iday /) ))
-IF (lnc_vs   ) CALL check(nf90_put_var(ncidout, ncvar_vs (1) ,ivs,start =(/1 ,1,iday/)))
-!IF (lnc_lal   ) CALL check(nf90_put_var(ncidout, ncvar_lal(1) ,ilal,start =(/1 ,1,iday/)))
+IF (lnc_rain) CALL check( nf90_put_var(ncidout, ncvar_rain(1), rrain, start=(/ 1, 1, istep /) ))
+IF (lnc_temp) CALL check( nf90_put_var(ncidout, ncvar_temp(1), rtemp, start=(/ 1, 1, istep /) ))
+IF (lnc_maxtemp) CALL check( nf90_put_var(ncidout, ncvar_maxtemp(1), rmaxtemp, start=(/ 1, 1, istep /) ))
+IF (lnc_mintemp) CALL check( nf90_put_var(ncidout, ncvar_mintemp(1), rmintemp, start=(/ 1, 1, istep /) ))
+IF (lnc_rh) CALL check( nf90_put_var(ncidout, ncvar_rh(1), rrh, start=(/ 1, 1, istep /) ))
+IF (lnc_maxrh) CALL check( nf90_put_var(ncidout, ncvar_maxrh(1), rmaxrh, start=(/ 1, 1, istep /) ))
+IF (lnc_minrh) CALL check( nf90_put_var(ncidout, ncvar_minrh(1), rminrh, start=(/ 1, 1, istep /) ))
+IF (lnc_cc) CALL check( nf90_put_var(ncidout, ncvar_cc(1), rcc, start=(/ 1, 1, istep /) ))
+IF (lnc_snow) CALL check( nf90_put_var(ncidout, ncvar_snow(1), rsnow, start=(/ 1, 1, istep /) ))
+IF (lnc_wspeed) CALL check( nf90_put_var(ncidout, ncvar_wspeed(1), rwspeed, start=(/ 1, 1, istep /) ))
+IF (lnc_dp) CALL check( nf90_put_var(ncidout, ncvar_dp(1), rdp, start=(/ 1, 1, istep /) ))
+IF (lnc_vs   ) CALL check(nf90_put_var(ncidout, ncvar_vs (1) ,ivs,start =(/1 ,1,istep/)))
+!IF (lnc_lal   ) CALL check(nf90_put_var(ncidout, ncvar_lal(1) ,ilal,start =(/1 ,1,istep/)))
 
 IF (lnc_nfdrs) THEN 
  
-      CALL check( nf90_put_var(ncidout, ncvar_mc1(1),  mc%r1hr, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mc10(1), mc%r10hr , start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mc100(1),mc%r100hr , start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mc1000(1),mc%r1000hr , start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mc1(1),  mc%r1hr, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mc10(1), mc%r10hr , start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mc100(1),mc%r100hr , start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mc1000(1),mc%r1000hr , start=(/ 1, 1, istep /) ))
  
-      CALL check( nf90_put_var(ncidout, ncvar_x1000(1),  mc%rx1000, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mcherb(1), mc%rherb, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mcwood(1), mc%rwood , start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_x1000(1),  mc%rx1000, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mcherb(1), mc%rherb, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mcwood(1), mc%rwood , start=(/ 1, 1, istep /) ))
  
-      CALL check( nf90_put_var(ncidout, ncvar_ros(1),  fire_prop%ros, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_sc(1) ,  fire_prop%sc , start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_erc(1),  fire_prop%erc, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_bi(1),   fire_prop%bi, start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_ros(1),  fire_prop%ros, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_sc(1) ,  fire_prop%sc , start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_erc(1),  fire_prop%erc, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_bi(1),   fire_prop%bi, start=(/ 1, 1, istep /) ))
  
-      CALL check( nf90_put_var(ncidout, ncvar_ic(1),   fire_prob%ic, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mcoi(1), fire_prob%mcoi , start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_loi(1),  fire_prob%loi, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fli(1),  fire_prob%fli, start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_ic(1),   fire_prob%ic, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mcoi(1), fire_prob%mcoi , start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_loi(1),  fire_prob%loi, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fli(1),  fire_prob%fli, start=(/ 1, 1, istep /) ))
  
 ENDIF 
 
 IF (lnc_mark5) THEN 
  
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_kb(1),  mark5_fuel%kb_drought_index, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_df(1),  mark5_fuel%drought_factor , start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_mc(1),  mark5_fuel%moist, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_w(1),   mark5_fuel%weight, start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_kb(1),  mark5_fuel%kb_drought_index, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_df(1),  mark5_fuel%drought_factor , start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_mc(1),  mark5_fuel%moist, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_w(1),   mark5_fuel%weight, start=(/ 1, 1, istep /) ))
    
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_ros0(1),    mark5_prop%ros_theta0,   start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_ros(1),     mark5_prop%ros_theta,    start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_height(1),  mark5_prop%flame_height, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_heightd(1), mark5_prop%flame_distance, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_fdi(1),     mark5_prob%fire_danger_index, start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_ros0(1),    mark5_prop%ros_theta0,   start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_ros(1),     mark5_prop%ros_theta,    start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_height(1),  mark5_prop%flame_height, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_heightd(1), mark5_prop%flame_distance, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_mark5_fdi(1),     mark5_prob%fire_danger_index, start=(/ 1, 1, istep /) ))
 
    END IF
 
@@ -1344,22 +1345,22 @@ IF (lnc_fwi) THEN
 
 
  
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_fwi(1),  fwi_risk%fwi, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_ffmc(1), fwi_risk%ffmc , start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_dmc(1),  fwi_risk%dmc, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_dc(1),   fwi_risk%dc, start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_fwi(1),  fwi_risk%fwi, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_ffmc(1), fwi_risk%ffmc , start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_dmc(1),  fwi_risk%dmc, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_dc(1),   fwi_risk%dc, start=(/ 1, 1, istep /) ))
    
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_isi(1),     fwi_risk%isi,   start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_bui(1),     fwi_risk%bui,    start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_dsr(1),     fwi_risk%dsr, start=(/ 1, 1, iday /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_danger_risk(1), fwi_risk%danger_risk, start=(/ 1, 1, iday /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_isi(1),     fwi_risk%isi,   start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_bui(1),     fwi_risk%bui,    start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_dsr(1),     fwi_risk%dsr, start=(/ 1, 1, istep /) ))
+      CALL check( nf90_put_var(ncidout, ncvar_fwi_danger_risk(1), fwi_risk%danger_risk, start=(/ 1, 1, istep /) ))
 
 
    END IF
-   IF ( istep .EQ. restart_day ) THEN 
+   IF ( INT(nhours(istep)/24.) .EQ. restart_day .AND. lrestart ) THEN 
    
       CALL dump_restart
-      
+      lrestart=.FALSE.
    ENDIF
 
 

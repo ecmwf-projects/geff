@@ -22,7 +22,6 @@ SUBROUTINE dump_restart
   IMPLICIT NONE
 
   INTEGER :: latvarid, lonvarid, timevarid, unlimdimid
-  INTEGER :: nlatcheck, nloncheck, ndaycheck
   INTEGER :: i,j
   REAL, DIMENSION(nlon,nlat)::  meanrbndryt
   INTEGER, PARAMETER :: ncd_ps=2
@@ -74,7 +73,7 @@ SUBROUTINE dump_restart
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "geff", version))
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "comments","geff  restart file"))
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "refdate", time_units))
-  CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "nday",nday))
+  CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "nday after starting date",restart_day))
 
   !---------------------------------------------
   ! define the output structures
