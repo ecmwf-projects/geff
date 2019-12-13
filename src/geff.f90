@@ -79,6 +79,7 @@ PROGRAM geff
   INTEGER :: istep,icheck,idate,ix,iy,ii
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate 
+  INTEGER(4) :: restartdate 
   REAL:: daylit
 
   ! local real scalars for prognostic calculations
@@ -144,16 +145,20 @@ PROGRAM geff
 
   CALL setup ! initial conditions for arrays
 
+  ! define the date at which to dump the restart 
+  CALL ADD_DAY (inidate,initime, (restart_day-1)*24,restartdate)
+  print*, "Restart date:",restartdate, "Restart time:", initime 
+
   DO istep=1,ntimestep
 
      IF (ltimer) CALL timer('go  ',icheck,time1,time2) !set up timer
 
-     CALL ADD_DAY (inidate,nhours(istep),actualdate)
+     CALL ADD_DAY (inidate,initime, nhours(istep),actualdate)
 
      jyear=INT(actualdate/10000.)
      jmonth=INT((actualdate-jyear*10000.)/100.)
      jday=INT((actualdate-jyear*10000.)-jmonth*100.)
-     jhh=MOD((nhours(istep)),24)
+     jhh=initime+MOD((nhours(istep)),24)
 
      PRINT*,'step ',istep, "actualdate", actualdate, "time (hours)",jhh
   
@@ -957,6 +962,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         
         IF (jhh .EQ. initime) THEN 
            IF (zrain .LT. 5. ) THEN
+           !   print*, "UPDATING DAYS SINCE RAIN", initime, jhh
               mark5_fuel(ix,iy)%timesincerain=mark5_fuel(ix,iy)%timesincerain + 1.
            ELSE
               mark5_fuel(ix,iy)%timesincerain=0
@@ -1357,8 +1363,7 @@ IF (lnc_fwi) THEN
 
 
    END IF
-   IF ( INT(nhours(istep)/24.) .EQ. restart_day .AND. lrestart ) THEN 
-   
+   IF ( actualdate .EQ. restartdate .AND. lrestart ) THEN 
       CALL dump_restart
       lrestart=.FALSE.
    ENDIF
