@@ -1137,9 +1137,9 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
       CALL DryingFactor(zlat,jmonth,Lf)
       IF ((ztemp-r0CtoK) .GT. -2.8)THEN 
-        vv = 0.36 * ((ztemp-r0CtoK)+2.8) + Lf
+        vv = (0.36 * ((ztemp-r0CtoK)+2.8) + Lf)/ 2.
       ELSE
-        vv = Lf
+        vv = Lf / 2.
       ENDIF
       IF (vv .LT. 0 ) THEN 
       	vv=0.0
