@@ -1,13 +1,13 @@
 #!/bin/ksh -v
 #--------------------------------------------------
-# This is an example scripts to run geff using ecmwf forecast inputs 
+# This is an example scripts to run geff using ecmwf forecast inputs
 # files needs to be available in the input directory
-# 
+#
 #--------------------------------------------------
 
 # control
-rundir="./" # directory where geff runs 
-# data needs to be copied into the directory 
+rundir="./" # directory where geff runs
+# data needs to be copied into the directory
 # $rundir/input. The results will be stored in $rundir and some diagnostic outputs will be dumped in $rundir/output.
 geff_exe="../src/geff_exe"
 geff_data_dir="../data/"
@@ -28,22 +28,22 @@ geff_data_dir="../data/"
 
 # constant files
 
-#lsmfile       land sea mask file 
+#lsmfile       land sea mask file
 #crfile        climatic regions  4 =  wet,  3 = humid, 2 =  snow, 1= dry
-#fmfile        fuel model file code. 
+#fmfile        fuel model file code.
 #slopefile     slope is divided in 5 classes (0,1,2,3,4)
 #cvfile        vegetation cover (fraction [0,1])
 #rainclimfile   #climatological precipitation accumulated over an year mm/year
 
-# some global constant fields can be found in the directory 
+# some global constant fields can be found in the directory
 #$rundir/constant
 
 #
 cd $rundir/
-mkdir -p $rundir/input  #this two directories need to exhist 
-mkdir -p $rundir/output #this two directories need to exhist 
+mkdir -p $rundir/input  #this two directories need to exhist
+mkdir -p $rundir/output #this two directories need to exhist
 
-cp $geff_data_dir/* $rundir/input 
+cp $geff_data_dir/* $rundir/input
 
 namelist=ecfire.namelist
 
@@ -89,7 +89,7 @@ rainclimfile='prclim_EU.nc'
 /
 EOF
 
-banner " run geff" 
+banner " run geff"
 #==================================================================
 
 $geff_exe
