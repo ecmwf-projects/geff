@@ -1136,6 +1136,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
        ENDIF
 
       CALL DryingFactor(zlat,jmonth,Lf)
+      ! Evapotranspiration factors
       IF ((ztemp-r0CtoK) .GT. -2.8)THEN 
         vv = (0.36 * ((ztemp-r0CtoK)+2.8) + Lf)/ 2.
       ELSE
