@@ -15,7 +15,7 @@ MODULE mo_namelist
   IMPLICIT NONE
 
 ! program control namelist
-  NAMELIST /control/output_file,rundir,date1,date2,nday,time,init_file,lstick,restart_day,now,version
+  NAMELIST /control/output_file,rundir,inidate,initime,dt,init_file,lstick,restart_day,now,version
 
 ! climate data namelist 
   NAMELIST /climate/tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
@@ -55,9 +55,8 @@ CONTAINS
   WRITE(iounit,*) 'run date ',now
   WRITE(iounit,*)
 
-  WRITE(iounit,*)' integration days: ',nday
-  WRITE(iounit,*)' timestep: ',dt
-  WRITE(iounit,*)' integration steps: ',nday/dt
+ 
+  WRITE(iounit,*)' timestep (hours): ',dt
   WRITE(iounit,*) 
    
   RETURN

@@ -182,16 +182,19 @@ END FUNCTION gregdate
 
 
 !=================================
-SUBROUTINE ADD_DAY (date,nday,newdate)
+SUBROUTINE ADD_DAY (date,time,hh,newdate)
 
    IMPLICIT NONE
 
-   INTEGER, INTENT(IN)  :: date,nday 
+   INTEGER, INTENT(IN)  :: date,time,hh 
    INTEGER, INTENT(OUT) :: newdate
 
    ! local
 
-   INTEGER:: jul
+   INTEGER:: jul,nday
+   
+   nday=INT((hh+time)/24.)
+ 
 
    jul=juldate(date)
    jul=jul+nday

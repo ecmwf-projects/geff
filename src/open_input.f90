@@ -22,7 +22,7 @@ SUBROUTINE open_input
   INTEGER :: istatus,i
   
   ! netcdf vars - only needed locally
-  INTEGER :: nlatcheck, nloncheck, ndaycheck
+  INTEGER :: nlatcheck, nloncheck, ntimestepcheck
   REAL, ALLOCATABLE :: latscheck(:)
 !---------------------------------------------------------------------------
 !  meteorological  variables read in from analysis, obs or forecast
@@ -78,7 +78,7 @@ SUBROUTINE open_input
     ! read in number of timesteps
     !----------------------------
     CALL check(NF90_INQ_DIMID(ncid_rain, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(ncid_rain, timeDimID, len = nday))
+    CALL check(NF90_INQUIRE_DIMENSION(ncid_rain, timeDimID, len = ntimestep))
 
     ! id for rainfall 
     CALL check(NF90_INQ_VARID(ncid_rain, crainvar, VarId_rain))
@@ -106,13 +106,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_temp, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_temp, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_temp, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_temp, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_temp, timeDimID, len = ntimestepcheck))
 
     ! here we check that the temperature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck ) THEN 
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, tempfile
+    &   ntimestep.ne.ntimestepcheck ) THEN 
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, tempfile
       STOP 1
     ENDIF
 
@@ -141,13 +141,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_maxtemp, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_maxtemp, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_maxtemp, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_maxtemp, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_maxtemp, timeDimID, len = ntimestepcheck))
 
     ! here we check that the temperature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck) THEN 
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, maxtempfile
+    &   ntimestep.ne.ntimestepcheck) THEN 
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, maxtempfile
       STOP 1
     ENDIF
 
@@ -175,13 +175,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_mintemp, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_mintemp, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_mintemp, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_mintemp, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_mintemp, timeDimID, len = ntimestepcheck))
 
     ! here we check that the temperature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, mintempfile
+    &   ntimestep.ne.ntimestepcheck)  THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, mintempfile
       STOP 1
     ENDIF
 
@@ -208,13 +208,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_rh, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_rh, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_rh, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_rh, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_rh, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, rhfile
+    &   ntimestep.ne.ntimestepcheck) THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, rhfile
       STOP 1
     ENDIF
 
@@ -240,13 +240,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_maxrh, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_maxrh, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_maxrh, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_maxrh, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_maxrh, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, maxrhfile
+    &   ntimestep.ne.ntimestepcheck) THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, maxrhfile
       STOP 1
     ENDIF
 
@@ -273,13 +273,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_minrh, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_minrh, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_minrh, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_minrh, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_minrh, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, minrhfile
+    &   ntimestep.ne.ntimestepcheck) THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, minrhfile
       STOP 1
     ENDIF
 
@@ -306,13 +306,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_cc, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_cc, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_cc, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_cc, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_cc, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, ccfile
+    &   ntimestep.ne.ntimestepcheck) THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, ccfile
       STOP 1
     ENDIF
 
@@ -339,13 +339,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_wspeed, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_wspeed, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_wspeed, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_wspeed, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_wspeed, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, wspeedfile
+    &   ntimestep.ne.ntimestepcheck) THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, wspeedfile
       STOP 1
     ENDIF
 
@@ -371,13 +371,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_snow, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_snow, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_snow, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_snow, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_snow, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, snowfile
+    &   ntimestep.ne.ntimestepcheck)  THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, snowfile
       STOP 1
     ENDIF
 
@@ -403,13 +403,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_dp, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_dp, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_dp, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_dp, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_dp, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, dpfile
+    &   ntimestep.ne.ntimestepcheck)  THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, dpfile
       STOP 1
     ENDIF
 
@@ -436,13 +436,13 @@ SUBROUTINE open_input
     CALL check(NF90_INQ_DIMID(ncid_vs, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_vs, LonDimID, len = nloncheck))
     CALL check(NF90_INQ_DIMID(ncid_vs, time_name, timeDimID))
-    CALL check(NF90_INQUIRE_DIMENSION(Ncid_vs, timeDimID, len = ndaycheck))
+    CALL check(NF90_INQUIRE_DIMENSION(Ncid_vs, timeDimID, len = ntimestepcheck))
 
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
-    &   nday.ne.ndaycheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, vsfile
+    &   ntimestep.ne.ntimestepcheck)  THEN
+      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, vsfile
       STOP 1
     ENDIF
 
@@ -470,13 +470,13 @@ SUBROUTINE open_input
 !    CALL check(NF90_INQ_DIMID(ncid_lal, lon_name, LonDimID))
 !    CALL check(NF90_INQUIRE_DIMENSION(Ncid_lal, LonDimID, len = nloncheck))
 !    CALL check(NF90_INQ_DIMID(ncid_lal, time_name, timeDimID))
-!    CALL check(NF90_INQUIRE_DIMENSION(Ncid_lal, timeDimID, len = ndaycheck))
+!    CALL check(NF90_INQUIRE_DIMENSION(Ncid_lal, timeDimID, len = ntimestepcheck))
 !
 !    ! here we check that the rherature file has the same number of days as the rain file
 !    IF (nlon.ne.nloncheck .or. &
 !    &   nlat.ne.nlatcheck .or. &
-!    &   nday.ne.ndaycheck)  THEN
-!      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,nday,ndaycheck, lalfile
+!    &   ntimestep.ne.ntimestepcheck)  THEN
+!      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, lalfile
 !      STOP 1
 !    ENDIF
 !
@@ -661,14 +661,13 @@ SUBROUTINE open_input
 
 
     DEALLOCATE(latscheck)
-    ! allocate the fields for dates (has to be after above, since nday read from rainfile
-    ALLOCATE(ndate(nday)) 
-    nrun=nday/dt !
+    ! allocate the fields for dates (has to be after above, since ntimestep read from rainfile
+    ALLOCATE(nhours(ntimestep)) 
     ndaydiag=1
-    DO i=1,nday    
-      ndate(i)=i-1
+    DO i=1,ntimestep    
+      nhours(i)=(i-1)*dt
     ENDDO
-    nstep=nday/dt ! length of run in timesteps
+   
 
 
 END SUBROUTINE open_input
