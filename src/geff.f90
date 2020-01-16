@@ -253,7 +253,7 @@ PROGRAM geff
 
            ! calculations is performed only on land points for all the indices
            !
-      IF (rlsm(ix,iy) .gt. 0.0001 .and. zlat .gt. -60.0 )  THEN      
+      IF (rlsm(ix,iy) .gt. 0.0001 .and. zlat .gt. -60.0 .and. rtemp(ix,iy) .gt. -0.0001  )  THEN      
             ! 0- set-up conditions 
    !---------------------------------------------------------------------------
     
@@ -1284,8 +1284,31 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
        fwi_risk(ix,iy)%dsr=rfillvalue        
        fwi_risk(ix,iy)%danger_risk=rfillvalue
 
+! Meteo input 
 
-    ENDIF !non-lake or sea point
+
+       rrain(ix,iy)=rfillvalue 
+       rtemp(ix,iy)=rfillvalue 
+       rmaxtemp(ix,iy)=rfillvalue 
+       rmintemp(ix,iy)=rfillvalue 
+       rrh(ix,iy)=rfillvalue 
+       rmaxrh(ix,iy)=rfillvalue 
+       rminrh(ix,iy)=rfillvalue 
+       rcc(ix,iy)=rfillvalue 
+       rsnow(ix,iy)=rfillvalue 
+       rwspeed(ix,iy)=rfillvalue 
+       rdp(ix,iy)=rfillvalue 
+       ivs(ix,iy)=ifillvalue 
+! Cut also the  constant fields to be consistent wwith the othe rfields
+
+       rlsm(ix,iy)=rfillvalue 
+       icr(ix,iy)=ifillvalue
+       ifm(ix,iy)=ifillvalue
+       rcv(ix,iy)=rfillvalue
+       islope(ix,iy)=ifillvalue
+       rrainclim(ix,iy)=rfillvalue
+
+   ENDIF !non-lake or sea point
     !--------------------
     ! END OF SPATIAL LOOP
     !--------------------
@@ -1371,6 +1394,18 @@ IF (lnc_fwi) THEN
 
 
 ENDDO ! date loop
+
+
+! write constant fields 
+ 
+IF(lnc_lsm)            CALL check( nf90_put_var(ncidout, ncvar_lsm(1),   rlsm , start=(/ 1, 1 /)))
+IF(lnc_cr)             CALL check( nf90_put_var(ncidout, ncvar_cr(1) ,   icr  , start=(/ 1, 1 /)))
+IF(lnc_fm)             CALL check( nf90_put_var(ncidout, ncvar_fm(1) ,   ifm  , start=(/ 1, 1 /)))
+IF(lnc_cv)             CALL check( nf90_put_var(ncidout, ncvar_cv (1),   rcv  , start=(/ 1, 1 /)))
+IF(lnc_slope)          CALL check( nf90_put_var(ncidout, ncvar_slope(1), islope, start=(/ 1, 1 /)))
+IF(lnc_rainclim)       CALL check( nf90_put_var(ncidout, ncvar_rainclim(1), rrainclim, start=(/ 1, 1 /)))
+
+
 
   CALL setdown
 

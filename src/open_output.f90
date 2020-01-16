@@ -243,13 +243,8 @@ END IF
   CALL check( nf90_put_var(ncidout, latvarid, lats) )
   CALL check( nf90_put_var(ncidout, lonvarid, lons) )
   CALL check( nf90_put_var(ncidout, timevarid, nhours) )
-! write constant fields 
-  IF(lnc_lsm)            CALL check( nf90_put_var(ncidout, ncvar_lsm(1),   rlsm , start=(/ 1, 1 /)))
-  IF(lnc_cr)             CALL check( nf90_put_var(ncidout, ncvar_cr(1) ,   icr  , start=(/ 1, 1 /)))
-  IF(lnc_fm)             CALL check( nf90_put_var(ncidout, ncvar_fm(1) ,   ifm  , start=(/ 1, 1 /)))
-  IF(lnc_cv)             CALL check( nf90_put_var(ncidout, ncvar_cv (1),   rcv  , start=(/ 1, 1 /)))
-  IF(lnc_slope)          CALL check( nf90_put_var(ncidout, ncvar_slope(1), islope, start=(/ 1, 1 /)))
-  IF(lnc_rainclim)       CALL check( nf90_put_var(ncidout, ncvar_rainclim(1), rrainclim, start=(/ 1, 1 /)))
+
+
   !------------------
   ! Set up the arrays
   !------------------
