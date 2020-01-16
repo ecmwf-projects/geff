@@ -8,7 +8,6 @@ SUBROUTINE setup
 ! setup subroutine to read in forcing data and setup output files
 !
 !---------------------------------------------------------
-  USE netcdf
   USE mo_control
   USE mo_constants
   USE mo_fire
@@ -31,7 +30,7 @@ SUBROUTINE setup
   !
 
  CALL read_namelists
- CALL set_grid
+ CALL ncdf_set_grid
 
   !
   ! allocate arrays
@@ -118,12 +117,12 @@ fwi_risk(:,:)%dsr=rfillvalue
 fwi_risk(:,:)%danger_risk=rfillvalue
 
 
-   CALL open_input
-   Print*, "Input files: OPENED" 
-  CALL initialize
+  CALL ncdf_open_input
+  PRINT*, "Input files: OPENED" 
+  CALL ncdf_initialize
 
-  CALL open_output
-  Print*, "Output file: CREATED " 
+  CALL ncdf_open_output
+  PRINT*, "Output file: CREATED " 
 
 
 END SUBROUTINE setup

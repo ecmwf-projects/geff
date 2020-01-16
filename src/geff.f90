@@ -60,7 +60,6 @@ PROGRAM geff
 !                vegetation stage might not be available
 !============================================================================================
 !
-  USE netcdf
   USE mo_constants
   USE mo_control
   USE mo_fire
@@ -113,16 +112,16 @@ PROGRAM geff
   REAL:: rkwet,rktmp
   REAL:: KBDI_temp, Ep
 
-  REAL::	mo, rf, kd, kw, &
-       &	mr, mr0, mr1,&
-       &	ed, ed0, ed1, ed2,&
-       &	ko, ko0, ko1, ko2,&
-       &	ew, ew0, ew1, ew2,&
-       &	kl, kl0, kl1, kl2,&
-       &         vv,rd, qo, qr,dr,&
-       &	re, moo, mrr, bb, pr, k,&
-       &	m, fw, fd, fwiB,ff, ff0, ff1,&
-       &        dc0,dl,lf,fwind,uu,mm
+  REAL:: mo, rf, kd, kw, &
+       & mr, mr0, mr1,&
+       & ed, ed0, ed1, ed2,&
+       & ko, ko0, ko1, ko2,&
+       & ew, ew0, ew1, ew2,&
+       & kl, kl0, kl1, kl2,&
+       & vv,rd, qo, qr,dr,&
+       & re, moo, mrr, bb, pr, k,&
+       & m, fw, fd, fwiB,ff, ff0, ff1,&
+       & dc0,dl,lf,fwind,uu,mm
  
 
  !
@@ -166,7 +165,7 @@ PROGRAM geff
 
      ! read in met data timeslice
      !---------------------------
-     CALL getdata(istep)
+     CALL ncdf_getdata(istep)
    
      !-----------------
      ! GRIDDED LOOP !!!
@@ -862,7 +861,7 @@ PROGRAM geff
  !   END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)  
 !!B) MARK-5   
 !-----------
-       IF ( fctcur .gt.0 ) THEN	 
+       IF ( fctcur .gt.0 ) THEN
         !here we assume that the curing is the one calculated for the nfdrs 
         mark5_fuel(ix,iy)%curing=fctcur*100.
      ELSE 
@@ -882,10 +881,10 @@ PROGRAM geff
         
 ! TEST  
 
-!Yesterday's maximum screen temp 27 (°C)
-! 	Site's average annual rainfall 2000 (mm)
-! 	Gross 24hr rain to 9.00am 9 (mm) 
-!	KBDI yesterday 200
+! Yesterday's maximum screen temp 27 (°C)
+! Site's average annual rainfall 2000 (mm)
+! Gross 24hr rain to 9.00am 9 (mm) 
+! KBDI yesterday 200
 
 !THEN 
 ! KBDI today should be  196
@@ -999,7 +998,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !        fwi_risk(ix,iy)%ffmc=85 
 !TEST ***************************
 
-	mo = 147.2 * (101.0 - fwi_risk(ix,iy)%ffmc)/(MAX((59.5 + fwi_risk(ix,iy)%ffmc),reps)) 
+        mo = 147.2 * (101.0 - fwi_risk(ix,iy)%ffmc)/(MAX((59.5 + fwi_risk(ix,iy)%ffmc),reps)) 
         IF ( zrain .GT. 0.5) THEN
            rf = zrain-0.5
            mr0 = EXP(-100.0 /(251.0 - mo))
@@ -1143,7 +1142,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         vv = Lf / 2.
       ENDIF
       IF (vv .LT. 0 ) THEN 
-      	vv=0.0
+        vv=0.0
       END IF
             !upper limit the DC as it can get to very large numbers that 
       !are outside the limits of single precision 
@@ -1293,86 +1292,24 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 ENDDO !nlon
 ENDDO !nlat
 
-!!D)    NCDF OUTPUT
+!!D)    OUTPUT
 !------------
+      CALL ncdf_write_results(istep)
 
-IF (lnc_rain) CALL check( nf90_put_var(ncidout, ncvar_rain(1), rrain, start=(/ 1, 1, istep /) ))
-IF (lnc_temp) CALL check( nf90_put_var(ncidout, ncvar_temp(1), rtemp, start=(/ 1, 1, istep /) ))
-IF (lnc_maxtemp) CALL check( nf90_put_var(ncidout, ncvar_maxtemp(1), rmaxtemp, start=(/ 1, 1, istep /) ))
-IF (lnc_mintemp) CALL check( nf90_put_var(ncidout, ncvar_mintemp(1), rmintemp, start=(/ 1, 1, istep /) ))
-IF (lnc_rh) CALL check( nf90_put_var(ncidout, ncvar_rh(1), rrh, start=(/ 1, 1, istep /) ))
-IF (lnc_maxrh) CALL check( nf90_put_var(ncidout, ncvar_maxrh(1), rmaxrh, start=(/ 1, 1, istep /) ))
-IF (lnc_minrh) CALL check( nf90_put_var(ncidout, ncvar_minrh(1), rminrh, start=(/ 1, 1, istep /) ))
-IF (lnc_cc) CALL check( nf90_put_var(ncidout, ncvar_cc(1), rcc, start=(/ 1, 1, istep /) ))
-IF (lnc_snow) CALL check( nf90_put_var(ncidout, ncvar_snow(1), rsnow, start=(/ 1, 1, istep /) ))
-IF (lnc_wspeed) CALL check( nf90_put_var(ncidout, ncvar_wspeed(1), rwspeed, start=(/ 1, 1, istep /) ))
-IF (lnc_dp) CALL check( nf90_put_var(ncidout, ncvar_dp(1), rdp, start=(/ 1, 1, istep /) ))
-IF (lnc_vs   ) CALL check(nf90_put_var(ncidout, ncvar_vs (1) ,ivs,start =(/1 ,1,istep/)))
-!IF (lnc_lal   ) CALL check(nf90_put_var(ncidout, ncvar_lal(1) ,ilal,start =(/1 ,1,istep/)))
-
-IF (lnc_nfdrs) THEN 
- 
-      CALL check( nf90_put_var(ncidout, ncvar_mc1(1),  mc%r1hr, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mc10(1), mc%r10hr , start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mc100(1),mc%r100hr , start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mc1000(1),mc%r1000hr , start=(/ 1, 1, istep /) ))
- 
-      CALL check( nf90_put_var(ncidout, ncvar_x1000(1),  mc%rx1000, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mcherb(1), mc%rherb, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mcwood(1), mc%rwood , start=(/ 1, 1, istep /) ))
- 
-      CALL check( nf90_put_var(ncidout, ncvar_ros(1),  fire_prop%ros, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_sc(1) ,  fire_prop%sc , start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_erc(1),  fire_prop%erc, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_bi(1),   fire_prop%bi, start=(/ 1, 1, istep /) ))
- 
-      CALL check( nf90_put_var(ncidout, ncvar_ic(1),   fire_prob%ic, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mcoi(1), fire_prob%mcoi , start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_loi(1),  fire_prob%loi, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fli(1),  fire_prob%fli, start=(/ 1, 1, istep /) ))
- 
-ENDIF 
-
-IF (lnc_mark5) THEN 
- 
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_kb(1),  mark5_fuel%kb_drought_index, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_df(1),  mark5_fuel%drought_factor , start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_mc(1),  mark5_fuel%moist, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_w(1),   mark5_fuel%weight, start=(/ 1, 1, istep /) ))
-   
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_ros0(1),    mark5_prop%ros_theta0,   start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_ros(1),     mark5_prop%ros_theta,    start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_height(1),  mark5_prop%flame_height, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_heightd(1), mark5_prop%flame_distance, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_mark5_fdi(1),     mark5_prob%fire_danger_index, start=(/ 1, 1, istep /) ))
-
-   END IF
-
-IF (lnc_fwi) THEN 
-
-
- 
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_fwi(1),  fwi_risk%fwi, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_ffmc(1), fwi_risk%ffmc , start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_dmc(1),  fwi_risk%dmc, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_dc(1),   fwi_risk%dc, start=(/ 1, 1, istep /) ))
-   
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_isi(1),     fwi_risk%isi,   start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_bui(1),     fwi_risk%bui,    start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_dsr(1),     fwi_risk%dsr, start=(/ 1, 1, istep /) ))
-      CALL check( nf90_put_var(ncidout, ncvar_fwi_danger_risk(1), fwi_risk%danger_risk, start=(/ 1, 1, istep /) ))
-
-
-   END IF
    IF ( actualdate .EQ. restartdate .AND. lrestart ) THEN 
-      CALL dump_restart
+      CALL ncdf_write_restart
       lrestart=.FALSE.
    ENDIF
 
 
 ENDDO ! date loop
 
-  CALL setdown
+
+  ! write 
+  CALL ncdf_write_constant_fields
+
+
+  CALL ncdf_setdown
 
   WRITE(iounit,*) 'integration finished'
 
@@ -1406,6 +1343,5 @@ CONTAINS
 END FUNCTION ISNAN
 
 
-
-
 END PROGRAM geff
+
