@@ -1,41 +1,42 @@
+! (C) Copyright 1996- ECMWF.
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+! In applying this licence, ECMWF does not waive the privileges and immunities
+! granted to it by virtue of its status as an intergovernmental organisation nor
+! does it submit to any jurisdiction.
+
+
+!> @brief Control parameters
+!> @author Di Giuseppe, F., ECMWF
 MODULE mo_control
-!--------------------------------------------------------- 
-! ECFIRE: EC-Fire model .
-!
-! Di Giuseppe F. 2014, ECMF
-! nen@ecmwf.int
-!
-! control parameters  for model
-!
-!
-!---------------------------------------------------------
 
   USE mo_constants
+
   IMPLICIT NONE
 !
 ! these will be user definable soon
-!  
+!
 !
 ! run control
 !
 ! define parameters in namelist
 
-  INTEGER :: iounit
   CHARACTER (len = 200) :: output_file, rundir
   CHARACTER (len = 50)  :: now,version
   CHARACTER (len = 100) :: init_file='none'
-  
+
   CHARACTER(len=*), PARAMETER :: input='./input/'
   CHARACTER(len=*), PARAMETER :: output='./output/'
   LOGICAL :: lstick
-  
-  
+
+
   INTEGER :: inidate, initime
   INTEGER :: dt ! dt is in hours
   ! move derived parameters to setup.f90
-  INTEGER :: restart_day !number of timestep before dumping a restart file 
+  INTEGER :: restart_day !number of timestep before dumping a restart file
 
- 
+
 ! netcdf and input file indices
 
   CHARACTER (LEN=2) :: crainvar="tp"
@@ -57,8 +58,8 @@ MODULE mo_control
   CHARACTER (LEN=5) :: cslopevar="slope"
   CHARACTER (LEN=13) :: ccrvar="climate_class" ! climate regions taken from the dataset  Koeppen_CRU_GPCCVASClimO
   CHARACTER (LEN=10) :: cfmvar="fuel_model" !
- 
-  
+
+
   INTEGER :: ncid_temp, ncid_maxtemp,ncid_mintemp,&
        ncid_minrh, ncid_maxrh, ncid_rh, &
        ncid_rain, ncid_cc, ncid_wspeed, &
@@ -95,8 +96,8 @@ MODULE mo_control
   LOGICAL :: lfm_latreverse=.false.
 
 !============================================================
- 
-! climate data file 
+
+! climate data file
   CHARACTER(len=200) :: rainfile
   CHARACTER(len=200) :: rainclimfile
   CHARACTER(len=200) :: tempfile
@@ -111,7 +112,7 @@ MODULE mo_control
   CHARACTER(len=200) :: dpfile
   CHARACTER(len=200) :: vsfile
 !  CHARACTER(len=200) :: lalfile
-  
+
   CHARACTER(len=200) :: lsmfile
   CHARACTER(len=200) :: cvfile
   CHARACTER(len=200) :: slopefile
@@ -148,15 +149,15 @@ MODULE mo_control
   LOGICAL :: lnc_cr=.true.
   LOGICAL :: lnc_fm=.true.
 
-  !fire variables 
+  !fire variables
 
   LOGICAL :: lnc_nfdrs=.true.
   LOGICAL :: lnc_mark5=.true.
   LOGICAL :: lnc_fwi=.true.
 
 ! index of point to dump quick timeseries diagnostics
-  INTEGER :: nxdg=369,nydg=229 
+  INTEGER :: nxdg=369,nydg=229
   REAL :: rfillvalue=-9999.0 ! missing value
   INTEGER :: ifillvalue=-9999 ! missing value
-  
+
 END MODULE mo_control

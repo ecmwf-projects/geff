@@ -1,61 +1,63 @@
+! (C) Copyright 1996- ECMWF.
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+! In applying this licence, ECMWF does not waive the privileges and immunities
+! granted to it by virtue of its status as an intergovernmental organisation nor
+! does it submit to any jurisdiction.
+
+
+!> @brief Module for meteorological constant fields and fire variables
+!> @author Di Giuseppe, F., ECMWF
 MODULE mo_fire
-!--------------------------------------------------------- 
-! ECFIRE: EC-Fire model .
-!
-! Di Giuseppe F. 2014, ECMF
-! nen@ecmwf.int
-!
-! module for meteo constant fields and specific fire variables 
-!
-!---------------------------------------------------------
-  USE mo_constants
+
   USE mo_control
 
   IMPLICIT NONE
 
   ! spatial dimensions
   INTEGER  :: nlat,nlon
- 
-  ! time dimensions 
-  INTEGER :: ntimestep        ! total integration time as read from input files 
- 
+
+  ! time dimensions
+  INTEGER :: ntimestep        ! total integration time as read from input files
+
   ! region data
   REAL :: lon,dlon,lat,dlat
   REAL, ALLOCATABLE :: lons(:), lats(:) ! lon lat values
-  
+
   ! meteorological variables
 
   INTEGER, ALLOCATABLE  :: nhours(:)      ! nhours(ntimestep)         !          integer date
-  REAL, ALLOCATABLE :: rtemp (:,:)       ! rtemp(nx,ny)      ! (K)      T2m     as a function of  space for one slice at time 
+  REAL, ALLOCATABLE :: rtemp (:,:)       ! rtemp(nx,ny)      ! (K)      T2m     as a function of  space for one slice at time
   REAL, ALLOCATABLE :: rmaxtemp (:,:)    ! rtempmax(nx,ny)   ! (K)      T2m max as a function of  space for one slice at time
   REAL, ALLOCATABLE :: rmintemp (:,:)    ! rtempmin(nx,ny)   ! (K)      T2m min as a function of  space for one slice at time
-  REAL, ALLOCATABLE :: rrh(:,:)          ! rrh(nx,ny)        ! (frac)   RH as a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rminrh(:,:)       ! rrhmin(nx,ny)     ! (frac)   RH min as a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rmaxrh(:,:)       ! rrhmax(nx,ny)     ! (frac)   RH max as a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rrain(:,:)        ! rrain(nx,ny)      ! (mm/day) precip as a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rrainclim(:,:)    ! rrainclim(nx,ny)  ! (mm/day) climatic precip as a function of space for one slice at time 
- 
-  REAL, ALLOCATABLE :: rcc(:,:)          ! rcc(nx,ny)        ! (frac)   Cloud cover as a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rwspeed(:,:)      ! rwspeed(nx,ny)    ! (m/s)    Wind speed  a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rsnow(:,:)        ! rsnow(nx,ny)      ! (mask)   Snow mask a function of space for one slice at time 
-  REAL, ALLOCATABLE :: rdp(:,:)          ! rdp (nx,ny)       ! (hr)     Duration of precipitation in the previous 24 hours
-  INTEGER, ALLOCATABLE :: ivs(:,:)       ! ivs(nx,ny)        ! (num)    index which identifies the vegetation stage 
-!  INTEGER, ALLOCATABLE :: ilal(:,:)       ! ilal(nx,ny)        ! (num)    index which identifies the lightning activity (1-6) 
+  REAL, ALLOCATABLE :: rrh(:,:)          ! rrh(nx,ny)        ! (frac)   RH as a function of space for one slice at time
+  REAL, ALLOCATABLE :: rminrh(:,:)       ! rrhmin(nx,ny)     ! (frac)   RH min as a function of space for one slice at time
+  REAL, ALLOCATABLE :: rmaxrh(:,:)       ! rrhmax(nx,ny)     ! (frac)   RH max as a function of space for one slice at time
+  REAL, ALLOCATABLE :: rrain(:,:)        ! rrain(nx,ny)      ! (mm/day) precip as a function of space for one slice at time
+  REAL, ALLOCATABLE :: rrainclim(:,:)    ! rrainclim(nx,ny)  ! (mm/day) climatic precip as a function of space for one slice at time
 
-!constant fields 
+  REAL, ALLOCATABLE :: rcc(:,:)          ! rcc(nx,ny)        ! (frac)   Cloud cover as a function of space for one slice at time
+  REAL, ALLOCATABLE :: rwspeed(:,:)      ! rwspeed(nx,ny)    ! (m/s)    Wind speed  a function of space for one slice at time
+  REAL, ALLOCATABLE :: rsnow(:,:)        ! rsnow(nx,ny)      ! (mask)   Snow mask a function of space for one slice at time
+  REAL, ALLOCATABLE :: rdp(:,:)          ! rdp (nx,ny)       ! (hr)     Duration of precipitation in the previous 24 hours
+  INTEGER, ALLOCATABLE :: ivs(:,:)       ! ivs(nx,ny)        ! (num)    index which identifies the vegetation stage
+!  INTEGER, ALLOCATABLE :: ilal(:,:)       ! ilal(nx,ny)        ! (num)    index which identifies the lightning activity (1-6)
+
+!constant fields
 
   REAL,    ALLOCATABLE :: rlsm(:,:)        ! rlsm(nx,ny)      ! (mask)  Land=1 sea=0   0.5=coast mask
   REAL,    ALLOCATABLE :: rcv(:,:)        !  rcv(nx,ny)      ! (type)  fraction/cover of high + low vegetation (IFS)
-  INTEGER,    ALLOCATABLE :: islope(:,:)   ! slope(nx,ny)     ! (num)   slope class 
+  INTEGER,    ALLOCATABLE :: islope(:,:)   ! slope(nx,ny)     ! (num)   slope class
   INTEGER, ALLOCATABLE :: icr(:,:)         ! icr(nx,ny)       ! (type)  climate region (Koeppler WMO)
   INTEGER, ALLOCATABLE :: ifm(:,:)         ! ifm(nx,ny)       ! (type)  fuel-model maps (JRC)
-  
- 
 
- 
+
+
+
   REAL    :: rvar_fillvalue !! missing values in datasets
   INTEGER :: ivar_fillvalue !! missing values in datasets
-  REAL, ALLOCATABLE :: rdiag2d(:,:,:) ! nlon, nlat, ndiag2d 
+  REAL, ALLOCATABLE :: rdiag2d(:,:,:) ! nlon, nlat, ndiag2d
   INTEGER :: ndiag2d=0 ! number of diagnostics (defined in setup)
 
 
@@ -72,9 +74,9 @@ MODULE mo_fire
 
 ! ncids and indices for 2d output fields
   INTEGER, PARAMETER :: ncvar_ps=2
-  INTEGER :: ncvar_rain(ncvar_ps)       
-  INTEGER :: ncvar_rainclim(ncvar_ps)       
-  INTEGER :: ncvar_temp(ncvar_ps)       
+  INTEGER :: ncvar_rain(ncvar_ps)
+  INTEGER :: ncvar_rainclim(ncvar_ps)
+  INTEGER :: ncvar_temp(ncvar_ps)
   INTEGER :: ncvar_maxtemp(ncvar_ps)
   INTEGER :: ncvar_mintemp(ncvar_ps)
   INTEGER :: ncvar_rh(ncvar_ps)
@@ -88,8 +90,8 @@ MODULE mo_fire
 !  INTEGER :: ncvar_lal(ncvar_ps)
 
   INTEGER :: ncvar_lsm(ncvar_ps)
-  INTEGER :: ncvar_cv(ncvar_ps) 
-  INTEGER :: ncvar_slope(ncvar_ps) 
+  INTEGER :: ncvar_cv(ncvar_ps)
+  INTEGER :: ncvar_slope(ncvar_ps)
   INTEGER :: ncvar_cr(ncvar_ps)
   INTEGER :: ncvar_fm(ncvar_ps)
 ! prognostic
@@ -111,7 +113,7 @@ MODULE mo_fire
   INTEGER :: ncvar_mcoi(ncvar_ps)
   INTEGER :: ncvar_loi(ncvar_ps)
   INTEGER :: ncvar_fli(ncvar_ps)
-  
+
 !mark 5
 
  INTEGER :: ncvar_mark5_kb(ncvar_ps)
@@ -125,7 +127,7 @@ MODULE mo_fire
  INTEGER :: ncvar_mark5_fdi(ncvar_ps)
  INTEGER :: ncvar_mark5_tsr(ncvar_ps)
 
-!FWI 
+!FWI
 
  INTEGER :: ncvar_fwi_fwi(ncvar_ps)
  INTEGER :: ncvar_fwi_ffmc(ncvar_ps)

@@ -6,13 +6,13 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
+
+!> @brief NetCDF I/O
+!> @author Di Giuseppe, F., ECMWF
+!> @author Maciel, P., ECMWF
 MODULE mo_ncdf_tools
 
   USE netcdf
-  USE mo_control
-  USE mo_constants
-  USE mo_fire
-  USE mo_namelist
   USE mo_nfdrs
   USE mo_mark5
   USE mo_fwi
@@ -91,11 +91,11 @@ SUBROUTINE ncdf_write_restart
 
 
 
-  print *,'- now dump restart'
+  PRINT *,'- now dump restart'
 
   ! dump restart file:
 
-  CALL check(NF90_CREATE(path = input//"restart_ecfire.nc", cmode=or(nf90_clobber,nf90_64bit_offset), ncid = ncidrest))
+  CALL check(NF90_CREATE(path = input//"restart_geff.nc", cmode=or(nf90_clobber,nf90_64bit_offset), ncid = ncidrest))
 
 
 ! define the dimensions
@@ -174,46 +174,46 @@ SUBROUTINE ncdf_write_restart
 
 
 
-  print *,'writing vars'
+  PRINT *,'writing vars'
   ! Write the coordinate variable data. This will put the latitudes
   ! and longitudes of our data grid into the netCDF file.
   CALL check( nf90_put_var(ncidrest, latvarid, lats) )
   CALL check( nf90_put_var(ncidrest, lonvarid, lons) )
 
-  print*,"NFDRS"
- print*,"======"
+  PRINT *,"NFDRS"
+ PRINT *,"======"
 
-  print*,"mc1"
+  PRINT *,"mc1"
   CALL check( nf90_put_var(ncidrest, ncd_mc1(1)   , mc%r1hr ))
-  print*,"mc10"
+  PRINT *,"mc10"
   CALL check( nf90_put_var(ncidrest, ncd_mc10(1)  , mc%r10hr ))
-  print*,"mc100"
+  PRINT *,"mc100"
   CALL check( nf90_put_var(ncidrest, ncd_mc100(1) , mc%r100hr  ))
-  print*,"mc1000"
+  PRINT *,"mc1000"
   CALL check( nf90_put_var(ncidrest, ncd_mc1000(1) , mc%r1000hr  ))
-  print*,"mc-herb"
+  PRINT *,"mc-herb"
   CALL check( nf90_put_var(ncidrest, ncd_mcherb(1)  , mc%rherb  ))
-  print*,"mc-wood"
+  PRINT *,"mc-wood"
   CALL check( nf90_put_var(ncidrest, ncd_mcwood(1)  , mc%rwood  ))
-  print*,"x1000"
+  PRINT *,"x1000"
   CALL check( nf90_put_var(ncidrest, ncd_x1000(1)  , mc%rx1000  ))
-  print*,"meanrbndryt"
+  PRINT *,"meanrbndryt"
   CALL check( nf90_put_var(ncidrest, ncd_rbndryt(1)  , mc%rbndryt ))
 
-  print*,"MARK-5"
-  print*,"======"
-  print*,"kbdi"
+  PRINT *,"MARK-5"
+  PRINT *,"======"
+  PRINT *,"kbdi"
   CALL check( nf90_put_var(ncidrest, ncd_mark5_kb(1)  , mark5_fuel%kb_drought_index  ))
-  print*,"timesincerain"
+  PRINT *,"timesincerain"
   CALL check( nf90_put_var(ncidrest, ncd_mark5_tsr(1)  , mark5_fuel%timesincerain  ))
 
-  print*,"FWI"
-  print*,"======"
-  print*,"ffmc"
+  PRINT *,"FWI"
+  PRINT *,"======"
+  PRINT *,"ffmc"
   CALL check( nf90_put_var(ncidrest, ncd_fwi_ffmc(1), fwi_risk%ffmc ))
-  print*,"dmc"
+  PRINT *,"dmc"
   CALL check( nf90_put_var(ncidrest, ncd_fwi_dmc(1), fwi_risk%dmc ))
-  print*,"dc"
+  PRINT *,"dc"
   CALL check( nf90_put_var(ncidrest, ncd_fwi_dc(1), fwi_risk%dc ))
   CALL check( nf90_close(ncidrest))
 
@@ -235,7 +235,7 @@ SUBROUTINE ncdf_open_input
     !Land sea mask
     !------------
 
-    print *,'opening Land sea-mask file ',input//lsmfile
+    PRINT *,'opening Land sea-mask file ',input//lsmfile
     CALL check(NF90_OPEN(path=input//lsmfile,mode=nf90_nowrite,ncid=ncid_lsm))
 
     ! dimensions are taken from the LSM
@@ -244,7 +244,7 @@ SUBROUTINE ncdf_open_input
     CALL check(NF90_INQ_DIMID(ncid_lsm, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_lsm, LonDimID, len = nloncheck))
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainfile
       STOP 1
     ENDIF
     ! here we check that the rherature file has the same number of days as the rain file
@@ -264,7 +264,7 @@ SUBROUTINE ncdf_open_input
     !---------
     ! rainfall
     !---------
-    print *,'opening rainfall ',input//rainfile
+    PRINT *,'opening rainfall ',input//rainfile
     CALL check(NF90_OPEN(path=input//rainfile,mode=nf90_nowrite,ncid=ncid_rain))
 
     ! dimensions to make sure input file is correct size.
@@ -273,7 +273,7 @@ SUBROUTINE ncdf_open_input
     CALL check(NF90_INQ_DIMID(ncid_rain, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_rain, LonDimID, len = nloncheck))
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainfile
       STOP 1
     ENDIF
 
@@ -300,7 +300,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! temperature
     !------------
-    print *,'opening temperature ',input//tempfile
+    PRINT *,'opening temperature ',input//tempfile
     CALL check(NF90_OPEN(path=input//tempfile,mode=nf90_nowrite,ncid=ncid_temp))
 
     ! dimensions to make sure input file is correct size.
@@ -315,7 +315,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck ) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, tempfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, tempfile
       STOP 1
     ENDIF
 
@@ -335,7 +335,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! temperature maximum
     !------------
-    print *,'opening max temperature ',input//maxtempfile
+    PRINT *,'opening max temperature ',input//maxtempfile
     CALL check(NF90_OPEN(path=input//maxtempfile,mode=nf90_nowrite,ncid=ncid_maxtemp))
 
     ! dimensions to make sure input file is correct size.
@@ -350,7 +350,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, maxtempfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, maxtempfile
       STOP 1
     ENDIF
 
@@ -369,7 +369,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! temperature minimum
     !------------
-    print *,'opening minimum temperature ',input//mintempfile
+    PRINT *,'opening minimum temperature ',input//mintempfile
     CALL check(NF90_OPEN(path=input//mintempfile,mode=nf90_nowrite,ncid=ncid_mintemp))
 
     ! dimensions to make sure input file is correct size.
@@ -384,7 +384,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, mintempfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, mintempfile
       STOP 1
     ENDIF
 
@@ -402,7 +402,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! relative humidity
     !------------
-    print *,'opening relative humidity ',input//rhfile
+    PRINT *,'opening relative humidity ',input//rhfile
     CALL check(NF90_OPEN(path=input//rhfile,mode=nf90_nowrite,ncid=ncid_rh))
 
     ! dimensions to make sure input file is correct size.
@@ -417,7 +417,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, rhfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, rhfile
       STOP 1
     ENDIF
 
@@ -434,7 +434,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! max relative humidity
     !------------
-    print *,'opening relative humidity ',input//maxrhfile
+    PRINT *,'opening relative humidity ',input//maxrhfile
     CALL check(NF90_OPEN(path=input//maxrhfile,mode=nf90_nowrite,ncid=ncid_maxrh))
 
     ! dimensions to make sure input file is correct size.
@@ -449,7 +449,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, maxrhfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, maxrhfile
       STOP 1
     ENDIF
 
@@ -467,7 +467,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! min relative humidity
     !------------
-    print *,'opening min relative humidity ',input//minrhfile
+    PRINT *,'opening min relative humidity ',input//minrhfile
     CALL check(NF90_OPEN(path=input//minrhfile,mode=nf90_nowrite,ncid=ncid_minrh))
 
     ! dimensions to make sure input file is correct size.
@@ -482,7 +482,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, minrhfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, minrhfile
       STOP 1
     ENDIF
 
@@ -500,7 +500,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! Cloud cover
     !------------
-    print *,'opening cloud cover file ',input//ccfile
+    PRINT *,'opening cloud cover file ',input//ccfile
     CALL check(NF90_OPEN(path=input//ccfile,mode=nf90_nowrite,ncid=ncid_cc))
 
     ! dimensions to make sure input file is correct size.
@@ -515,7 +515,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, ccfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, ccfile
       STOP 1
     ENDIF
 
@@ -533,7 +533,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! Wind speed
     !------------
-    print *,'opening wind speed file ',input//wspeedfile
+    PRINT *,'opening wind speed file ',input//wspeedfile
     CALL check(NF90_OPEN(path=input//wspeedfile,mode=nf90_nowrite,ncid=ncid_wspeed))
 
     ! dimensions to make sure input file is correct size.
@@ -548,7 +548,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, wspeedfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, wspeedfile
       STOP 1
     ENDIF
 
@@ -565,7 +565,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! snow cover
     !------------
-    print *,'opening snowcover file ',input//snowfile
+    PRINT *,'opening snowcover file ',input//snowfile
     CALL check(NF90_OPEN(path=input//snowfile,mode=nf90_nowrite,ncid=ncid_snow))
 
     ! dimensions to make sure input file is correct size.
@@ -580,7 +580,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, snowfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, snowfile
       STOP 1
     ENDIF
 
@@ -597,7 +597,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! rain duration
     !------------
-    print *,'opening rain duration (DP) file ',input//dpfile
+    PRINT *,'opening rain duration (DP) file ',input//dpfile
     CALL check(NF90_OPEN(path=input//dpfile,mode=nf90_nowrite,ncid=ncid_dp))
 
     ! dimensions to make sure input file is correct size.
@@ -612,7 +612,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, dpfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, dpfile
       STOP 1
     ENDIF
 
@@ -630,7 +630,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! vegetation stages summary file
     !------------
-    print *,'opening Vegetation stage  file (vegstage) file ',input//vsfile
+    PRINT *,'opening Vegetation stage  file (vegstage) file ',input//vsfile
     CALL check(NF90_OPEN(path=input//vsfile,mode=nf90_nowrite,ncid=ncid_vs))
 
     ! dimensions to make sure input file is correct size.
@@ -645,7 +645,7 @@ SUBROUTINE ncdf_open_input
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck .or. &
     &   ntimestep.ne.ntimestepcheck)  THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, vsfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, vsfile
       STOP 1
     ENDIF
 
@@ -664,7 +664,7 @@ SUBROUTINE ncdf_open_input
 !    !------------
 !    ! lightning activity file
 !    !------------
-!    print *,'opening Lightning activity   file ',input//lalfile
+!    PRINT *,'opening Lightning activity   file ',input//lalfile
 !    CALL check(NF90_OPEN(path=input//lalfile,mode=nf90_nowrite,ncid=ncid_lal))
 !
 !    ! dimensions to make sure input file is correct size.
@@ -679,7 +679,7 @@ SUBROUTINE ncdf_open_input
 !    IF (nlon.ne.nloncheck .or. &
 !    &   nlat.ne.nlatcheck .or. &
 !    &   ntimestep.ne.ntimestepcheck)  THEN
-!      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, lalfile
+!      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,ntimestep,ntimestepcheck, lalfile
 !      STOP 1
 !    ENDIF
 !
@@ -701,7 +701,7 @@ SUBROUTINE ncdf_open_input
    !---------
     ! climate rainfall
     !---------
-    print *,'opening  climate rainfall ',input//rainclimfile
+    PRINT *,'opening  climate rainfall ',input//rainclimfile
     CALL check(NF90_OPEN(path=input//rainclimfile,mode=nf90_nowrite,ncid=ncid_rainclim))
 
     ! dimensions to make sure input file is correct size.
@@ -710,7 +710,7 @@ SUBROUTINE ncdf_open_input
     CALL check(NF90_INQ_DIMID(ncid_rainclim, lon_name, LonDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid_rainclim, LonDimID, len = nloncheck))
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainclimfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, rainclimfile
       STOP 1
     ENDIF
    ! data for
@@ -731,7 +731,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! climate regions
     !------------
-    print *,'opening climatic regions file ',input//crfile
+    PRINT *,'opening climatic regions file ',input//crfile
     CALL check(NF90_OPEN(path=input//crfile,mode=nf90_nowrite,ncid=ncid_cr))
 
     ! dimensions to make sure input file is correct size.
@@ -743,7 +743,7 @@ SUBROUTINE ncdf_open_input
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, crfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, crfile
       STOP 1
     ENDIF
 
@@ -754,7 +754,7 @@ SUBROUTINE ncdf_open_input
 
     ! if attribute not there then default to fillvalue
     istatus=NF90_GET_ATT(ncid_cr, VarId_cr, "_FillValue", ivar_FillValue)
-    print*,"ivar_FillValue",ivar_FillValue
+    PRINT *,"ivar_FillValue",ivar_FillValue
     IF (istatus /= nf90_noerr) ivar_FillValue=ifillvalue
 
     ! check the order of latitude and reverse if necessary
@@ -765,7 +765,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! fuel-model map
     !------------
-    print *,'opening fuel-model maps ',input//fmfile
+    PRINT *,'opening fuel-model maps ',input//fmfile
     CALL check(NF90_OPEN(path=input//fmfile,mode=nf90_nowrite,ncid=ncid_fm))
 
     ! dimensions to make sure input file is correct size.
@@ -777,7 +777,7 @@ SUBROUTINE ncdf_open_input
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, fmfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, fmfile
       STOP 1
     ENDIF
 
@@ -788,7 +788,7 @@ SUBROUTINE ncdf_open_input
 
     ! if attribute not there then default to fillvalue
     istatus=NF90_GET_ATT(ncid_fm, VarId_fm, "_FillValue", ivar_FillValue)
-    print*,"ivar_FillValue",ivar_FillValue
+    PRINT *,"ivar_FillValue",ivar_FillValue
     IF (istatus /= nf90_noerr) ivar_FillValue=ifillvalue
 
     ! check the order of latitude and reverse if necessary
@@ -799,7 +799,7 @@ SUBROUTINE ncdf_open_input
     !------------
     ! Vegetation cover (high +low)
     !------------
-    print *,'opening  vegetation cover  ',input//cvfile
+    PRINT *,'opening  vegetation cover  ',input//cvfile
     CALL check(NF90_OPEN(path=input//cvfile,mode=nf90_nowrite,ncid=ncid_cv))
 
     ! dimensions to make sure input file is correct size.
@@ -811,7 +811,7 @@ SUBROUTINE ncdf_open_input
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, cvfile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, cvfile
       STOP 1
     ENDIF
 
@@ -833,7 +833,7 @@ SUBROUTINE ncdf_open_input
     !------------
     !Slope due to subgridscale orography
     !------------
-    print *,'opening slope of subgridscale orography  ',input//slopefile
+    PRINT *,'opening slope of subgridscale orography  ',input//slopefile
     CALL check(NF90_OPEN(path=input//slopefile,mode=nf90_nowrite,ncid=ncid_slope))
 
     ! dimensions to make sure input file is correct size.
@@ -845,7 +845,7 @@ SUBROUTINE ncdf_open_input
     ! here we check that the rherature file has the same number of days as the rain file
     IF (nlon.ne.nloncheck .or. &
     &   nlat.ne.nlatcheck ) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, slopefile
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck, slopefile
       STOP 1
     ENDIF
 
@@ -1126,7 +1126,7 @@ SUBROUTINE ncdf_set_grid
     !Land sea mask
     !------------
 
-    print *,'opening Land sea-mask file ',input//lsmfile
+    PRINT *,'opening Land sea-mask file ',input//lsmfile
     CALL check(NF90_OPEN(path=input//lsmfile,mode=nf90_nowrite,ncid=ncid_lsm))
 
     ! dimensions are taken from the LSM
@@ -1139,14 +1139,14 @@ SUBROUTINE ncdf_set_grid
     nlon=nloncheck
     nlat=nlatcheck
 
-    WRITE(iounit,*) '*** data dimensions  *** ',nlon,nlat
+    PRINT *, '*** data dimensions  *** ',nlon,nlat
 
     ALLOCATE(lons(nlon))
     ALLOCATE(lats(nlat))
 
     CALL check(NF90_GET_VAR(ncid_lsm,LatDimID,lats ))
     CALL check(NF90_GET_VAR(ncid_lsm,LonDimID,lons ))
-    WRITE(iounit,*) '*** grid points   *** ',lats(:),lons(:)
+    PRINT *, '*** grid points   *** ',lats(:),lons(:)
 
 
 END SUBROUTINE ncdf_set_grid
@@ -1168,7 +1168,7 @@ SUBROUTINE ncdf_initialize
   !
   CASE('rest')
 
-    print *, 'opening RESTART condition file '//input//init_file
+    PRINT *, 'opening RESTART condition file '//input//init_file
     CALL check(NF90_OPEN(path=input//init_file,mode=nf90_nowrite,ncid=ncid))
 
     CALL check(NF90_INQ_DIMID(ncid, lat_name, LatDimID))
@@ -1178,7 +1178,7 @@ SUBROUTINE ncdf_initialize
     CALL check(NF90_INQUIRE_DIMENSION(Ncid, LonDimID, len = nloncheck))
 
     IF (nlon.ne.nloncheck .or. nlat.ne.nlatcheck) THEN
-      WRITE(iounit,*) '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,'init_file'
+      PRINT *, '*** data dimensions input error *** ',nlon,nloncheck,nlat,nlatcheck,'init_file'
       STOP 1
     ENDIF
 
@@ -1213,10 +1213,10 @@ SUBROUTINE ncdf_initialize
 
     ! close the initialization file
     CALL check(NF90_CLOSE(ncid))
-    print *,'initial conditions read ok'
+    PRINT *,'initial conditions read ok'
 
    CASE DEFAULT  ! idealized fixed initial conditions
-      print *,'modelling initializing from artificial conditions'
+      PRINT *,'modelling initializing from artificial conditions'
    ! Here the loop is necessary !
    ! Dead fuel
 
@@ -1259,7 +1259,7 @@ SUBROUTINE ncdf_initialize
    ENDDO
 
 END SELECT
-  print *,'Initialization completed'
+  PRINT *,'Initialization completed'
 
    RETURN
 END SUBROUTINE ncdf_initialize
@@ -1296,7 +1296,7 @@ SUBROUTINE ncdf_setdown
   CALL check(NF90_CLOSE(ncid_fm))
   CALL check(NF90_CLOSE(ncid_slope))
 
-  print *,'input/output closed '
+  PRINT *,'input/output closed '
 
 
 
@@ -1366,36 +1366,36 @@ IF (lnc_dp) CALL check( nf90_put_var(ncidout, ncvar_dp(1), rdp, start=(/ 1, 1, i
 IF (lnc_vs   ) CALL check(nf90_put_var(ncidout, ncvar_vs (1) ,ivs,start =(/1 ,1,istep/)))
 !IF (lnc_lal   ) CALL check(nf90_put_var(ncidout, ncvar_lal(1) ,ilal,start =(/1 ,1,istep/)))
 
-IF (lnc_nfdrs) THEN 
- 
+IF (lnc_nfdrs) THEN
+
       CALL check( nf90_put_var(ncidout, ncvar_mc1(1),  mc%r1hr, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mc10(1), mc%r10hr , start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mc100(1),mc%r100hr , start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mc1000(1),mc%r1000hr , start=(/ 1, 1, istep /) ))
- 
+
       CALL check( nf90_put_var(ncidout, ncvar_x1000(1),  mc%rx1000, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mcherb(1), mc%rherb, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mcwood(1), mc%rwood , start=(/ 1, 1, istep /) ))
- 
+
       CALL check( nf90_put_var(ncidout, ncvar_ros(1),  fire_prop%ros, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_sc(1) ,  fire_prop%sc , start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_erc(1),  fire_prop%erc, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_bi(1),   fire_prop%bi, start=(/ 1, 1, istep /) ))
- 
+
       CALL check( nf90_put_var(ncidout, ncvar_ic(1),   fire_prob%ic, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mcoi(1), fire_prob%mcoi , start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_loi(1),  fire_prob%loi, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_fli(1),  fire_prob%fli, start=(/ 1, 1, istep /) ))
- 
-ENDIF 
 
-IF (lnc_mark5) THEN 
- 
+ENDIF
+
+IF (lnc_mark5) THEN
+
       CALL check( nf90_put_var(ncidout, ncvar_mark5_kb(1),  mark5_fuel%kb_drought_index, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mark5_df(1),  mark5_fuel%drought_factor , start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mark5_mc(1),  mark5_fuel%moist, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mark5_w(1),   mark5_fuel%weight, start=(/ 1, 1, istep /) ))
-   
+
       CALL check( nf90_put_var(ncidout, ncvar_mark5_ros0(1),    mark5_prop%ros_theta0,   start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mark5_ros(1),     mark5_prop%ros_theta,    start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_mark5_height(1),  mark5_prop%flame_height, start=(/ 1, 1, istep /) ))
@@ -1404,13 +1404,13 @@ IF (lnc_mark5) THEN
 
    END IF
 
-IF (lnc_fwi) THEN 
- 
+IF (lnc_fwi) THEN
+
       CALL check( nf90_put_var(ncidout, ncvar_fwi_fwi(1),  fwi_risk%fwi, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_fwi_ffmc(1), fwi_risk%ffmc , start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_fwi_dmc(1),  fwi_risk%dmc, start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_fwi_dc(1),   fwi_risk%dc, start=(/ 1, 1, istep /) ))
-   
+
       CALL check( nf90_put_var(ncidout, ncvar_fwi_isi(1),     fwi_risk%isi,   start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_fwi_bui(1),     fwi_risk%bui,    start=(/ 1, 1, istep /) ))
       CALL check( nf90_put_var(ncidout, ncvar_fwi_dsr(1),     fwi_risk%dsr, start=(/ 1, 1, istep /) ))

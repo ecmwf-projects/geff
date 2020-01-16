@@ -1,15 +1,16 @@
+! (C) Copyright 1996- ECMWF.
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+! In applying this licence, ECMWF does not waive the privileges and immunities
+! granted to it by virtue of its status as an intergovernmental organisation nor
+! does it submit to any jurisdiction.
+
+
+!> @brief Read in forcing data and setup output files
+!> @author Di Giuseppe, F., ECMWF
 SUBROUTINE setup
-!--------------------------------------------------------- 
-! ECFIRE: EC-Fire model .
-!
-! Di Giuseppe F. 2014, ECMF
-! nen@ecmwf.int
-!
-! setup subroutine to read in forcing data and setup output files
-!
-!---------------------------------------------------------
-  USE mo_control
-  USE mo_constants
+
   USE mo_fire
   USE mo_namelist
   USE mo_ncdf_tools
@@ -22,9 +23,9 @@ SUBROUTINE setup
   ! local variables
   INTEGER :: ix,iy,i,j,idate
 
- 
 
-  !-------------------------- 
+
+  !--------------------------
   !
   ! get basic run info
   !
@@ -44,7 +45,7 @@ SUBROUTINE setup
   ALLOCATE(rrh(nlon,nlat))
   ALLOCATE(rmaxrh(nlon,nlat))
   ALLOCATE(rminrh(nlon,nlat))
-  ALLOCATE(rcc(nlon,nlat)) 
+  ALLOCATE(rcc(nlon,nlat))
   ALLOCATE(rwspeed(nlon,nlat))
   ALLOCATE(rsnow(nlon,nlat))
   ALLOCATE(rdp(nlon,nlat))
@@ -62,16 +63,16 @@ SUBROUTINE setup
  ! NFDRS
  ALLOCATE(mc(nlon,nlat))
  ALLOCATE(fire_prop(nlon,nlat))
- ALLOCATE(fire_prob(nlon,nlat)) 
- 
+ ALLOCATE(fire_prob(nlon,nlat))
+
 !  mc(:,:)%r1hr=rfillvalue
 !  mc(:,:)%r10hr=rfillvalue
 !  mc(:,:)%r100hr=rfillvalue
-!  mc(:,:)%r1000hr=rfillvalue  
+!  mc(:,:)%r1000hr=rfillvalue
 !  mc(:,:)%rherb=rfillvalue
 !  mc(:,:)%rwood=rfillvalue
 !  mc(:,:)%rx1000=rfillvalue
-  
+
 
  fire_prop(:,:)%ros=rfillvalue
  fire_prop(:,:)%sc=ifillvalue
@@ -82,7 +83,7 @@ SUBROUTINE setup
  fire_prob(:,:)%mcoi=ifillvalue
  fire_prob(:,:)%loi=ifillvalue
  fire_prob(:,:)%fli=rfillvalue
- 
+
 
  !MARK-5
  ALLOCATE(mark5_fuel(nlon,nlat))
@@ -100,7 +101,7 @@ SUBROUTINE setup
  mark5_prop(:,:)%ros_theta=rfillvalue
  mark5_prop(:,:)%flame_height=rfillvalue
  mark5_prop(:,:)%flame_distance=rfillvalue
- 
+
  mark5_prob(:,:)%fire_danger_index=rfillvalue
 
  ! FWI
@@ -118,11 +119,11 @@ fwi_risk(:,:)%danger_risk=rfillvalue
 
 
   CALL ncdf_open_input
-  PRINT*, "Input files: OPENED" 
+  PRINT*, "Input files: OPENED"
   CALL ncdf_initialize
 
   CALL ncdf_open_output
-  PRINT*, "Output file: CREATED " 
+  PRINT*, "Output file: CREATED "
 
 
 END SUBROUTINE setup

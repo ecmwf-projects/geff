@@ -1,15 +1,16 @@
+! (C) Copyright 1996- ECMWF.
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+! In applying this licence, ECMWF does not waive the privileges and immunities
+! granted to it by virtue of its status as an intergovernmental organisation nor
+! does it submit to any jurisdiction.
+
+
+!> @brief Namelists for input
+!> @author Di Giuseppe, F., ECMWF
 MODULE mo_namelist
-!--------------------------------------------------------- 
-! ECFIRE: EC-Fire model .
-!
-! Di Giuseppe F. 2014, ECMF
-! nen@ecmwf.int
-!
-!namelists for input 
-!
-!---------------------------------------------------------
-  USE mo_constants
-  USE mo_control
+
   USE mo_fire
 
   IMPLICIT NONE
@@ -17,10 +18,10 @@ MODULE mo_namelist
 ! program control namelist
   NAMELIST /control/output_file,rundir,inidate,initime,dt,init_file,lstick,restart_day,now,version
 
-! climate data namelist 
+! climate data namelist
   NAMELIST /climate/tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
 
-! constant data  namelist 
+! constant data  namelist
   NAMELIST /constdata/rainclimfile,lsmfile,crfile,fmfile,cvfile,slopefile
 
 CONTAINS
@@ -30,8 +31,8 @@ CONTAINS
 !-------------------------------
 ! 1. NAMELISTS
 !-------------------------------
-  print *,'file ',input//'ecfire.namelist'
-  OPEN(8,file=input//'ecfire.namelist',status='OLD')
+  PRINT *,'file ',input//'geff.namelist'
+  OPEN(8,file=input//'geff.namelist',status='OLD')
   READ(8,nml=control)
   READ(8,nml=climate)
   READ(8,nml=constdata)
@@ -44,21 +45,14 @@ CONTAINS
 ! ------
 ! output
 ! ------
-  IF (output_file=='screen') THEN
-    iounit=6
-  ELSE
-    iounit=7
-    OPEN(iounit,FILE=output//'ecfire.out')
-  ENDIF
+  PRINT *, '-------------- GEFF '//version//' ---------------'
+  PRINT *, 'run date ',now
+  PRINT *,
 
-  WRITE(iounit,*) '-------------- ECFIRE '//version//' ---------------'
-  WRITE(iounit,*) 'run date ',now
-  WRITE(iounit,*)
 
- 
-  WRITE(iounit,*)' timestep (hours): ',dt
-  WRITE(iounit,*) 
-   
+  PRINT *,' timestep (hours): ',dt
+  PRINT *,
+
   RETURN
 END SUBROUTINE read_namelists
 

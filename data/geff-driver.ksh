@@ -9,8 +9,8 @@
 rundir="./" # directory where geff runs
 # data needs to be copied into the directory
 # $rundir/input. The results will be stored in $rundir and some diagnostic outputs will be dumped in $rundir/output.
-geff_exe="../src/geff_exe"
-geff_data_dir="../data/"
+geff="../bin/geff"
+data="../data/"
 # forcings files
 
 #tempfile     2m temperature 12 local time (Kelvin)
@@ -40,19 +40,15 @@ geff_data_dir="../data/"
 
 #
 cd $rundir/
-mkdir -p $rundir/input  #this two directories need to exhist
-mkdir -p $rundir/output #this two directories need to exhist
+mkdir -p $rundir/input  #these two directories need to exist
+mkdir -p $rundir/output #these two directories need to exist
 
-cp $geff_data_dir/* $rundir/input
+cp $data/* $rundir/input
 
-namelist=ecfire.namelist
+namelist=geff.namelist
 
 cat <<EOF > ./input/$namelist
-  !
-  ! this is the namelist file for the geff  model
-  !
-  ! F. Di GIUSEPPE 2014, ECMWF
-  !
+! GEFF
 &CONTROL
 output_file='geff.nc',
 rundir='./',
@@ -92,5 +88,5 @@ EOF
 banner " run geff"
 #==================================================================
 
-$geff_exe
+$geff
 
