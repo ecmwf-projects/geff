@@ -7,11 +7,17 @@ project(geff VERSION 42.0.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/r
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(NetCDF COMPONENTS Fortran REQUIRED)
+
+find_package(NetCDF COMPONENTS Fortran)
 message(STATUS "Package NetCDF: ${NetCDF_FOUND}")
 
 find_package(ecCodes COMPONENTS Fortran)
 message(STATUS "Package ecCodes: ${eccodes_FOUND}")
+
+if (NOT NetCDF_FOUND AND NOT eccodes_FOUND)
+    message(FATAL_ERROR "GEFF requires ecCodes either/or NetCDF")
+endif()
+
 
 add_subdirectory(src)
 

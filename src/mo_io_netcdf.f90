@@ -10,9 +10,10 @@
 !> @brief NetCDF I/O
 !> @author Di Giuseppe, F., ECMWF
 !> @author Maciel, P., ECMWF
-MODULE mo_ncdf_tools
+MODULE mo_io_netcdf
 
   USE netcdf
+
   USE mo_nfdrs
   USE mo_mark5
   USE mo_fwi
@@ -21,15 +22,15 @@ MODULE mo_ncdf_tools
   IMPLICIT NONE
   PRIVATE
 
-  PUBLIC :: ncdf_getdata
-  PUBLIC :: ncdf_initialize
-  PUBLIC :: ncdf_open_input
-  PUBLIC :: ncdf_open_output
-  PUBLIC :: ncdf_set_grid
-  PUBLIC :: ncdf_setdown
-  PUBLIC :: ncdf_write_constant_fields
-  PUBLIC :: ncdf_write_restart
-  PUBLIC :: ncdf_write_results
+  PUBLIC :: netcdf_getdata
+  PUBLIC :: netcdf_initialize
+  PUBLIC :: netcdf_open_input
+  PUBLIC :: netcdf_open_output
+  PUBLIC :: netcdf_set_grid
+  PUBLIC :: netcdf_setdown
+  PUBLIC :: netcdf_write_constant_fields
+  PUBLIC :: netcdf_write_restart
+  PUBLIC :: netcdf_write_results
 
 CONTAINS
 
@@ -69,7 +70,7 @@ SUBROUTINE define_output(ncidx,ivarid,name,title,iunits,type,ndiag,idarray)
 
 END SUBROUTINE define_output
 
-SUBROUTINE ncdf_write_restart
+SUBROUTINE netcdf_write_restart
   INTEGER :: latvarid, lonvarid, timevarid, unlimdimid
   INTEGER :: i,j
   REAL, DIMENSION(nlon,nlat)::  meanrbndryt
@@ -218,10 +219,10 @@ SUBROUTINE ncdf_write_restart
   CALL check( nf90_put_var(ncidrest, ncd_fwi_dc(1), fwi_risk%dc ))
   CALL check( nf90_close(ncidrest))
 
-END SUBROUTINE ncdf_write_restart
+END SUBROUTINE netcdf_write_restart
 
 
-SUBROUTINE ncdf_open_input
+SUBROUTINE netcdf_open_input
   INTEGER :: istatus,i
 
   ! netcdf vars - only needed locally
@@ -870,10 +871,10 @@ SUBROUTINE ncdf_open_input
     DO i=1,ntimestep
       nhours(i)=(i-1)*dt
     ENDDO
-END SUBROUTINE ncdf_open_input
+END SUBROUTINE netcdf_open_input
 
 
-SUBROUTINE ncdf_open_output
+SUBROUTINE netcdf_open_output
 
   ! netcdf vars - only needed locally
   INTEGER :: latvarid, lonvarid, timevarid
@@ -1106,10 +1107,10 @@ END IF
   ALLOCATE(rdiag2d(nlon,nlat,ndiag2d))
   rdiag2d=0.0
 
-END SUBROUTINE ncdf_open_output
+END SUBROUTINE netcdf_open_output
 
 
-SUBROUTINE ncdf_set_grid
+SUBROUTINE netcdf_set_grid
 
   ! local variables
   INTEGER :: istatus,i
@@ -1145,13 +1146,13 @@ SUBROUTINE ncdf_set_grid
 
     CALL check(NF90_GET_VAR(ncid_lsm,LatDimID,lats ))
     CALL check(NF90_GET_VAR(ncid_lsm,LonDimID,lons ))
-    PRINT *, '*** grid points   *** ',lats(:),lons(:)
+    ! PRINT *, '*** grid points   *** ',lats(:),lons(:)
 
 
-END SUBROUTINE ncdf_set_grid
+END SUBROUTINE netcdf_set_grid
 
 
-SUBROUTINE ncdf_initialize
+SUBROUTINE netcdf_initialize
 
   !local
   INTEGER i, j, ncid, ivarid,  nlatcheck, nloncheck
@@ -1260,10 +1261,10 @@ SUBROUTINE ncdf_initialize
 END SELECT
   PRINT *,'Initialization completed'
 
-END SUBROUTINE ncdf_initialize
+END SUBROUTINE netcdf_initialize
 
 
-SUBROUTINE ncdf_setdown
+SUBROUTINE netcdf_setdown
 
  ! INTEGER :: latvarid, lonvarid, timevarid, unlimdimid
  ! INTEGER :: nlatcheck, nloncheck, ndaycheck
@@ -1295,10 +1296,10 @@ SUBROUTINE ncdf_setdown
   CALL check(NF90_CLOSE(ncid_slope))
 
   PRINT *,'input/output closed '
-END SUBROUTINE ncdf_setdown
+END SUBROUTINE netcdf_setdown
 
 
-SUBROUTINE ncdf_getdata(istep)
+SUBROUTINE netcdf_getdata(istep)
   INTEGER, INTENT(IN) :: istep
 
   !---------------------------------------------------------------------------
@@ -1340,10 +1341,10 @@ SUBROUTINE ncdf_getdata(istep)
   IF (lvs_latreverse)          ivs=ivs(:,nlat:1:-1)
 
 !  IF (llal_latreverse)         ilal=ilal(:,nlat:1:-1)
-END SUBROUTINE ncdf_getdata
+END SUBROUTINE netcdf_getdata
 
 
-SUBROUTINE ncdf_write_results(istep)
+SUBROUTINE netcdf_write_results(istep)
     integer, intent(in) :: istep
 
 IF (lnc_rain) CALL check( nf90_put_var(ncidout, ncvar_rain(1), rrain, start=(/ 1, 1, istep /) ))
@@ -1412,18 +1413,18 @@ IF (lnc_fwi) THEN
 
 
    END IF
-END SUBROUTINE ncdf_write_results
+END SUBROUTINE netcdf_write_results
 
 
-SUBROUTINE ncdf_write_constant_fields
+SUBROUTINE netcdf_write_constant_fields
 IF(lnc_lsm)            CALL check( nf90_put_var(ncidout, ncvar_lsm(1),   rlsm , start=(/ 1, 1 /)))
 IF(lnc_cr)             CALL check( nf90_put_var(ncidout, ncvar_cr(1) ,   icr  , start=(/ 1, 1 /)))
 IF(lnc_fm)             CALL check( nf90_put_var(ncidout, ncvar_fm(1) ,   ifm  , start=(/ 1, 1 /)))
 IF(lnc_cv)             CALL check( nf90_put_var(ncidout, ncvar_cv (1),   rcv  , start=(/ 1, 1 /)))
 IF(lnc_slope)          CALL check( nf90_put_var(ncidout, ncvar_slope(1), islope, start=(/ 1, 1 /)))
 IF(lnc_rainclim)       CALL check( nf90_put_var(ncidout, ncvar_rainclim(1), rrainclim, start=(/ 1, 1 /)))
-END SUBROUTINE ncdf_write_constant_fields
+END SUBROUTINE netcdf_write_constant_fields
 
 
-END MODULE mo_ncdf_tools
+END MODULE
 

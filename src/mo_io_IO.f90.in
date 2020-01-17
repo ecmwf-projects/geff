@@ -1,0 +1,63 @@
+! (C) Copyright 1996- ECMWF.
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+! In applying this licence, ECMWF does not waive the privileges and immunities
+! granted to it by virtue of its status as an intergovernmental organisation nor
+! does it submit to any jurisdiction.
+
+!> @brief I/O @IO@ dummy module
+!> @author Maciel, P., ECMWF
+MODULE mo_io_@IO@
+
+   IMPLICIT NONE
+   PRIVATE :: not_available
+
+CONTAINS
+
+    SUBROUTINE @IO@_set_grid
+        CALL not_available('@IO@_set_grid')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_open_input
+        CALL not_available('@IO@_open_input')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_initialize
+        CALL not_available('@IO@_initialize')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_open_output
+        CALL not_available('@IO@_open_output')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_getdata(istep)
+        INTEGER, INTENT(IN) :: istep
+        CALL not_available('@IO@_getdata')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_write_results(istep)
+        INTEGER, INTENT(IN) :: istep
+        CALL not_available('@IO@_write_results')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_write_restart
+        CALL not_available('@IO@_write_restart')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_write_constant_fields
+        CALL not_available('@IO@_write_constant_fields')
+    END SUBROUTINE
+
+    SUBROUTINE @IO@_setdown
+        CALL not_available('@IO@_setdown')
+    END SUBROUTINE
+
+    SUBROUTINE not_available(what)
+        CHARACTER(LEN=*), INTENT(IN) :: what
+        PRINT *, '%ERROR: not available: '//what
+        STOP 1
+    END SUBROUTINE
+
+END MODULE
+

@@ -63,7 +63,7 @@ PROGRAM geff
   USE mo_nfdrs
   USE mo_mark5
   USE mo_fwi
-  USE mo_ncdf_tools
+  USE mo_io
   USE mo_fuelmodel
   USE mo_vegstage
   USE mo_version
@@ -155,9 +155,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
   PRINT *, 'now: ', now
   PRINT *, 'dt (hours): ', dt
-  PRINT *,
+  PRINT *, ''
 
-  CALL ncdf_set_grid
+  CALL io_set_grid
 
   !
   ! allocate/initialize arrays
@@ -242,11 +242,13 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   fwi_risk(:,:)%danger_risk=rfillvalue
 
 
-  CALL ncdf_open_input
+  CALL io_open_input
   PRINT*, "Input files: OPENED"
-  CALL ncdf_initialize
 
-  CALL ncdf_open_output
+  CALL io_initialize
+  PRINT*, "Initialize: DONE"
+
+  CALL io_open_output
   PRINT*, "Output file: CREATED"
 
 
@@ -275,7 +277,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
      ! read in met data timeslice
      !---------------------------
-     CALL ncdf_getdata(istep)
+     CALL io_getdata(istep)
 
      !-----------------
      ! GRIDDED LOOP !!!
@@ -1404,10 +1406,10 @@ ENDDO !nlat
 
 !!D)    OUTPUT
 !------------
-      CALL ncdf_write_results(istep)
+      CALL io_write_results(istep)
 
    IF ( actualdate .EQ. restartdate .AND. lrestart ) THEN
-      CALL ncdf_write_restart
+      CALL io_write_restart
       lrestart=.FALSE.
    ENDIF
 
@@ -1416,26 +1418,26 @@ ENDDO ! date loop
 
 
   ! write
-  CALL ncdf_write_constant_fields
+  CALL io_write_constant_fields
 
 
-  CALL ncdf_setdown
+  CALL io_setdown
 
   PRINT *, 'integration finished'
 
 !---------------------------------------
 CONTAINS
-  SUBROUTINE timer(str,icheck,time1,time2)
+  SUBROUTINE timer(str,icheck,t1,t2)
 
   IMPLICIT NONE
 
-  REAL :: time1,time2
+  REAL :: t1,t2
   INTEGER :: icheck
   CHARACTER*(*) :: str
 
-  CALL cpu_time(time2)
-  PRINT *,'Check point ',icheck,str,1000*time2-time1
-  time1=time2
+  CALL cpu_time(t2)
+  PRINT *,'Check point ',icheck,str,1000*t2-t1
+  t1=t2
   icheck=icheck+1
 
   RETURN
@@ -1443,14 +1445,8 @@ CONTAINS
 
   LOGICAL FUNCTION ISNAN(R)
      REAL :: R
-  IF (R .GT. 0.0) THEN
-     ISNAN = .FALSE.
-  ELSEIF (R .LE. 0.0) THEN
-     ISNAN = .FALSE.
-  ELSE
-     ISNAN = .TRUE.
-  END IF
-END FUNCTION ISNAN
+     ISNAN = R .NE. R
+  END FUNCTION ISNAN
 
 
 END PROGRAM geff

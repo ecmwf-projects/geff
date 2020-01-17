@@ -33,6 +33,8 @@ MODULE mo_control
   ! move derived parameters to setup.f90
   INTEGER :: restart_day !number of timestep before dumping a restart file
 
+  LOGICAL :: lgrib=.false.
+
 
 ! netcdf and input file indices
 
