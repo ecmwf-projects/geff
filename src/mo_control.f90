@@ -22,14 +22,11 @@ MODULE mo_control
 !
 ! define parameters in namelist
 
-  CHARACTER (len = 200) :: output_file, rundir
-  CHARACTER (len = 50)  :: now,version
+  CHARACTER (len = 200) :: output_file
+  CHARACTER (len = 50)  :: now
   CHARACTER (len = 100) :: init_file='none'
 
-  CHARACTER(len=*), PARAMETER :: input='./input/'
-  CHARACTER(len=*), PARAMETER :: output='./output/'
-  LOGICAL :: lstick
-
+  CHARACTER(len=*), PARAMETER :: namelst='geff.namelist'
 
   INTEGER :: inidate, initime
   INTEGER :: dt ! dt is in hours

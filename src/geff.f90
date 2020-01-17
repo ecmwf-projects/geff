@@ -9,6 +9,7 @@
 
 !> @brief GEFF runtime
 !> @author Di Giuseppe, F., ECMWF
+!> @author Maciel, P., ECMWF
 PROGRAM geff
 
 ! --- order of code ---
@@ -65,20 +66,21 @@ PROGRAM geff
   USE mo_ncdf_tools
   USE mo_fuelmodel
   USE mo_vegstage
+  USE mo_version
 
   IMPLICIT NONE
 
-! Local type
   TYPE (fuelmodel_type):: fuelmodel
   TYPE (vegstage_type) :: vegstage
-  ! local integers
-  INTEGER :: istep,icheck,idate,ix,iy,ii
+
+  ! local variables
+  INTEGER :: istep,icheck,idate,ix,iy,ii,i,j
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate
   INTEGER(4) :: restartdate
   REAL:: daylit
 
-  ! local real scalars for prognostic calculations
+  ! variables for prognostic calculations
   REAL :: zrain, ztemp, zmaxtemp,  zrainclim &
 &           ,zmintemp,  zcc, zwspeed, zdp&
 &           ,zrh, zminrh, zmaxrh, zsnow, zemc &
@@ -91,8 +93,7 @@ PROGRAM geff
 
   REAL:: gren
 
-  !local real scalar for diagnostic calculations
-
+  ! variables for diagnostic calculations
   REAL :: wtotd,wtotl,w1p,wtot,w1n,w10n,w100n,w1000n,&
        &  wherbn,wwoodn, rhobed,rhobar,betbar,etasd,etasl,&
        &  hn1,hn10,hn100,hn1000,hnherb,hnwood, wrat,sa1,sa10,sa100,saherb,&
@@ -120,26 +121,138 @@ PROGRAM geff
        & m, fw, fd, fwiB,ff, ff0, ff1,&
        & dc0,dl,lf,fwind,uu,mm
 
-
- !
-  ! local integer  scalars
+  ! local integer scalars
   INTEGER :: jfueltype,jvs
   INTEGER :: jyear,jmonth,jday,jhh
 
-! fortran timer functions
+  ! fortran timer functions
   REAL :: time1=0.0,time2=0.0
   LOGICAL :: lspinup, &          ! spin up period - turn off output
 &            ltimer=.false.      ! turn the cpu timer on for the first timestep
   LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm, lrestart=.TRUE.
 
+NAMELIST /control/ output_file, inidate, initime, dt, init_file, restart_day, now
+NAMELIST /climate/ tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
+NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
+
+
+  ! -----
+  ! SETUP
+  ! -----
+
+  !--------------------------
+  ! get basic run info
+
+  PRINT *, '-------------- GEFF ---------------'
+  PRINT *, 'version: ', version
+  PRINT *, 'file: ', "'"//namelst//"'"
+
+  OPEN (8, file=namelst, status='OLD')
+  READ (8, nml=control)
+  READ (8, nml=climate)
+  READ (8, nml=constdata)
+  CLOSE (8)
+
+  PRINT *, 'now: ', now
+  PRINT *, 'dt (hours): ', dt
+  PRINT *,
+
+  CALL ncdf_set_grid
+
+  !
+  ! allocate/initialize arrays
+  !
+
+  ! meteo
+  ALLOCATE(rrain(nlon,nlat))
+  ALLOCATE(rrainclim(nlon,nlat))
+  ALLOCATE(rtemp(nlon,nlat))
+  ALLOCATE(rmaxtemp(nlon,nlat))
+  ALLOCATE(rmintemp(nlon,nlat))
+  ALLOCATE(rrh(nlon,nlat))
+  ALLOCATE(rmaxrh(nlon,nlat))
+  ALLOCATE(rminrh(nlon,nlat))
+  ALLOCATE(rcc(nlon,nlat))
+  ALLOCATE(rwspeed(nlon,nlat))
+  ALLOCATE(rsnow(nlon,nlat))
+  ALLOCATE(rdp(nlon,nlat))
+  ALLOCATE(ivs(nlon,nlat))
+  ! ALLOCATE(ilal(nlon,nlat))
+
+  ! constant
+  ALLOCATE(rlsm(nlon,nlat))
+  ALLOCATE(rcv(nlon,nlat))
+  ALLOCATE(icr(nlon,nlat))
+  ALLOCATE(ifm(nlon,nlat))
+  ALLOCATE(islope(nlon,nlat))
+
+  ! NFDRS
+  ALLOCATE(mc(nlon,nlat))
+  ALLOCATE(fire_prop(nlon,nlat))
+  ALLOCATE(fire_prob(nlon,nlat))
+
+  ! mc(:,:)%r1hr=rfillvalue
+  ! mc(:,:)%r10hr=rfillvalue
+  ! mc(:,:)%r100hr=rfillvalue
+  ! mc(:,:)%r1000hr=rfillvalue
+  ! mc(:,:)%rherb=rfillvalue
+  ! mc(:,:)%rwood=rfillvalue
+  ! mc(:,:)%rx1000=rfillvalue
+
+  fire_prop(:,:)%ros=rfillvalue
+  fire_prop(:,:)%sc=ifillvalue
+  fire_prop(:,:)%erc=ifillvalue
+  fire_prop(:,:)%bi=ifillvalue
+
+  fire_prob(:,:)%ic=ifillvalue
+  fire_prob(:,:)%mcoi=ifillvalue
+  fire_prob(:,:)%loi=ifillvalue
+  fire_prob(:,:)%fli=rfillvalue
+
+  !MARK-5
+  ALLOCATE(mark5_fuel(nlon,nlat))
+  ALLOCATE(mark5_prop(nlon,nlat))
+  ALLOCATE(mark5_prob(nlon,nlat))
+
+  mark5_fuel(:,:)%moist=rfillvalue
+  mark5_fuel(:,:)%weight=rfillvalue
+  mark5_fuel(:,:)%curing=rfillvalue
+  mark5_fuel(:,:)%kb_drought_index=rfillvalue
+  mark5_fuel(:,:)%drought_factor=rfillvalue
+  mark5_fuel(:,:)%timesincerain=rfillvalue
+
+  mark5_prop(:,:)%ros_theta0=rfillvalue
+  mark5_prop(:,:)%ros_theta=rfillvalue
+  mark5_prop(:,:)%flame_height=rfillvalue
+  mark5_prop(:,:)%flame_distance=rfillvalue
+
+  mark5_prob(:,:)%fire_danger_index=rfillvalue
+
+  ! FWI
+
+  ALLOCATE(fwi_risk(nlon,nlat))
+
+  fwi_risk(:,:)%fwi=rfillvalue
+  fwi_risk(:,:)%ffmc=rfillvalue
+  fwi_risk(:,:)%dmc=rfillvalue
+  fwi_risk(:,:)%dc=rfillvalue
+  fwi_risk(:,:)%isi=rfillvalue
+  fwi_risk(:,:)%bui=rfillvalue
+  fwi_risk(:,:)%dsr=rfillvalue
+  fwi_risk(:,:)%danger_risk=rfillvalue
+
+
+  CALL ncdf_open_input
+  PRINT*, "Input files: OPENED"
+  CALL ncdf_initialize
+
+  CALL ncdf_open_output
+  PRINT*, "Output file: CREATED"
+
 
   ! -----
   ! START
   ! -----
-
-  PRINT *,'setup'
-
-  CALL setup ! initial conditions for arrays
 
   ! define the date at which to dump the restart
   CALL ADD_DAY (inidate,initime, (restart_day-1)*24,restartdate)
@@ -242,7 +355,7 @@ PROGRAM geff
            !---------------------------------------
            ! ONLY  MODEL POINT IF
            ! NOT A 100%  LAKE/SEA POINT
-           ! YES ALSO  ARTIC CLIMATE .AND. icr(ix,iy) .gt.  0
+           ! YES ALSO  ARCTIC CLIMATE .AND. icr(ix,iy) .gt.  0
            ! fuel model IS DEFINED (i.e. one of the  20 valid fuel models)
            ! vegetation stage is defined  (this has been removed )
            !---------------------------------------
@@ -285,7 +398,7 @@ PROGRAM geff
 
 
      ! 0.3 climate class for the pixel
-              ! we wanto to run also on the artic /climate
+              ! we wanto to run also on the arctic/climate
               !bounding necessary since the land sea mask in the climatic zone
               !and the IFS land-sea mask are not the same and Koplen is a much lower resolution
               IF ( icr(ix,iy) .LE. 0) THEN

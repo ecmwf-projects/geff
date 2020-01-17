@@ -16,6 +16,7 @@ MODULE mo_ncdf_tools
   USE mo_nfdrs
   USE mo_mark5
   USE mo_fwi
+  USE mo_version
 
   IMPLICIT NONE
   PRIVATE
@@ -95,7 +96,7 @@ SUBROUTINE ncdf_write_restart
 
   ! dump restart file:
 
-  CALL check(NF90_CREATE(path = input//"restart_geff.nc", cmode=or(nf90_clobber,nf90_64bit_offset), ncid = ncidrest))
+  CALL check(NF90_CREATE(path="restart.nc", cmode=or(nf90_clobber,nf90_64bit_offset), ncid = ncidrest))
 
 
 ! define the dimensions
@@ -119,7 +120,7 @@ SUBROUTINE ncdf_write_restart
   ! define global attributes
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "rundate", now))
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "geff", version))
-  CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "comments","geff  restart file"))
+  CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "comments","geff restart file"))
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "refdate", time_units))
   CALL check( NF90_PUT_ATT(ncidrest, NF90_GLOBAL, "nday after starting date",restart_day))
 
@@ -217,7 +218,6 @@ SUBROUTINE ncdf_write_restart
   CALL check( nf90_put_var(ncidrest, ncd_fwi_dc(1), fwi_risk%dc ))
   CALL check( nf90_close(ncidrest))
 
-  RETURN
 END SUBROUTINE ncdf_write_restart
 
 
@@ -235,8 +235,8 @@ SUBROUTINE ncdf_open_input
     !Land sea mask
     !------------
 
-    PRINT *,'opening Land sea-mask file ',input//lsmfile
-    CALL check(NF90_OPEN(path=input//lsmfile,mode=nf90_nowrite,ncid=ncid_lsm))
+    PRINT *,'opening Land sea-mask file ',lsmfile
+    CALL check(NF90_OPEN(path=lsmfile,mode=nf90_nowrite,ncid=ncid_lsm))
 
     ! dimensions are taken from the LSM
     CALL check(NF90_INQ_DIMID(ncid_lsm, lat_name, LatDimID))
@@ -264,8 +264,8 @@ SUBROUTINE ncdf_open_input
     !---------
     ! rainfall
     !---------
-    PRINT *,'opening rainfall ',input//rainfile
-    CALL check(NF90_OPEN(path=input//rainfile,mode=nf90_nowrite,ncid=ncid_rain))
+    PRINT *,'opening rainfall ',rainfile
+    CALL check(NF90_OPEN(path=rainfile,mode=nf90_nowrite,ncid=ncid_rain))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_rain, lat_name, LatDimID))
@@ -300,8 +300,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! temperature
     !------------
-    PRINT *,'opening temperature ',input//tempfile
-    CALL check(NF90_OPEN(path=input//tempfile,mode=nf90_nowrite,ncid=ncid_temp))
+    PRINT *,'opening temperature ',tempfile
+    CALL check(NF90_OPEN(path=tempfile,mode=nf90_nowrite,ncid=ncid_temp))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_temp, lat_name, LatDimID))
@@ -335,8 +335,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! temperature maximum
     !------------
-    PRINT *,'opening max temperature ',input//maxtempfile
-    CALL check(NF90_OPEN(path=input//maxtempfile,mode=nf90_nowrite,ncid=ncid_maxtemp))
+    PRINT *,'opening max temperature ',maxtempfile
+    CALL check(NF90_OPEN(path=maxtempfile,mode=nf90_nowrite,ncid=ncid_maxtemp))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_maxtemp, lat_name, LatDimID))
@@ -369,8 +369,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! temperature minimum
     !------------
-    PRINT *,'opening minimum temperature ',input//mintempfile
-    CALL check(NF90_OPEN(path=input//mintempfile,mode=nf90_nowrite,ncid=ncid_mintemp))
+    PRINT *,'opening minimum temperature ',mintempfile
+    CALL check(NF90_OPEN(path=mintempfile,mode=nf90_nowrite,ncid=ncid_mintemp))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_mintemp, lat_name, LatDimID))
@@ -402,8 +402,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! relative humidity
     !------------
-    PRINT *,'opening relative humidity ',input//rhfile
-    CALL check(NF90_OPEN(path=input//rhfile,mode=nf90_nowrite,ncid=ncid_rh))
+    PRINT *,'opening relative humidity ',rhfile
+    CALL check(NF90_OPEN(path=rhfile,mode=nf90_nowrite,ncid=ncid_rh))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_rh, lat_name, LatDimID))
@@ -434,8 +434,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! max relative humidity
     !------------
-    PRINT *,'opening relative humidity ',input//maxrhfile
-    CALL check(NF90_OPEN(path=input//maxrhfile,mode=nf90_nowrite,ncid=ncid_maxrh))
+    PRINT *,'opening relative humidity ',maxrhfile
+    CALL check(NF90_OPEN(path=maxrhfile,mode=nf90_nowrite,ncid=ncid_maxrh))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_maxrh, lat_name, LatDimID))
@@ -467,8 +467,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! min relative humidity
     !------------
-    PRINT *,'opening min relative humidity ',input//minrhfile
-    CALL check(NF90_OPEN(path=input//minrhfile,mode=nf90_nowrite,ncid=ncid_minrh))
+    PRINT *,'opening min relative humidity ',minrhfile
+    CALL check(NF90_OPEN(path=minrhfile,mode=nf90_nowrite,ncid=ncid_minrh))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_minrh, lat_name, LatDimID))
@@ -500,8 +500,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! Cloud cover
     !------------
-    PRINT *,'opening cloud cover file ',input//ccfile
-    CALL check(NF90_OPEN(path=input//ccfile,mode=nf90_nowrite,ncid=ncid_cc))
+    PRINT *,'opening cloud cover file ',ccfile
+    CALL check(NF90_OPEN(path=ccfile,mode=nf90_nowrite,ncid=ncid_cc))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_cc, lat_name, LatDimID))
@@ -533,8 +533,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! Wind speed
     !------------
-    PRINT *,'opening wind speed file ',input//wspeedfile
-    CALL check(NF90_OPEN(path=input//wspeedfile,mode=nf90_nowrite,ncid=ncid_wspeed))
+    PRINT *,'opening wind speed file ',wspeedfile
+    CALL check(NF90_OPEN(path=wspeedfile,mode=nf90_nowrite,ncid=ncid_wspeed))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_wspeed, lat_name, LatDimID))
@@ -565,8 +565,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! snow cover
     !------------
-    PRINT *,'opening snowcover file ',input//snowfile
-    CALL check(NF90_OPEN(path=input//snowfile,mode=nf90_nowrite,ncid=ncid_snow))
+    PRINT *,'opening snowcover file ',snowfile
+    CALL check(NF90_OPEN(path=snowfile,mode=nf90_nowrite,ncid=ncid_snow))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_snow, lat_name, LatDimID))
@@ -597,8 +597,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! rain duration
     !------------
-    PRINT *,'opening rain duration (DP) file ',input//dpfile
-    CALL check(NF90_OPEN(path=input//dpfile,mode=nf90_nowrite,ncid=ncid_dp))
+    PRINT *,'opening rain duration (DP) file ',dpfile
+    CALL check(NF90_OPEN(path=dpfile,mode=nf90_nowrite,ncid=ncid_dp))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_dp, lat_name, LatDimID))
@@ -630,8 +630,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! vegetation stages summary file
     !------------
-    PRINT *,'opening Vegetation stage  file (vegstage) file ',input//vsfile
-    CALL check(NF90_OPEN(path=input//vsfile,mode=nf90_nowrite,ncid=ncid_vs))
+    PRINT *,'opening Vegetation stage  file (vegstage) file ',vsfile
+    CALL check(NF90_OPEN(path=vsfile,mode=nf90_nowrite,ncid=ncid_vs))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_vs, lat_name, LatDimID))
@@ -664,8 +664,8 @@ SUBROUTINE ncdf_open_input
 !    !------------
 !    ! lightning activity file
 !    !------------
-!    PRINT *,'opening Lightning activity   file ',input//lalfile
-!    CALL check(NF90_OPEN(path=input//lalfile,mode=nf90_nowrite,ncid=ncid_lal))
+!    PRINT *,'opening Lightning activity   file ',lalfile
+!    CALL check(NF90_OPEN(path=lalfile,mode=nf90_nowrite,ncid=ncid_lal))
 !
 !    ! dimensions to make sure input file is correct size.
 !    CALL check(NF90_INQ_DIMID(ncid_lal, lat_name, LatDimID))
@@ -701,8 +701,8 @@ SUBROUTINE ncdf_open_input
    !---------
     ! climate rainfall
     !---------
-    PRINT *,'opening  climate rainfall ',input//rainclimfile
-    CALL check(NF90_OPEN(path=input//rainclimfile,mode=nf90_nowrite,ncid=ncid_rainclim))
+    PRINT *,'opening  climate rainfall ',rainclimfile
+    CALL check(NF90_OPEN(path=rainclimfile,mode=nf90_nowrite,ncid=ncid_rainclim))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_rainclim, lat_name, LatDimID))
@@ -731,8 +731,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! climate regions
     !------------
-    PRINT *,'opening climatic regions file ',input//crfile
-    CALL check(NF90_OPEN(path=input//crfile,mode=nf90_nowrite,ncid=ncid_cr))
+    PRINT *,'opening climatic regions file ',crfile
+    CALL check(NF90_OPEN(path=crfile,mode=nf90_nowrite,ncid=ncid_cr))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_cr, lat_name, LatDimID))
@@ -765,8 +765,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! fuel-model map
     !------------
-    PRINT *,'opening fuel-model maps ',input//fmfile
-    CALL check(NF90_OPEN(path=input//fmfile,mode=nf90_nowrite,ncid=ncid_fm))
+    PRINT *,'opening fuel-model maps ',fmfile
+    CALL check(NF90_OPEN(path=fmfile,mode=nf90_nowrite,ncid=ncid_fm))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_fm, lat_name, LatDimID))
@@ -799,8 +799,8 @@ SUBROUTINE ncdf_open_input
     !------------
     ! Vegetation cover (high +low)
     !------------
-    PRINT *,'opening  vegetation cover  ',input//cvfile
-    CALL check(NF90_OPEN(path=input//cvfile,mode=nf90_nowrite,ncid=ncid_cv))
+    PRINT *,'opening  vegetation cover  ',cvfile
+    CALL check(NF90_OPEN(path=cvfile,mode=nf90_nowrite,ncid=ncid_cv))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_cv, lat_name, LatDimID))
@@ -833,8 +833,8 @@ SUBROUTINE ncdf_open_input
     !------------
     !Slope due to subgridscale orography
     !------------
-    PRINT *,'opening slope of subgridscale orography  ',input//slopefile
-    CALL check(NF90_OPEN(path=input//slopefile,mode=nf90_nowrite,ncid=ncid_slope))
+    PRINT *,'opening slope of subgridscale orography  ',slopefile
+    CALL check(NF90_OPEN(path=slopefile,mode=nf90_nowrite,ncid=ncid_slope))
 
     ! dimensions to make sure input file is correct size.
     CALL check(NF90_INQ_DIMID(ncid_slope, lat_name, LatDimID))
@@ -916,7 +916,7 @@ SUBROUTINE ncdf_open_output
 
   ! define global attributes
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "Reference date", now))
-  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "ECMWF fire model", version))
+  CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "geff", version))
   CALL check( NF90_PUT_ATT(ncidout, NF90_GLOBAL, "License", "Copernicus"))
 
 
@@ -1106,7 +1106,6 @@ END IF
   ALLOCATE(rdiag2d(nlon,nlat,ndiag2d))
   rdiag2d=0.0
 
-  RETURN
 END SUBROUTINE ncdf_open_output
 
 
@@ -1126,8 +1125,8 @@ SUBROUTINE ncdf_set_grid
     !Land sea mask
     !------------
 
-    PRINT *,'opening Land sea-mask file ',input//lsmfile
-    CALL check(NF90_OPEN(path=input//lsmfile,mode=nf90_nowrite,ncid=ncid_lsm))
+    PRINT *,'opening Land sea-mask file ',lsmfile
+    CALL check(NF90_OPEN(path=lsmfile,mode=nf90_nowrite,ncid=ncid_lsm))
 
     ! dimensions are taken from the LSM
     CALL check(NF90_INQ_DIMID(ncid_lsm, "lat", LatDimID))
@@ -1168,8 +1167,8 @@ SUBROUTINE ncdf_initialize
   !
   CASE('rest')
 
-    PRINT *, 'opening RESTART condition file '//input//init_file
-    CALL check(NF90_OPEN(path=input//init_file,mode=nf90_nowrite,ncid=ncid))
+    PRINT *, 'opening RESTART condition file '//init_file
+    CALL check(NF90_OPEN(path=init_file,mode=nf90_nowrite,ncid=ncid))
 
     CALL check(NF90_INQ_DIMID(ncid, lat_name, LatDimID))
     CALL check(NF90_INQUIRE_DIMENSION(Ncid, LatDimID, len = nlatcheck))
@@ -1261,7 +1260,6 @@ SUBROUTINE ncdf_initialize
 END SELECT
   PRINT *,'Initialization completed'
 
-   RETURN
 END SUBROUTINE ncdf_initialize
 
 
@@ -1297,10 +1295,6 @@ SUBROUTINE ncdf_setdown
   CALL check(NF90_CLOSE(ncid_slope))
 
   PRINT *,'input/output closed '
-
-
-
-  RETURN
 END SUBROUTINE ncdf_setdown
 
 

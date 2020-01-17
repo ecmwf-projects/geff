@@ -1,0 +1,64 @@
+! GEFF
+!
+! CONTROL
+! * output_file   ex. 'geff.nc'
+! * inidate       ex. 20170404
+! * initime       ex. 1200
+! * dt            ex. 24
+! * init_file     ex. 'restart.nc'
+! * restart_day   ex. 1
+! * now           ex. '20170404'
+!
+! CLIMATE
+! * tempfile      2m temperature 12 local time (Kelvin)
+! * maxtempfile   2m max temperature in 24 h before (Kelvin)
+! * mintempfile   2m min temperature in 24 h before (Kelvin)
+! * rhfile        2m relative humidity at 12 local time (%)
+! * maxrhfile     2m max relative humidity in the 24 h before (%)
+! * minrhfile     2m min relative humidity in the 24 h before (%)
+! * rainfile      accumulated precipitation in the 24 h before (mm/day)
+! * ccfile        Cloud cover file (fraction)
+! * wspeedfile    wind speed intensity (m/s)
+! * snowfile      snow cover mask (0/1)
+! * dpfile        duration of precipitation in the previous 24 hours (hours)
+! * vsfile        vegetation stage file (1=cured, 2=pre-green, 3=green, 4=transition)
+!
+! CONSTDATA
+! * lsmfile       land sea mask file
+! * crfile        climatic regions (1=arid, 2=semi-arid, 3=humid, 4=wet, 5=arctic)
+! * fmfile        fuel model file code.
+! * slopefile     slope is divided in 5 classes (0, 1, 2, 3, 4)
+! * cvfile        vegetation cover (fraction [0, 1])
+! * rainclimfile  climatological precipitation accumulated over an year mm/year
+!
+&CONTROL
+output_file='geff.nc',
+inidate=20170404,
+initime=1200,
+dt=24,
+init_file='',
+restart_day=1,
+now='20170404'
+/
+&CLIMATE
+tempfile='tt_EU.nc',
+maxtempfile='ttmax_EU.nc',
+mintempfile='ttmin_EU.nc',
+rhfile='rh_EU.nc',
+maxrhfile='rhmax_EU.nc',
+minrhfile='rhmin_EU.nc',
+rainfile='pr_EU.nc',
+ccfile='cc_EU.nc',
+wspeedfile='ws_EU.nc',
+snowfile='sc_EU.nc',
+dpfile='prdur_EU.nc',
+vsfile='vs_EU.nc'
+/
+&CONSTDATA
+lsmfile='lm_EU.nc',
+crfile='cr_EU.nc',
+fmfile='fm_EU.nc',
+slopefile='slope_EU.nc',
+cvfile='vc_EU.nc',
+rainclimfile='prclim_EU.nc'
+/
