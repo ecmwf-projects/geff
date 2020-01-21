@@ -29,7 +29,7 @@ MODULE mo_fwi
     REAL :: danger_risk      ! fwi subdivided into classes
  END type fwi_risk_type
 
-  TYPE(fwi_risk_type)       ,  ALLOCATABLE :: fwi_risk(:,:)
+  TYPE(fwi_risk_type)       ,  ALLOCATABLE :: fwi_risk(:)
 
 CONTAINS
 !=================================

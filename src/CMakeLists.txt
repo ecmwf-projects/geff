@@ -8,21 +8,12 @@ add_executable (geff
     mo_fire.f90
     mo_fuelmodel.f90
     mo_fwi.f90
-    mo_io.f90
+    mo_io_eccodes.f90
     mo_mark5.f90
     mo_nfdrs.f90
     mo_vegstage.f90
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
 
-foreach(IO netcdf eccodes)
-    if (TARGET ${IO}::${IO})
-        target_link_libraries (geff PRIVATE ${IO}::${IO})
-        target_sources (geff PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/mo_io_${IO}.f90")
-    else()
-        configure_file (mo_io_IO.f90.in mo_io_${IO}.f90 @ONLY)
-        target_sources (geff PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/mo_io_${IO}.f90")
-    endif()
-endforeach()
-
+target_link_libraries (geff PRIVATE eccodes::eccodes)
 set_target_properties (geff PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 

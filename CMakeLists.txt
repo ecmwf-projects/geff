@@ -8,15 +8,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-find_package(NetCDF COMPONENTS Fortran)
-message(STATUS "Package NetCDF: ${NetCDF_FOUND}")
-
-find_package(ecCodes COMPONENTS Fortran)
+find_package(ecCodes COMPONENTS Fortran REQUIRED)
 message(STATUS "Package ecCodes: ${eccodes_FOUND}")
-
-if (NOT NetCDF_FOUND AND NOT eccodes_FOUND)
-    message(FATAL_ERROR "GEFF requires ecCodes either/or NetCDF")
-endif()
 
 
 add_subdirectory(src)

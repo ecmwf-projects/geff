@@ -24,7 +24,7 @@ MODULE mo_mark5
     REAL :: timesincerain
  END type mark5_fuel_type
 
-  TYPE(mark5_fuel_type)       ,  ALLOCATABLE :: mark5_fuel(:,:)
+  TYPE(mark5_fuel_type)       ,  ALLOCATABLE :: mark5_fuel(:)
 
 ! Mark 5 fuel status:
 
@@ -39,8 +39,8 @@ MODULE mo_mark5
      REAL :: fire_danger_index    ! fire danger index
   END type mark5_prob_type
 
-  TYPE(mark5_prob_type)       ,  ALLOCATABLE :: mark5_prob(:,:)
-  TYPE(mark5_prop_type)       ,  ALLOCATABLE :: mark5_prop(:,:)
+  TYPE(mark5_prob_type)       ,  ALLOCATABLE :: mark5_prob(:)
+  TYPE(mark5_prop_type)       ,  ALLOCATABLE :: mark5_prop(:)
 
 
 END MODULE mo_mark5

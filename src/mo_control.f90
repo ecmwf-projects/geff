@@ -28,15 +28,14 @@ MODULE mo_control
 
   CHARACTER(len=*), PARAMETER :: namelst='geff.namelist'
 
-  INTEGER :: inidate, initime
+  INTEGER :: inidate
+  INTEGER :: initime
   INTEGER :: dt ! dt is in hours
   ! move derived parameters to setup.f90
   INTEGER :: restart_day !number of timestep before dumping a restart file
 
-  LOGICAL :: lgrib=.false.
 
-
-! netcdf and input file indices
+  ! input file indices
 
   CHARACTER (LEN=2) :: crainvar="tp"
   CHARACTER (LEN=6) :: crainclimvar="tpclim"
@@ -51,52 +50,15 @@ MODULE mo_control
   CHARACTER (LEN=4) :: csnowvar="snow"
   CHARACTER (LEN=3) :: cdpvar="dp" ! duration of precipitation in the previous 24 hours(hr)
   CHARACTER (LEN=9) :: cvsvar="veg_stage" !
-!  CHARACTER (LEN=3) :: clalvar="lal" !
   CHARACTER (LEN=3) :: clsmvar="lsm"
   CHARACTER (LEN=3) :: ccvvar="cv"
   CHARACTER (LEN=5) :: cslopevar="slope"
   CHARACTER (LEN=13) :: ccrvar="climate_class" ! climate regions taken from the dataset  Koeppen_CRU_GPCCVASClimO
   CHARACTER (LEN=10) :: cfmvar="fuel_model" !
 
+  !============================================================
 
-  INTEGER :: ncid_temp, ncid_maxtemp,ncid_mintemp,&
-       ncid_minrh, ncid_maxrh, ncid_rh, &
-       ncid_rain, ncid_cc, ncid_wspeed, &
-       ncid_snow, ncid_dp, ncid_vs,     &
-       ncid_rainclim,         & !ncid_lal,
-       ncid_lsm,     &
-       ncid_cv,ncid_slope,   &
-       ncid_cr, ncid_fm, infile    ! file id
-  INTEGER :: varid_temp, varid_maxtemp, varid_mintemp, &
-       varid_rh, varid_maxrh, varid_minrh, &
-       varid_rain, varid_cc,varid_wspeed,  &
-       varid_snow,varid_dp,varid_vs,       &
-       varid_rainclim,           & !varid_lal,
-       varid_lsm, varid_cv, varid_slope,  &
-       varid_cr,varid_fm ! var  id
-  LOGICAL :: ltemp_latreverse=.false. ! reverse the lats?
-  LOGICAL :: lmaxtemp_latreverse=.false.
-  LOGICAL :: lmintemp_latreverse=.false. ! reverse the lats?
-  LOGICAL :: lrh_latreverse=.false.
-  LOGICAL :: lmaxrh_latreverse=.false. ! reverse the lats?
-  LOGICAL :: lminrh_latreverse=.false.
-  LOGICAL :: lrain_latreverse=.false.
-  LOGICAL :: lrainclim_latreverse=.false.
-  LOGICAL :: lwspeed_latreverse=.false.
-  LOGICAL :: lsnow_latreverse=.false.
-  LOGICAL :: lcc_latreverse=.false.
-  LOGICAL :: ldp_latreverse=.false.
-  LOGICAL :: lvs_latreverse=.false.
-!  LOGICAL :: llal_latreverse=.false.
-  LOGICAL :: llsm_latreverse=.false.
-  LOGICAL :: lcv_latreverse=.false.
-  LOGICAL :: lslope_latreverse=.false.
-  LOGICAL :: lcr_latreverse=.false.
-  LOGICAL :: lfm_latreverse=.false.
-
-!============================================================
-
-! climate data file
+  ! climate data file
   CHARACTER(len=200) :: rainfile
   CHARACTER(len=200) :: rainclimfile
   CHARACTER(len=200) :: tempfile
@@ -110,7 +72,6 @@ MODULE mo_control
   CHARACTER(len=200) :: wspeedfile
   CHARACTER(len=200) :: dpfile
   CHARACTER(len=200) :: vsfile
-!  CHARACTER(len=200) :: lalfile
 
   CHARACTER(len=200) :: lsmfile
   CHARACTER(len=200) :: cvfile
@@ -118,44 +79,9 @@ MODULE mo_control
   CHARACTER(len=200) :: crfile
   CHARACTER(len=200) :: fmfile
 
-
-  CHARACTER (len=31) :: time_units ! e.g. "days since 1990-11-25 00:00 UTC" this is a variable fields depends on date1
-  CHARACTER (len = *), PARAMETER :: lat_name = "lat"
-  CHARACTER (len = *), PARAMETER :: lon_name = "lon"
-  CHARACTER (len = *), PARAMETER :: time_name = "time"
-  CHARACTER (len = *), PARAMETER :: units = "units"
-  CHARACTER (len = *), PARAMETER :: lat_units = "degrees_north"
-  CHARACTER (len = *), PARAMETER :: lon_units = "degrees_east"
-
-! control of output file
-  LOGICAL :: lnc_rain=.true.
-  LOGICAL :: lnc_rainclim=.true.
-  LOGICAL :: lnc_temp=.true.
-  LOGICAL :: lnc_maxtemp=.true.
-  LOGICAL :: lnc_mintemp=.true.
-  LOGICAL :: lnc_rh=.true.
-  LOGICAL :: lnc_maxrh=.true.
-  LOGICAL :: lnc_minrh=.true.
-  LOGICAL :: lnc_snow=.true.
-  LOGICAL :: lnc_wspeed=.true.
-  LOGICAL :: lnc_cc=.true.
-  LOGICAL :: lnc_dp=.true.
-  LOGICAL :: lnc_vs=.true.
-!  LOGICAL :: lnc_lal=.true.
-  LOGICAL :: lnc_lsm=.true.
-  LOGICAL :: lnc_cv=.true.
-  LOGICAL :: lnc_slope=.true.
-  LOGICAL :: lnc_cr=.true.
-  LOGICAL :: lnc_fm=.true.
-
-  !fire variables
-
-  LOGICAL :: lnc_nfdrs=.true.
-  LOGICAL :: lnc_mark5=.true.
-  LOGICAL :: lnc_fwi=.true.
-
 ! index of point to dump quick timeseries diagnostics
-  INTEGER :: nxdg=369,nydg=229
+  INTEGER :: nxdg=369
+  INTEGER :: nydg=229
   REAL :: rfillvalue=-9999.0 ! missing value
   INTEGER :: ifillvalue=-9999 ! missing value
 

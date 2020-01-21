@@ -29,7 +29,7 @@ MODULE mo_nfdrs
 
   END type mc_type
 
-  TYPE(mc_type)       ,  ALLOCATABLE :: mc(:,:)
+  TYPE(mc_type)       ,  ALLOCATABLE :: mc(:)
 
 !diagnostic:
 
@@ -47,8 +47,8 @@ MODULE mo_nfdrs
      REAL :: fli    ! fire load index
   END type fire_prob_type
 
-  TYPE(fire_prop_type)       ,  ALLOCATABLE :: fire_prop(:,:)
-  TYPE(fire_prob_type)       ,  ALLOCATABLE :: fire_prob(:,:)
+  TYPE(fire_prop_type)       ,  ALLOCATABLE :: fire_prop(:)
+  TYPE(fire_prob_type)       ,  ALLOCATABLE :: fire_prob(:)
 
 
 CONTAINS

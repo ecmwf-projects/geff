@@ -63,7 +63,7 @@ PROGRAM geff
   USE mo_nfdrs
   USE mo_mark5
   USE mo_fwi
-  USE mo_io
+  USE mo_io_eccodes
   USE mo_fuelmodel
   USE mo_vegstage
   USE mo_version
@@ -74,7 +74,7 @@ PROGRAM geff
   TYPE (vegstage_type) :: vegstage
 
   ! local variables
-  INTEGER :: istep,icheck,idate,ix,iy,ii,i,j
+  INTEGER :: istep,icheck,idate,i,ii,j
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate
   INTEGER(4) :: restartdate
@@ -121,6 +121,9 @@ PROGRAM geff
        & m, fw, fd, fwiB,ff, ff0, ff1,&
        & dc0,dl,lf,fwind,uu,mm
 
+  CHARACTER (len=8) :: str_date
+  CHARACTER (len=4) :: str_time
+
   ! local integer scalars
   INTEGER :: jfueltype,jvs
   INTEGER :: jyear,jmonth,jday,jhh
@@ -153,9 +156,13 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   READ (8, nml=constdata)
   CLOSE (8)
 
-  PRINT *, 'now: ', now
+  WRITE (str_date, '(I8)') inidate
+  WRITE (str_time, '(I4)') initime
+
+  PRINT *, 'now (reference date): ', now
   PRINT *, 'dt (hours): ', dt
-  PRINT *, ''
+  PRINT *, "time units", "hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" &
+  & "//str_time(1:2)//":"//str_time(3:4)//" UTC"
 
   CALL io_set_grid
 
@@ -164,82 +171,81 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   !
 
   ! meteo
-  ALLOCATE(rrain(nlon,nlat))
-  ALLOCATE(rrainclim(nlon,nlat))
-  ALLOCATE(rtemp(nlon,nlat))
-  ALLOCATE(rmaxtemp(nlon,nlat))
-  ALLOCATE(rmintemp(nlon,nlat))
-  ALLOCATE(rrh(nlon,nlat))
-  ALLOCATE(rmaxrh(nlon,nlat))
-  ALLOCATE(rminrh(nlon,nlat))
-  ALLOCATE(rcc(nlon,nlat))
-  ALLOCATE(rwspeed(nlon,nlat))
-  ALLOCATE(rsnow(nlon,nlat))
-  ALLOCATE(rdp(nlon,nlat))
-  ALLOCATE(ivs(nlon,nlat))
-  ! ALLOCATE(ilal(nlon,nlat))
+  ALLOCATE(rrain(npoints))
+  ALLOCATE(rrainclim(npoints))
+  ALLOCATE(rtemp(npoints))
+  ALLOCATE(rmaxtemp(npoints))
+  ALLOCATE(rmintemp(npoints))
+  ALLOCATE(rrh(npoints))
+  ALLOCATE(rmaxrh(npoints))
+  ALLOCATE(rminrh(npoints))
+  ALLOCATE(rcc(npoints))
+  ALLOCATE(rwspeed(npoints))
+  ALLOCATE(rsnow(npoints))
+  ALLOCATE(rdp(npoints))
+  ALLOCATE(ivs(npoints))
 
   ! constant
-  ALLOCATE(rlsm(nlon,nlat))
-  ALLOCATE(rcv(nlon,nlat))
-  ALLOCATE(icr(nlon,nlat))
-  ALLOCATE(ifm(nlon,nlat))
-  ALLOCATE(islope(nlon,nlat))
+  ALLOCATE(rlsm(npoints))
+  ALLOCATE(rcv(npoints))
+  ALLOCATE(icr(npoints))
+  ALLOCATE(ifm(npoints))
+  ALLOCATE(islope(npoints))
 
   ! NFDRS
-  ALLOCATE(mc(nlon,nlat))
-  ALLOCATE(fire_prop(nlon,nlat))
-  ALLOCATE(fire_prob(nlon,nlat))
+  ALLOCATE(mc(npoints))
+  ALLOCATE(fire_prop(npoints))
+  ALLOCATE(fire_prob(npoints))
 
-  ! mc(:,:)%r1hr=rfillvalue
-  ! mc(:,:)%r10hr=rfillvalue
-  ! mc(:,:)%r100hr=rfillvalue
-  ! mc(:,:)%r1000hr=rfillvalue
-  ! mc(:,:)%rherb=rfillvalue
-  ! mc(:,:)%rwood=rfillvalue
-  ! mc(:,:)%rx1000=rfillvalue
+  ! mc(:)%r1hr=rfillvalue
+  ! mc(:)%r10hr=rfillvalue
+  ! mc(:)%r100hr=rfillvalue
+  ! mc(:)%r1000hr=rfillvalue
+  ! mc(:)%rherb=rfillvalue
+  ! mc(:)%rwood=rfillvalue
+  ! mc(:)%rx1000=rfillvalue
 
-  fire_prop(:,:)%ros=rfillvalue
-  fire_prop(:,:)%sc=ifillvalue
-  fire_prop(:,:)%erc=ifillvalue
-  fire_prop(:,:)%bi=ifillvalue
+  fire_prop(:)%ros=rfillvalue
+  fire_prop(:)%sc=ifillvalue
+  fire_prop(:)%erc=ifillvalue
+  fire_prop(:)%bi=ifillvalue
 
-  fire_prob(:,:)%ic=ifillvalue
-  fire_prob(:,:)%mcoi=ifillvalue
-  fire_prob(:,:)%loi=ifillvalue
-  fire_prob(:,:)%fli=rfillvalue
+  fire_prob(:)%ic=ifillvalue
+  fire_prob(:)%mcoi=ifillvalue
+  fire_prob(:)%loi=ifillvalue
+  fire_prob(:)%fli=rfillvalue
 
   !MARK-5
-  ALLOCATE(mark5_fuel(nlon,nlat))
-  ALLOCATE(mark5_prop(nlon,nlat))
-  ALLOCATE(mark5_prob(nlon,nlat))
+  ALLOCATE(mark5_fuel(npoints))
+  ALLOCATE(mark5_prop(npoints))
+  ALLOCATE(mark5_prob(npoints))
 
-  mark5_fuel(:,:)%moist=rfillvalue
-  mark5_fuel(:,:)%weight=rfillvalue
-  mark5_fuel(:,:)%curing=rfillvalue
-  mark5_fuel(:,:)%kb_drought_index=rfillvalue
-  mark5_fuel(:,:)%drought_factor=rfillvalue
-  mark5_fuel(:,:)%timesincerain=rfillvalue
+  mark5_fuel(:)%moist=rfillvalue
+  mark5_fuel(:)%weight=rfillvalue
+  mark5_fuel(:)%curing=rfillvalue
+  mark5_fuel(:)%kb_drought_index=rfillvalue
+  mark5_fuel(:)%drought_factor=rfillvalue
+  mark5_fuel(:)%timesincerain=rfillvalue
 
-  mark5_prop(:,:)%ros_theta0=rfillvalue
-  mark5_prop(:,:)%ros_theta=rfillvalue
-  mark5_prop(:,:)%flame_height=rfillvalue
-  mark5_prop(:,:)%flame_distance=rfillvalue
+  mark5_prop(:)%ros_theta0=rfillvalue
+  mark5_prop(:)%ros_theta=rfillvalue
+  mark5_prop(:)%flame_height=rfillvalue
+  mark5_prop(:)%flame_distance=rfillvalue
 
-  mark5_prob(:,:)%fire_danger_index=rfillvalue
+  mark5_prob(:)%fire_danger_index=rfillvalue
 
   ! FWI
 
-  ALLOCATE(fwi_risk(nlon,nlat))
+  ALLOCATE(fwi_risk(npoints))
 
-  fwi_risk(:,:)%fwi=rfillvalue
-  fwi_risk(:,:)%ffmc=rfillvalue
-  fwi_risk(:,:)%dmc=rfillvalue
-  fwi_risk(:,:)%dc=rfillvalue
-  fwi_risk(:,:)%isi=rfillvalue
-  fwi_risk(:,:)%bui=rfillvalue
-  fwi_risk(:,:)%dsr=rfillvalue
-  fwi_risk(:,:)%danger_risk=rfillvalue
+  fwi_risk(:)%fwi=rfillvalue
+  fwi_risk(:)%ffmc=rfillvalue
+  fwi_risk(:)%dmc=rfillvalue
+  fwi_risk(:)%dc=rfillvalue
+  fwi_risk(:)%isi=rfillvalue
+  fwi_risk(:)%bui=rfillvalue
+  fwi_risk(:)%dsr=rfillvalue
+  fwi_risk(:)%danger_risk=rfillvalue
 
 
   CALL io_open_input
@@ -279,30 +285,30 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
      !---------------------------
      CALL io_getdata(istep)
 
-     !-----------------
-     ! GRIDDED LOOP !!!
-     !-----------------
+     !-------------
+     ! GRIDDED LOOP
+     !-------------
 
-     DO ix=1,nlon
-        DO iy=1,nlat
+     DO i = 1, npoints
+
            fctcur=0
-           zrain=MAX(rrain(ix,iy),0.0) ! 1 day rainfall
-           ztemp=MAX(rtemp(ix,iy),0.0) ! temperature on a daily timestep
-           zmaxtemp=MAX(rmaxtemp(ix,iy),0.0) ! max daily temperature
-           zmintemp=MAX(rmintemp(ix,iy),0.0) ! min daily temperature
-           zrh=MAX(rrh(ix,iy),0.0) ! relative humidity
-           zmaxrh=MAX(rmaxrh(ix,iy),0.0) ! max daily relative humidity
-           zminrh=MAX(rminrh(ix,iy),0.0) ! min daily relative humidity
-           zsnow=rsnow(ix,iy) ! snow mask
-           zcc=MAX(rcc(ix,iy),0.0) ! cloud cover
-           zwspeed=MAX(rwspeed(ix,iy),0.0) ! wind speed
-           zdp=MAX(rdp(ix,iy),0.0) !duration of precipiatation in hours
-           jvs=MAX(ivs(ix,iy),0)   !vegetation stage
-           jslope=islope(ix,iy)
-           zrainclim=MAX(rrainclim(ix,iy),0.0) ! for the Keetch-byram
-           zlat=lats(iy)                                                ! index the ammount of annual
+           zrain=MAX(rrain(i),0.0) ! 1 day rainfall
+           ztemp=MAX(rtemp(i),0.0) ! temperature on a daily timestep
+           zmaxtemp=MAX(rmaxtemp(i),0.0) ! max daily temperature
+           zmintemp=MAX(rmintemp(i),0.0) ! min daily temperature
+           zrh=MAX(rrh(i),0.0) ! relative humidity
+           zmaxrh=MAX(rmaxrh(i),0.0) ! max daily relative humidity
+           zminrh=MAX(rminrh(i),0.0) ! min daily relative humidity
+           zsnow=rsnow(i) ! snow mask
+           zcc=MAX(rcc(i),0.0) ! cloud cover
+           zwspeed=MAX(rwspeed(i),0.0) ! wind speed
+           zdp=MAX(rdp(i),0.0) !duration of precipiatation in hours
+           jvs=MAX(ivs(i),0)   !vegetation stage
+           jslope=islope(i)
+           zrainclim=MAX(rrainclim(i),0.0) ! for the Keetch-byram
+           zlat=lats(i)                                                ! index the ammount of annual
                                                            ! precipitation is limited to 2,032mm/year
-           ilightning=0!MAX(MIN(ilal(ix,iy),6),0) ! lightining class limited to 6
+           ilightning=0!MAX(MIN(ilal(i),6),0) ! lightining class limited to 6
 
 
            !TEST 1
@@ -319,14 +325,14 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         !   zdp=0
         !   zsnow=0
         !   zrain=0
-        !   ifm(ix,iy)=7
+        !   ifm(i)=7
         !   zcc=0.38
-        !   mc(ix,iy)%r100hr=14
-        !   mc(ix,iy)%r1000hr=16
+        !   mc(i)%r100hr=14
+        !   mc(i)%r1000hr=16
         !   zlat=45
         !   !Answer
-           !mc(ix,iy)%r100hr=10.3
-           !mc(ix,iy)%r1000hr=14.8
+           !mc(i)%r100hr=10.3
+           !mc(i)%r1000hr=14.8
 
     !TEST 2
            !
@@ -341,23 +347,23 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
            !zminrh=61
            !zdp=0
            !zsnow=0
-           !ifm(ix,iy)=7
+           !ifm(i)=7
            !zcc=0.8
            !zwspeed=0.89
            !zrain=0.0
 !
-           !mc(ix,iy)%r100hr=10
-           !mc(ix,iy)%r1000hr=13
+           !mc(i)%r100hr=10
+           !mc(i)%r1000hr=13
            !Answer
-           !mc(ix,iy)%r100hr=12
-           !mc(ix,iy)%r1000hr=15.3
+           !mc(i)%r100hr=12
+           !mc(i)%r1000hr=15.3
 
 
 
            !---------------------------------------
            ! ONLY  MODEL POINT IF
            ! NOT A 100%  LAKE/SEA POINT
-           ! YES ALSO  ARCTIC CLIMATE .AND. icr(ix,iy) .gt.  0
+           ! YES ALSO  ARCTIC CLIMATE .AND. icr(i) .gt.  0
            ! fuel model IS DEFINED (i.e. one of the  20 valid fuel models)
            ! vegetation stage is defined  (this has been removed )
            !---------------------------------------
@@ -380,11 +386,11 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
      ! 0.2 fuel model for the pixel based on the JRC climatological maps
               !accordingly to the pixel fuel model the specific characteristic are loaded
-              IF ( ifm(ix,iy) .LE. 0) THEN
+              IF ( ifm(i) .LE. 0) THEN
                  lmask_fm=.FALSE. ! record that this point is missing for NFDRS
-                 ifm(ix,iy)=19 ! grass calculate as a grass point
+                 ifm(i)=19 ! grass calculate as a grass point
               END IF
-              CALL define_fuelmodel(ifm(ix,iy) , fuelmodel )
+              CALL define_fuelmodel(ifm(i) , fuelmodel )
 
 
               !All fuel loadings are converted to pounds per squarefoot by
@@ -403,11 +409,11 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
               ! we wanto to run also on the arctic/climate
               !bounding necessary since the land sea mask in the climatic zone
               !and the IFS land-sea mask are not the same and Koplen is a much lower resolution
-              IF ( icr(ix,iy) .LE. 0) THEN
-                 icr(ix,iy)=1 ! set icr=1 even if is missing data
+              IF ( icr(i) .LE. 0) THEN
+                 icr(i)=1 ! set icr=1 even if is missing data
                  lmask_cr=.FALSE. ! record that this point is missing for NFDRS
               END IF
-              iclima=icr(ix,iy)
+              iclima=icr(i)
 
 
       ! 0.4 vegetation stage
@@ -447,9 +453,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
           !1.1 --- 1hr fuel
 
-       mc(ix,iy)%r1hr=1.03*zemcpr
+       mc(i)%r1hr=1.03*zemcpr
      !1.2 --- 10hr fuel
-       mc(ix,iy)%r10hr=1.28*zemcpr
+       mc(i)%r10hr=1.28*zemcpr
 
        !Snow on the ground or  precipitation
       IF ( zrain .gt. 1.5 .or. zsnow .eq. 1) THEN
@@ -463,8 +469,8 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
          rhb=  100.0
          CALL  emc(tempa,rhb,zmaxem)
          ! and reset the values of 1hr and 10 hr to 35 %
-         mc(ix,iy)%r1hr=35.0
-         mc(ix,iy)%r10hr=35.0
+         mc(i)%r1hr=35.0
+         mc(i)%r10hr=35.0
 
       END IF
 
@@ -479,21 +485,21 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
        !update value for MC100
 
    !1.3 --- 100hr fuel
-       mc(ix,iy)%r100hr=MAX(mc(ix,iy)%r100hr,0.0)
-       mc(ix,iy)%r100hr=mc(ix,iy)%r100hr+(zbndryh-mc(ix,iy)%r100hr)*(1.0-0.87*EXP(-0.24))
+       mc(i)%r100hr=MAX(mc(i)%r100hr,0.0)
+       mc(i)%r100hr=mc(i)%r100hr+(zbndryh-mc(i)%r100hr)*(1.0-0.87*EXP(-0.24))
 
 
      !1.4 --- 1000hr fuel
        !
 
 
-       mc(ix,iy)%rbndryt=(((24-zdp)*zemcbar+zdp*(2.5*zdp+76.0))/24.0 +6*mc(ix,iy)%rbndryt)/7.0
+       mc(i)%rbndryt=(((24-zdp)*zemcbar+zdp*(2.5*zdp+76.0))/24.0 +6*mc(i)%rbndryt)/7.0
 
 
-       mc(ix,iy)%r1000hr= mc(ix,iy)%r1000hr + ( mc(ix,iy)%rbndryt -  mc(ix,iy)%r1000hr)*(1.00-0.82*EXP(-0.168))
+       mc(i)%r1000hr= mc(i)%r1000hr + ( mc(i)%rbndryt -  mc(i)%r1000hr)*(1.00-0.82*EXP(-0.168))
 
-       mc(ix,iy)%rx1000=MAX( mc(ix,iy)%rx1000,0.0)
-       mc(ix,iy)%r1000hr=MAX( mc(ix,iy)%r1000hr,0.0)
+       mc(i)%rx1000=MAX( mc(i)%rx1000,0.0)
+       mc(i)%r1000hr=MAX( mc(i)%r1000hr,0.0)
 
     !  write(11,*) vegstage%green_up,vegstage%green, vegstage%transition, vegstage%cured
        !1.5 --- herbaceous and wood
@@ -509,109 +515,109 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
           ! potential wood moisture content - only depends on the mc-1000hr
 
-          mcwoodp =MIN(MAX(woodga(iclima)+woodgb(iclima) *mc(ix,iy)%r1000hr,pregrn(iclima)),300.)
+          mcwoodp =MIN(MAX(woodga(iclima)+woodgb(iclima) *mc(i)%r1000hr,pregrn(iclima)),300.)
 
 
           !Instead to calculate the potential moisture content for the herbaceous
           ! we need the tendency in the mc-1000hr which is stored in the variable diff
           ! Since this is the green up I assume that the difference has to be >0
 
-          diff=(zbdybar -  mc(ix,iy)%r1000hr)*(1.00-0.82*EXP(-0.168))
+          diff=(zbdybar -  mc(i)%r1000hr)*(1.00-0.82*EXP(-0.168))
 
 
-          CALL kwet(mc(ix,iy)%r1000hr,diff, rkwet)
+          CALL kwet(mc(i)%r1000hr,diff, rkwet)
           CALL ktmp(zmintemp,zmaxtemp,rktmp)
 
 
           ! diagnostic variable which depends on mc-1000hr increments and
           ! is used to take into account for the slow moisture recovery
           ! in herbaceaous plants compared to dead fuel
-         ! PRINT *,"green-up",mc(ix,iy)%rx1000
+         ! PRINT *,"green-up",mc(i)%rx1000
 
-          mc(ix,iy)%rx1000=MAX(mc(ix,iy)%rx1000 + (diff *rkwet *rktmp),0.0)
+          mc(i)%rx1000=MAX(mc(i)%rx1000 + (diff *rkwet *rktmp),0.0)
 
 
           !therefore the potential herbaceous humidity content is not only a linear
           ! function of   mc-1000hr but of a function of it
 
-          mcherbp =MIN(MAX(rherbga(iclima)+rherbgb(iclima) *mc(ix,iy)%rx1000,30.),300.)
+          mcherbp =MIN(MAX(rherbga(iclima)+rherbgb(iclima) *mc(i)%rx1000,30.),300.)
 
           ! there is a thricky bit here for the herbaceaous part.
           ! The model causes fuel to be transfered back and forth between
-          ! the herbaceaous and the 1-hr class as   mc(ix,iy)%rherb
+          ! the herbaceaous and the 1-hr class as   mc(i)%rherb
           ! fluctuates between 30 and 120 %
-          ! In the IF-statement below  mc(ix,iy)%rherb  is calculated accordingly
+          ! In the IF-statement below  mc(i)%rherb  is calculated accordingly
           ! to the various phases of the vegetation
-          ! Once  mc(ix,iy)%rherb is given than the fuel loaded
+          ! Once  mc(i)%rherb is given than the fuel loaded
           ! is given by
-          !    fctcur=MAX(MIN(1.33 - 0.0111 * mc(ix,iy)%rherb,1),0)
+          !    fctcur=MAX(MIN(1.33 - 0.0111 * mc(i)%rherb,1),0)
           !    w1p= fuelmodel%weight%r1hr +  fctcur * fuelmodel%weight%rherb
           !    wherbp=(1-fctcur)*fuelmodel%weight%rherb
           ! These equations are calculated at the end of the IF-statement
 
-          mc(ix,iy)%rherb=30.0 + (mcherbp-30)*gren
-          mc(ix,iy)%rwood=pregrn(iclima)+(mcwoodp-pregrn(iclima))*gren
+          mc(i)%rherb=30.0 + (mcherbp-30)*gren
+          mc(i)%rwood=pregrn(iclima)+(mcwoodp-pregrn(iclima))*gren
 
-          fctcur=MAX(MIN(1.33 - 0.0111 * mc(ix,iy)%rherb,1.0),0.0)
+          fctcur=MAX(MIN(1.33 - 0.0111 * mc(i)%rherb,1.0),0.0)
 
         ELSE IF (vegstage%green .GE.1 ) THEN
           !=============================
           gren=1
-        !  PRINT *,"green",mc(ix,iy)%rx1000
-         mcherbp =rherbga(iclima)+rherbgb(iclima) *mc(ix,iy)%rx1000
+        !  PRINT *,"green",mc(i)%rx1000
+         mcherbp =rherbga(iclima)+rherbgb(iclima) *mc(i)%rx1000
 
           IF (mcherbp .lt. 120.0 ) THEN
              ! bypass the green stage and go into transition
              SELECT CASE (fuelmodel%herb_type)
              CASE ("annual")
-                mc(ix,iy)%rherb= MAX(MIN(annta(iclima) + anntb(iclima)* mc(ix,iy)%rx1000, mc(ix,iy)%rherb),30.0)
+                mc(i)%rherb= MAX(MIN(annta(iclima) + anntb(iclima)* mc(i)%rx1000, mc(i)%rherb),30.0)
              CASE ("perennial")
-                mc(ix,iy)%rherb= MIN(MAX(perta(iclima) + pertb(iclima)* mc(ix,iy)%rx1000,30.0),150.0)
+                mc(i)%rherb= MIN(MAX(perta(iclima) + pertb(iclima)* mc(i)%rx1000,30.0),150.0)
              END SELECT
 
           ELSE
-             mc(ix,iy)%rherb= MAX(MIN(rherbga(iclima)+ rherbgb(iclima) *mc(ix,iy)%rx1000 ,250.0),30.0)
+             mc(i)%rherb= MAX(MIN(rherbga(iclima)+ rherbgb(iclima) *mc(i)%rx1000 ,250.0),30.0)
 
           END IF
-          mc(ix,iy)%rwood= MAX(MIN(woodga(iclima) + woodgb (iclima) *mc(ix,iy)%r1000hr,200.0),pregrn(iclima))
+          mc(i)%rwood= MAX(MIN(woodga(iclima) + woodgb (iclima) *mc(i)%r1000hr,200.0),pregrn(iclima))
 
 
        ELSE IF (vegstage%transition .GE.1 ) THEN
           !=============================
-          mc(ix,iy)%rx1000=mc(ix,iy)%r1000hr
-       !   PRINT *,"transition",mc(ix,iy)%rx1000
+          mc(i)%rx1000=mc(i)%r1000hr
+       !   PRINT *,"transition",mc(i)%rx1000
           SELECT CASE (fuelmodel%herb_type)
           CASE ("annual")
-             mc(ix,iy)%rherb= MAX(MIN(annta(iclima) + anntb(iclima)* mc(ix,iy)%rx1000, mc(ix,iy)%rherb),30.0)
+             mc(i)%rherb= MAX(MIN(annta(iclima) + anntb(iclima)* mc(i)%rx1000, mc(i)%rherb),30.0)
           CASE ("perennial")
-             mc(ix,iy)%rherb= MIN(MAX(perta(iclima) + pertb(iclima)* mc(ix,iy)%rx1000,30.0),150.0)
+             mc(i)%rherb= MIN(MAX(perta(iclima) + pertb(iclima)* mc(i)%rx1000,30.0),150.0)
 
           END SELECT
-          mc(ix,iy)%rwood=pregrn(iclima)
+          mc(i)%rwood=pregrn(iclima)
 
 
        ELSE IF (vegstage%cured .GE.1 ) THEN
 
-          mc(ix,iy)%rx1000=mc(ix,iy)%r1000hr
+          mc(i)%rx1000=mc(i)%r1000hr
 
-          mc(ix,iy)%rwood=pregrn(iclima)
-      !      PRINT *,"cured",mc(ix,iy)%rx1000
+          mc(i)%rwood=pregrn(iclima)
+      !      PRINT *,"cured",mc(i)%rx1000
           SELECT CASE (fuelmodel%herb_type)
 
           CASE ("annual")
-             mc(ix,iy)%rherb=MAX(MIN(mc(ix,iy)%r1hr,30.0),0.0)
+             mc(i)%rherb=MAX(MIN(mc(i)%r1hr,30.0),0.0)
           CASE ("perennial")
-             mc(ix,iy)%rherb= MIN(MAX(perta(iclima) + pertb(iclima)* mc(ix,iy)%rx1000,30.0),150.0)
+             mc(i)%rherb= MIN(MAX(perta(iclima) + pertb(iclima)* mc(i)%rx1000,30.0),150.0)
 
           END SELECT
 
 
        END IF
        ! limit values of rwood and rherb
-      ! mc(ix,iy)%rwood=MAX(MIN(mc(ix,iy)%rwood,200),1)
-      ! mc(ix,iy)%rherb=MAX(MIN(mc(ix,iy)%rherb,200),1)
-     !  IF (mc(ix,iy)%rherb< 0) then
-     !     write(11,*) zbdybar , mc(ix,iy)%r1000hr,mc(ix,iy)%rx1000 , mc(ix,iy)%rherb,vegstage%green_up,vegstage%green, vegstage%transition, vegstage%cured,  mc(ix,iy)%r1hr
+      ! mc(i)%rwood=MAX(MIN(mc(i)%rwood,200),1)
+      ! mc(i)%rherb=MAX(MIN(mc(i)%rherb,200),1)
+     !  IF (mc(i)%rherb< 0) then
+     !     write(11,*) zbdybar , mc(i)%r1000hr,mc(i)%rx1000 , mc(i)%rherb,vegstage%green_up,vegstage%green, vegstage%transition, vegstage%cured,  mc(i)%r1hr
 
       ! end if
 
@@ -727,14 +733,14 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
        zeta=EXP((0.792+0.681*sgbrt**0.5)*(betbar+0.1))/(192.0+0.2595*sgbrt)
 
        !weighted dead-fuel moisture content for live extinsion moisture:
-       mclfe=(( mc(ix,iy)%r1hr*hn1)+(mc(ix,iy)%r10hr*hn10)+(mc(ix,iy)%r100hr*hn100))/(hn1+hn10+hn100)
+       mclfe=(( mc(i)%r1hr*hn1)+(mc(i)%r10hr*hn10)+(mc(i)%r100hr*hn100))/(hn1+hn10+hn100)
 
        !moisture of extinsion of live fuel
        mxl=MAX((2.9*wrat*(1.0-mclfe/fuelmodel%rmxd)-0.226)*100.0,fuelmodel%rmxd)
 
        !weighted moisture content of dead and live fuels
-       wtmcd=(f1*mc(ix,iy)%r1hr)+(f10*mc(ix,iy)%r10hr)+(f100*mc(ix,iy)%r100hr)
-       wtmcl=(fherb*mc(ix,iy)%rherb)+(fwood*mc(ix,iy)%rwood)
+       wtmcd=(f1*mc(i)%r1hr)+(f10*mc(i)%r10hr)+(f100*mc(i)%r100hr)
+       wtmcl=(fherb*mc(i)%rherb)+(fwood*mc(i)%rwood)
 
        !moisture damping coefficients of dead and live fuel
        dedrt=wtmcd/fuelmodel%rmxd
@@ -771,22 +777,22 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
        IF (fuelmodel%s2v%rwood > 0)      a5=EXP(-138.0/fuelmodel%s2v%rwood)
 
        htsink =rhobed*(fdead*&
-            &(f1 *a1 *(250.0+11.16*mc(ix,iy)%r1hr)+&
-            &f10 *a2 *(250.0+11.16*mc(ix,iy)%r10hr)+&
-            &f100*a3 *(250.0+11.16*mc(ix,iy)%r100hr)))+&
+            &(f1 *a1 *(250.0+11.16*mc(i)%r1hr)+&
+            &f10 *a2 *(250.0+11.16*mc(i)%r10hr)+&
+            &f100*a3 *(250.0+11.16*mc(i)%r100hr)))+&
             &(flive*&
-            &(fherb*a4*(250.0+11.16*mc(ix,iy)%rherb)+&
-            &fwood*a5*(250.0+11.16*mc(ix,iy)%rwood)))
+            &(fherb*a4*(250.0+11.16*mc(i)%rherb)+&
+            &fwood*a5*(250.0+11.16*mc(i)%rwood)))
 
        !rate of spread
 
-       fire_prop(ix,iy)%ros=ir *zeta *(1+phislp+phiwnd)/MAX(htsink ,reps) !ft/min
+       fire_prop(i)%ros=ir *zeta *(1+phislp+phiwnd)/MAX(htsink ,reps) !ft/min
 
-       if (ISNAN(fire_prop(ix,iy)%ros) ) fire_prop(ix,iy)%ros=0.0
+       if (ISNAN(fire_prop(i)%ros) ) fire_prop(i)%ros=0.0
 
-    !   if (ISNAN(fire_prop(ix,iy)%ros) .OR.fire_prop(ix,iy)%ros .GT. 200. )  PRINT *,mc(ix,iy)%rherb,mc(ix,iy)%rwood,ir, zeta,mc(ix,iy)%r1hr,fuelmodel%herb_type
+    !   if (ISNAN(fire_prop(i)%ros) .OR.fire_prop(i)%ros .GT. 200. )  PRINT *,mc(i)%rherb,mc(i)%rwood,ir, zeta,mc(i)%r1hr,fuelmodel%herb_type
        ! spread component
-       fire_prop(ix,iy)%sc=NINT(fire_prop(ix,iy)%ros)
+       fire_prop(i)%sc=NINT(fire_prop(i)%ros)
 
        !2.1.2 Energy Release
 
@@ -832,13 +838,13 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
        gmaope=gmamxe*(betbar/betope)**ade* EXP(ade*(1.0-betbar/betope))
 
        !weighted moisture contents of dead and live fuels
-       wtmcde=(f1e* mc(ix,iy)%r1hr)        +&
-             &(f10e* mc(ix,iy)%r10hr)      +&
-             &(f100e* mc(ix,iy)%r100hr)    +&
-             &(f1000e* mc(ix,iy)%r1000hr)
+       wtmcde=(f1e* mc(i)%r1hr)        +&
+             &(f10e* mc(i)%r10hr)      +&
+             &(f100e* mc(i)%r100hr)    +&
+             &(f1000e* mc(i)%r1000hr)
 
-       wtmcle=(fwoode* mc(ix,iy)%rwood)    +&
-             &(fherbe* mc(ix,iy)%rherb)
+       wtmcle=(fwoode* mc(i)%rwood)    +&
+             &(fherbe* mc(i)%rherb)
 
        !moisture dumping coefficients of dead and live fuel
        dedrte=wtmcde/fuelmodel%rmxd
@@ -855,9 +861,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
        tau=384.0/MAX(sgbrt,reps)
        !energy release component (1= 25 Btu/ft**2)
-       fire_prop(ix,iy)%erc= NINT(0.04*ire*tau)
+       fire_prop(i)%erc= NINT(0.04*ire*tau)
        !2.1.3 Burning Index
-       fire_prop(ix,iy)%bi= NINT(3.01*(fire_prop(ix,iy)%sc*fire_prop(ix,iy)%erc)**0.46)
+       fire_prop(i)%bi= NINT(3.01*(fire_prop(i)%sc*fire_prop(i)%erc)**0.46)
 
      !2.2  Fire occurrence probability
      !------------------------------------
@@ -868,24 +874,24 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
         qign=144.5-(0.266*(ztemp*9./5.-459.69))               -&
              &     (0.00058*(ztemp*9./5.-459.69)**2)           -&
-             &     (0.01*(ztemp*9./5.-459.69)*mc(ix,iy)%r1hr) +&
-             &  (18.54*(1.0-EXP(-0.151*mc(ix,iy)%r1hr))+6.4*mc(ix,iy)%r1hr)
+             &     (0.01*(ztemp*9./5.-459.69)*mc(i)%r1hr) +&
+             &  (18.54*(1.0-EXP(-0.151*mc(i)%r1hr))+6.4*mc(i)%r1hr)
 
         chi=(344.0-qign)/10.0
         IF ((chi**(3.6)*pnorm3-pnorm1) <= 0.0 ) THEN
           !probability of ignition
            p_i=0.0
-           fire_prob(ix,iy)%ic=0.0
+           fire_prob(i)%ic=0.0
         ELSE
            p_i=MIN(MAX((chi**(3.6)*pnorm3-pnorm1)*100.0/pnorm2,0.0),100.0)
-           scn=100.0*MIN(fire_prop(ix,iy)%sc/fuelmodel%rscm,1.0)
+           scn=100.0*MIN(fire_prop(i)%sc/fuelmodel%rscm,1.0)
            p_fi=scn**0.5
-           fire_prob(ix,iy)%ic=NINT(0.10*p_i*p_fi) !FDG Hacked for now we need to save both variables
+           fire_prob(i)%ic=NINT(0.10*p_i*p_fi) !FDG Hacked for now we need to save both variables
         END IF
           !2.2.2 Human caused fire occurrence index
         !mrisk???? = 10
         mrisk=10
-        fire_prob(ix,iy)%mcoi=NINT(0.01*mrisk*fire_prob(ix,iy)%ic)
+        fire_prob(i)%mcoi=NINT(0.01*mrisk*fire_prob(i)%ic)
 
         !2.2.3 Lightning-caused fire occurrence index
 
@@ -903,71 +909,71 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         raidur =stmdia(ilightning)/stmspd
 
         !moisture content of the 1-hr fuel within the rain area
-        fmf=mc(ix,iy)%r1hr+((76.0+2.7*raidur)-mc(ix,iy)%r1hr)*(1.0-EXP(-raidur))
+        fmf=mc(i)%r1hr+((76.0+2.7*raidur)-mc(i)%r1hr)*(1.0-EXP(-raidur))
 
         !Area weighted ignition component
-        icbar=((finsid*fire_prob(ix,iy)%ic)+(fotsid*fire_prob(ix,iy)%ic))/100.
+        icbar=((finsid*fire_prob(i)%ic)+(fotsid*fire_prob(i)%ic))/100.
 
         !lightning risk
         lrsf=1
         lrisk=MIN(MAX(cgrate(ilightning)*lrsf,0.0),100.0)
         IF (zrain > 1.0 .OR. ilightning .EQ. 1 ) THEN
-           fire_prob(ix,iy)%loi=MIN(MAX(NINT(0.25 *fire_prob(ix,iy)%loi),0),100)
+           fire_prob(i)%loi=MIN(MAX(NINT(0.25 *fire_prob(i)%loi),0),100)
         ELSE
-           fire_prob(ix,iy)%loi=MIN(MAX(NINT(10.0*(lrisk*icbar)+0.25*fire_prob(ix,iy)%loi),0),100)
+           fire_prob(i)%loi=MIN(MAX(NINT(10.0*(lrisk*icbar)+0.25*fire_prob(i)%loi),0),100)
         END IF
 
         IF (ilightning .EQ. 6) THEN
-           fire_prob(ix,iy)%loi=100
+           fire_prob(i)%loi=100
            lrisk=100
 
         END IF
 
         !2.2.4 Fire load index
 
-        fire_prob(ix,iy)%fli=0.71*SQRT(REAL(MIN(fire_prop(ix,iy)%bi**2.0,100.0)&
-             &+MIN(MAX((fire_prob(ix,iy)%loi+fire_prob(ix,iy)%mcoi)**2.0,0.0),100.0)))
+        fire_prob(i)%fli=0.71*SQRT(REAL(MIN(fire_prop(i)%bi**2.0,100.0)&
+             &+MIN(MAX((fire_prob(i)%loi+fire_prob(i)%mcoi)**2.0,0.0),100.0)))
 
 
   !   2.3 Mask outputs for wet/snow/dew  conditions
 
         ! Raining but no snow /ice on the ground
         IF (zsnow .EQ. 1.0 .OR. zrain .GT. 1.5  ) THEN
-           fire_prop(ix,iy)%ros=0.0
-           fire_prop(ix,iy)%sc=0
-           fire_prop(ix,iy)%erc=0
-           fire_prop(ix,iy)%bi=0
-           fire_prob(ix,iy)%ic=0
-           fire_prob(ix,iy)%mcoi=0
-           fire_prob(ix,iy)%loi=0
-           fire_prob(ix,iy)%fli=0.0
+           fire_prop(i)%ros=0.0
+           fire_prop(i)%sc=0
+           fire_prop(i)%erc=0
+           fire_prop(i)%bi=0
+           fire_prob(i)%ic=0
+           fire_prob(i)%mcoi=0
+           fire_prob(i)%loi=0
+           fire_prob(i)%fli=0.0
 
-           mc(ix,iy)%r1hr=35
-           mc(ix,iy)%r10hr=35
+           mc(i)%r1hr=35
+           mc(i)%r10hr=35
         END IF
  !    ELSE
 ! reset NFRDS due to fix field missing value
 !====================================================
 !
-!       fire_prop(ix,iy)%ros=rfillvalue
-!       fire_prop(ix,iy)%sc=ifillvalue
-!       fire_prop(ix,iy)%erc=ifillvalue
-!       fire_prop(ix,iy)%bi=ifillvalue
+!       fire_prop(i)%ros=rfillvalue
+!       fire_prop(i)%sc=ifillvalue
+!       fire_prop(i)%erc=ifillvalue
+!       fire_prop(i)%bi=ifillvalue
 !
-!       fire_prob(ix,iy)%ic=ifillvalue
-!       fire_prob(ix,iy)%mcoi=ifillvalue
-!       fire_prob(ix,iy)%loi=ifillvalue
-!       fire_prob(ix,iy)%fli=rfillvalue
+!       fire_prob(i)%ic=ifillvalue
+!       fire_prob(i)%mcoi=ifillvalue
+!       fire_prob(i)%loi=ifillvalue
+!       fire_prob(i)%fli=rfillvalue
 !
-!       mc(ix,iy)%r1hr=rfillvalue
-!       mc(ix,iy)%r10hr=rfillvalue
-!       mc(ix,iy)%r100hr=rfillvalue
-!       mc(ix,iy)%r1000hr=rfillvalue
+!       mc(i)%r1hr=rfillvalue
+!       mc(i)%r10hr=rfillvalue
+!       mc(i)%r100hr=rfillvalue
+!       mc(i)%r1000hr=rfillvalue
 !
-!       mc(ix,iy)%rherb=rfillvalue
-!       mc(ix,iy)%rwood=rfillvalue
-!       mc(ix,iy)%rx1000=rfillvalue
-!       mc(ix,iy)%rbndryt=rfillvalue
+!       mc(i)%rherb=rfillvalue
+!       mc(i)%rwood=rfillvalue
+!       mc(i)%rx1000=rfillvalue
+!       mc(i)%rbndryt=rfillvalue
 !
 
  !   END IF !  closes the IF (lmask_vegstage .AND. lmask_cr .AND. lmask_fm)
@@ -975,9 +981,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 !-----------
        IF ( fctcur .gt.0 ) THEN
         !here we assume that the curing is the one calculated for the nfdrs
-        mark5_fuel(ix,iy)%curing=fctcur*100.
+        mark5_fuel(i)%curing=fctcur*100.
      ELSE
-         mark5_fuel(ix,iy)%curing=30. !fix curing
+         mark5_fuel(i)%curing=30. !fix curing
       END IF
 
 
@@ -1004,13 +1010,13 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 ! zrain=9
 ! zmaxtemp=27+r0CtoK
 ! zrainclim=2000
-! mark5_fuel(ix,iy)%kb_drought_index =200
+! mark5_fuel(i)%kb_drought_index =200
 
-     IF (mark5_fuel(ix,iy)%timesincerain .EQ. 0) THEN
+     IF (mark5_fuel(i)%timesincerain .EQ. 0) THEN
            ! we had rain yestrday so the net-rainfall is
            !
            netrainfall=MAX(zrain,0.0)
-        ELSE IF (mark5_fuel(ix,iy)%timesincerain .GE. 1) THEN
+        ELSE IF (mark5_fuel(i)%timesincerain .GE. 1) THEN
            ! we come from a dry period the net precipitation needs to be reducend by 5 mm
 
            netrainfall=MAX(zrain -5.0,0.0)
@@ -1022,21 +1028,21 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
      &  (1+10.88*EXP(-0.001736*zrainclim))
 
  !yesterday KBDI less effective precipitation
-  KBDI_temp=MAX(mark5_fuel(ix,iy)%kb_drought_index-netrainfall,0.0)
+  KBDI_temp=MAX(mark5_fuel(i)%kb_drought_index-netrainfall,0.0)
 
   kb_drought_factor=((203.2-KBDI_temp) /1000.0)*Ep
 
 
 
-    !    kb_drought_factor=(203.2-MAX(mark5_fuel(ix,iy)%kb_drought_index-netrainfall,0.0))&
+    !    kb_drought_factor=(203.2-MAX(mark5_fuel(i)%kb_drought_index-netrainfall,0.0))&
     !         &                          *MAX((0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3),0.0)/&
     !         &                           (1+10.88*EXP(-0.001736*zrainclim))/1000.0 *dt
 
 
         ! the Keetch-Byram drough index of today is the Keetch-Byram drough index  of yestrday  PLUS
         ! the drought factor calculated above
-    !    WRITE(9,*) 'Keetch-Byram drough index ',mark5_fuel(ix,iy)%kb_drought_index,'drought factor',kb_drought_factor
-        mark5_fuel(ix,iy)%kb_drought_index=MIN(MAX(KBDI_temp + kb_drought_factor,0.0),203.2)
+    !    WRITE(9,*) 'Keetch-Byram drough index ',mark5_fuel(i)%kb_drought_index,'drought factor',kb_drought_factor
+        mark5_fuel(i)%kb_drought_index=MIN(MAX(KBDI_temp + kb_drought_factor,0.0),203.2)
 
 
         ! Once the Keetch-Byram index has been calculated use it to
@@ -1044,28 +1050,28 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         ! from 0 to 10], which estimates the proportion of fine fuels
         ! available for the forward spread of a fire.
 
-        mark5_fuel(ix,iy)%drought_factor=MAX(MIN(0.191*(mark5_fuel(ix,iy)%kb_drought_index+104.0)* &
-             & ((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))/ &
-             & (3.52*((mark5_fuel(ix,iy)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0),0.0)
+        mark5_fuel(i)%drought_factor=MAX(MIN(0.191*(mark5_fuel(i)%kb_drought_index+104.0)* &
+             & ((mark5_fuel(i)%timesincerain + 1.0)**(1.5))/ &
+             & (3.52*((mark5_fuel(i)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0),0.0)
 
 
 
         !Forest Fire Danger Index [open-ended scale, generally less than
         !100]. It measures both: the flammability of fuels, and thus the fire
         !danger; and the potential behaviour of a fire.
-        mark5_prob(ix,iy)%fire_danger_index=MIN(2.0 * EXP(-0.450 + &
-          &                                           0.987*LOG(mark5_fuel(ix,iy)%drought_factor+0.001)-&
+        mark5_prob(i)%fire_danger_index=MIN(2.0 * EXP(-0.450 + &
+          &                                           0.987*LOG(mark5_fuel(i)%drought_factor+0.001)-&
           &                                           0.0345*zrh+0.0338*(ztemp-r0CtoK)+0.0234*zwspeed*tokmhr),100.0)
 
-        mark5_fuel(ix,iy)%moist=MAX((97.7+4.06*zrh)/ &
-             & MAX((ztemp-r0CtoK+6.0),reps)-0.00854*zrh+3000.0/MAX(mark5_fuel(ix,iy)%curing,reps )-30.0,0.0)
+        mark5_fuel(i)%moist=MAX((97.7+4.06*zrh)/ &
+             & MAX((ztemp-r0CtoK+6.0),reps)-0.00854*zrh+3000.0/MAX(mark5_fuel(i)%curing,reps )-30.0,0.0)
 
-        mark5_fuel(ix,iy)%weight=wtot/ rtopoundsft2  !in units of ton/acre
+        mark5_fuel(i)%weight=wtot/ rtopoundsft2  !in units of ton/acre
 
-        mark5_prop (ix,iy)%ros_theta0= 0.0012*mark5_prob(ix,iy)%fire_danger_index*mark5_fuel(ix,iy)%weight
-        mark5_prop (ix,iy)%ros_theta=phislp*mark5_prop (ix,iy)%ros_theta0                                 !km/hr
-        mark5_prop (ix,iy)%flame_height=13.0* mark5_prop (ix,iy)%ros_theta0*mark5_fuel(ix,iy)%weight      !m
-        mark5_prop (ix,iy)%flame_distance=mark5_prop (ix,iy)%ros_theta0*(4.17-0.033*mark5_fuel(ix,iy)%weight)-0.36 !km
+        mark5_prop (i)%ros_theta0= 0.0012*mark5_prob(i)%fire_danger_index*mark5_fuel(i)%weight
+        mark5_prop (i)%ros_theta=phislp*mark5_prop (i)%ros_theta0                                 !km/hr
+        mark5_prop (i)%flame_height=13.0* mark5_prop (i)%ros_theta0*mark5_fuel(i)%weight      !m
+        mark5_prop (i)%flame_distance=mark5_prop (i)%ros_theta0*(4.17-0.033*mark5_fuel(i)%weight)-0.36 !km
 
         !time since rain (The threshold for rain is set at 5 mm/day for consistency with the
         ! Keetch-Byram drough index)
@@ -1074,16 +1080,16 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         IF (jhh .EQ. initime) THEN
            IF (zrain .LT. 5. ) THEN
            !   PRINT *, "UPDATING DAYS SINCE RAIN", initime, jhh
-              mark5_fuel(ix,iy)%timesincerain=mark5_fuel(ix,iy)%timesincerain + 1.
+              mark5_fuel(i)%timesincerain=mark5_fuel(i)%timesincerain + 1.
            ELSE
-              mark5_fuel(ix,iy)%timesincerain=0
+              mark5_fuel(i)%timesincerain=0
            ENDIF
         END IF
 
 
         IF ((zsnow .EQ. 1 .OR. zrain .GT. 1.5)) THEN
 
-           mark5_prob(ix,iy)%fire_danger_index=0.0
+           mark5_prob(i)%fire_danger_index=0.0
 
         END IF
 
@@ -1107,10 +1113,10 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !        zrh=42.
 !        zwspeed=6.944
 !        zrain=0
-!        fwi_risk(ix,iy)%ffmc=85
+!        fwi_risk(i)%ffmc=85
 !TEST ***************************
 
-        mo = 147.2 * (101.0 - fwi_risk(ix,iy)%ffmc)/(MAX((59.5 + fwi_risk(ix,iy)%ffmc),reps))
+        mo = 147.2 * (101.0 - fwi_risk(i)%ffmc)/(MAX((59.5 + fwi_risk(i)%ffmc),reps))
         IF ( zrain .GT. 0.5) THEN
            rf = zrain-0.5
            mr0 = EXP(-100.0 /(251.0 - mo))
@@ -1153,9 +1159,9 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
            ENDIF
         ENDIF
 ! rgw ffmc is scaled between 2% and 101%
-        fwi_risk(ix,iy)%ffmc = MIN(MAX(59.5*(250.0-mm)/(147.2+mm),2.0),101.0)
+        fwi_risk(i)%ffmc = MIN(MAX(59.5*(250.0-mm)/(147.2+mm),2.0),101.0)
 
-!        WRITE (9,*) 'fwi_risk(ix,iy)%ffmc',fwi_risk(ix,iy)%ffmc,87.692980092774448
+!        WRITE (9,*) 'fwi_risk(i)%ffmc',fwi_risk(i)%ffmc,87.692980092774448
    !     m=MAX(m,0.0)
 
 ! 2  The Duff Moisture Code
@@ -1174,29 +1180,29 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !        ztemp=17.+r0CtoK
 !        zrh=42.
 !        zrain=0
-!        fwi_risk(ix,iy)%dmc= 6
+!        fwi_risk(i)%dmc= 6
 !        zlat=45.98
 !        jmonth=4
 !TEST ***************************
    IF (zrain .GT. 1.5) THEN
       re = 0.92 * zrain - 1.27
-      moo = 20.0 + EXP(5.6348 -fwi_risk(ix,iy)%dmc / 43.43)
+      moo = 20.0 + EXP(5.6348 -fwi_risk(i)%dmc / 43.43)
 
-      IF  (fwi_risk(ix,iy)%dmc .LE. 33.0) THEN
-         bb = 100.0 / (0.5 + 0.3 * fwi_risk(ix,iy)%dmc)
-       ELSE IF (fwi_risk(ix,iy)%dmc .GT. 33.0 .AND. fwi_risk(ix,iy)%dmc .LE. 65.0) THEN
-         bb = 14.0 - 1.3 * LOG(fwi_risk(ix,iy)%dmc)
+      IF  (fwi_risk(i)%dmc .LE. 33.0) THEN
+         bb = 100.0 / (0.5 + 0.3 * fwi_risk(i)%dmc)
+       ELSE IF (fwi_risk(i)%dmc .GT. 33.0 .AND. fwi_risk(i)%dmc .LE. 65.0) THEN
+         bb = 14.0 - 1.3 * LOG(fwi_risk(i)%dmc)
        ELSE
-         bb = 6.2 * LOG(fwi_risk(ix,iy)%dmc) - 17.2
+         bb = 6.2 * LOG(fwi_risk(i)%dmc) - 17.2
        ENDIF
        mrr = moo + 1000.0 * re / (48.77 + bb * re)
 
        pr = 244.72 - 43.43 * LOG(mrr - 20.0)
 
        IF ( pr .GT. 0.0) THEN
-         fwi_risk(ix,iy)%dmc = pr
+         fwi_risk(i)%dmc = pr
        ELSE
-         fwi_risk(ix,iy)%dmc = 0.0
+         fwi_risk(i)%dmc = 0.0
        ENDIF
      ENDIF
 
@@ -1212,8 +1218,8 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
   ! increments
 
      !DMC is bounded between 0 and 10,000 (DMC could get to infinity and it will get to very high values over desereted areas where no fires can happens as there is no fuel )
-     fwi_risk(ix,iy)%dmc=MIN(MAX(fwi_risk(ix,iy)%dmc + 100.0 * k,0.0),10000.0)
-!     WRITE (9,*) 'fwi_risk(ix,iy)%dmc',fwi_risk(ix,iy)%dmc,' 8.5450511359999997'
+     fwi_risk(i)%dmc=MIN(MAX(fwi_risk(i)%dmc + 100.0 * k,0.0),10000.0)
+!     WRITE (9,*) 'fwi_risk(i)%dmc',fwi_risk(i)%dmc,' 8.5450511359999997'
 ! 3  The Drought Code
 !==========================================================================
 
@@ -1227,7 +1233,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !test dc should be  19.013999999999999  if
 !        ztemp=17.+r0CtoK
 !        zrain=0
-!        fwi_risk(ix,iy)%dc= 15
+!        fwi_risk(i)%dc= 15
 !        zlat=45.98
 !        jmonth=4
 !TEST ***************************
@@ -1235,14 +1241,14 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     IF (zrain .GT. 2.8) THEN
         rd = 0.83 * zrain - 1.27
       ! rd = 0.83 * zrain -  2.8
-      Qo = MIN(800.0 * EXP(-fwi_risk(ix,iy)%dc / 400.0),800.0)
+      Qo = MIN(800.0 * EXP(-fwi_risk(i)%dc / 400.0),800.0)
         Qr = Qo + 3.937 * rd
         Dr = 400.0 * LOG(800.0 / Qr)
 
         IF (Dr .GT. 0.0) THEN
-            fwi_risk(ix,iy)%dc = Dr
+            fwi_risk(i)%dc = Dr
          ELSE
-            fwi_risk(ix,iy)%dc = 0.0
+            fwi_risk(i)%dc = 0.0
          ENDIF
        ENDIF
 
@@ -1260,9 +1266,9 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
       !are outside the limits of single precision
       !DC is bounded between 0 and 10,000
 
-      fwi_risk(ix,iy)%dc=MIN(MAX(fwi_risk(ix,iy)%dc + 0.5 * vv,0.0),10000.0)
+      fwi_risk(i)%dc=MIN(MAX(fwi_risk(i)%dc + 0.5 * vv,0.0),10000.0)
 
-!       WRITE (9,*) 'fwi_risk(ix,iy)%dc',fwi_risk(ix,iy)%dc,'19.013999999999999 '
+!       WRITE (9,*) 'fwi_risk(i)%dc',fwi_risk(i)%dc,'19.013999999999999 '
 ! 4   Initial Spread Index
 !==========================================================================
 !
@@ -1275,19 +1281,19 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 ! test ISI should be  10.853661073655068   if
 !
 !        zwspeed=6.944
-!        fwi_risk(ix,iy)%ffmc=87.692980092774448
+!        fwi_risk(i)%ffmc=87.692980092774448
 !TEST ***************************
 
     fWIND = EXP(0.05039*zwspeed*tokmhr)
 
-    m = 147.2 * (101.0 - fwi_risk(ix,iy)%ffmc) /(59.5 + fwi_risk(ix,iy)%ffmc)
+    m = 147.2 * (101.0 - fwi_risk(i)%ffmc) /(59.5 + fwi_risk(i)%ffmc)
 
     ff = 91.9 *EXP(-0.1386 * m) * (1.0 + m**(5.31) / 49300000.0)
 
-    fwi_risk(ix,iy)%isi= 0.208 * fWIND * ff
+    fwi_risk(i)%isi= 0.208 * fWIND * ff
 
 
-!     WRITE (9,*) 'fwi_risk(ix,iy)%isi',fwi_risk(ix,iy)%isi,'10.85366107365 '
+!     WRITE (9,*) 'fwi_risk(i)%isi',fwi_risk(i)%isi,'10.85366107365 '
 
 ! 5    Buildup Index
 !==========================================================================
@@ -1297,18 +1303,18 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !    DC is the current day's Drought Code'''
 !TEST ***************************
 ! test BUI should be  8.4904265358371838   if
-!      fwi_risk(ix,iy)%dmc=8.5450511359999997
-!      fwi_risk(ix,iy)%dc=19.013999999999999
+!      fwi_risk(i)%dmc=8.5450511359999997
+!      fwi_risk(i)%dc=19.013999999999999
 !TEST ***************************
 
-    IF ( fwi_risk(ix,iy)%dmc .LE.  0.4 * fwi_risk(ix,iy)%dc ) THEN
-       uu =( 0.8 * fwi_risk(ix,iy)%dmc * fwi_risk(ix,iy)%dc ) / (fwi_risk(ix,iy)%dmc + 0.4 * fwi_risk(ix,iy)%dc)
+    IF ( fwi_risk(i)%dmc .LE.  0.4 * fwi_risk(i)%dc ) THEN
+       uu =( 0.8 * fwi_risk(i)%dmc * fwi_risk(i)%dc ) / (fwi_risk(i)%dmc + 0.4 * fwi_risk(i)%dc)
     ELSE
-       uu = fwi_risk(ix,iy)%dmc - (1.0 - 0.8 * fwi_risk(ix,iy)%dc / (fwi_risk(ix,iy)%dmc + 0.4 * fwi_risk(ix,iy)%dc )) * &
-            &  (0.92 + (0.0114 * fwi_risk(ix,iy)%dmc)**(1.7))
+       uu = fwi_risk(i)%dmc - (1.0 - 0.8 * fwi_risk(i)%dc / (fwi_risk(i)%dmc + 0.4 * fwi_risk(i)%dc )) * &
+            &  (0.92 + (0.0114 * fwi_risk(i)%dmc)**(1.7))
     ENDIF
-    fwi_risk(ix,iy)%bui=MAX(uu,0.0)
-!    WRITE (9,*) 'fwi_risk(ix,iy)%bui',fwi_risk(ix,iy)%bui,'8.4904265358371838 '
+    fwi_risk(i)%bui=MAX(uu,0.0)
+!    WRITE (9,*) 'fwi_risk(i)%bui',fwi_risk(i)%bui,'8.4904265358371838 '
 ! 6  Fire Weather Index
 !==========================================================================
 !
@@ -1320,80 +1326,80 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !test:
 !TEST ***************************
 ! FWI should be  10.096371392382368 if
-!    fwi_risk(ix,iy)%isi=10.853661073655068
-!    fwi_risk(ix,iy)%bui=8.4904265358371838
+!    fwi_risk(i)%isi=10.853661073655068
+!    fwi_risk(i)%bui=8.4904265358371838
 !TEST ***************************
-    IF (fwi_risk(ix,iy)%bui .LE. 80.0)THEN
-       fD = 0.626 * fwi_risk(ix,iy)%bui**(0.809) + 2.0
+    IF (fwi_risk(i)%bui .LE. 80.0)THEN
+       fD = 0.626 * fwi_risk(i)%bui**(0.809) + 2.0
     ELSE
-       fD = 1000.0 / (25.0 + 108.64 *EXP(-0.023 *fwi_risk(ix,iy)%bui))
+       fD = 1000.0 / (25.0 + 108.64 *EXP(-0.023 *fwi_risk(i)%bui))
     ENDIF
-    fwiB = 0.1 * fwi_risk(ix,iy)%isi * fD
+    fwiB = 0.1 * fwi_risk(i)%isi * fD
 
     IF (fwiB .GT. 1.0) THEN
-       fwi_risk(ix,iy)%fwi = MAX(EXP(2.72 *(0.434 * LOG(fwiB))**(0.647)),0.0)
+       fwi_risk(i)%fwi = MAX(EXP(2.72 *(0.434 * LOG(fwiB))**(0.647)),0.0)
     ELSE
-       fwi_risk(ix,iy)%fwi = MAX(fwiB,0.0)
+       fwi_risk(i)%fwi = MAX(fwiB,0.0)
     ENDIF
-!    WRITE (9,*) 'fwi_risk(ix,iy)%fwi',fwi_risk(ix,iy)%fwi,'10.096371392382368 '
+!    WRITE (9,*) 'fwi_risk(i)%fwi',fwi_risk(i)%fwi,'10.096371392382368 '
 
 ! IF YOU WANT TO MASK FOR SNOW uncomment these three lines
    !    IF (zsnow .EQ. 1 ) THEN
-   !        fwi_risk(ix,iy)%bui=0.0
-   !        fwi_risk(ix,iy)%isi=0.0
-   !        fwi_risk(ix,iy)%fwi=0.0
+   !        fwi_risk(i)%bui=0.0
+   !        fwi_risk(i)%isi=0.0
+   !        fwi_risk(i)%fwi=0.0
    !     END IF
 
 
 
-    IF (fwi_risk(ix,iy)%fwi .LT. 5.2                                    ) fwi_risk(ix,iy)%danger_risk=1.0
-    IF (fwi_risk(ix,iy)%fwi .GE. 5.2 .AND. fwi_risk(ix,iy)%fwi .LT. 11.2) fwi_risk(ix,iy)%danger_risk=2.0
-    IF (fwi_risk(ix,iy)%fwi .GE. 11.2.AND. fwi_risk(ix,iy)%fwi .LT. 21.3) fwi_risk(ix,iy)%danger_risk=3.0
-    IF (fwi_risk(ix,iy)%fwi .GE. 21.3.AND. fwi_risk(ix,iy)%fwi .LT. 38.0) fwi_risk(ix,iy)%danger_risk=4.0
-    IF (fwi_risk(ix,iy)%fwi .GE. 38.0.AND. fwi_risk(ix,iy)%fwi .LT. 50.0) fwi_risk(ix,iy)%danger_risk=5.0
-    IF (fwi_risk(ix,iy)%fwi .GT. 50.0                                   ) fwi_risk(ix,iy)%danger_risk=6.0
+    IF (fwi_risk(i)%fwi .LT. 5.2                                    ) fwi_risk(i)%danger_risk=1.0
+    IF (fwi_risk(i)%fwi .GE. 5.2 .AND. fwi_risk(i)%fwi .LT. 11.2) fwi_risk(i)%danger_risk=2.0
+    IF (fwi_risk(i)%fwi .GE. 11.2.AND. fwi_risk(i)%fwi .LT. 21.3) fwi_risk(i)%danger_risk=3.0
+    IF (fwi_risk(i)%fwi .GE. 21.3.AND. fwi_risk(i)%fwi .LT. 38.0) fwi_risk(i)%danger_risk=4.0
+    IF (fwi_risk(i)%fwi .GE. 38.0.AND. fwi_risk(i)%fwi .LT. 50.0) fwi_risk(i)%danger_risk=5.0
+    IF (fwi_risk(i)%fwi .GT. 50.0                                   ) fwi_risk(i)%danger_risk=6.0
 
-    fwi_risk(ix,iy)%dsr=0.0272*(fwi_risk(ix,iy)%fwi**(1.77))
+    fwi_risk(i)%dsr=0.0272*(fwi_risk(i)%fwi**(1.77))
 
  ELSE  ! not a valid point for calculation
 !NFDRS
-       fire_prop(ix,iy)%ros=rfillvalue
-       fire_prop(ix,iy)%sc=ifillvalue
-       fire_prop(ix,iy)%erc=ifillvalue
-       fire_prop(ix,iy)%bi=ifillvalue
+       fire_prop(i)%ros=rfillvalue
+       fire_prop(i)%sc=ifillvalue
+       fire_prop(i)%erc=ifillvalue
+       fire_prop(i)%bi=ifillvalue
 
-       fire_prob(ix,iy)%ic=ifillvalue
-       fire_prob(ix,iy)%mcoi=ifillvalue
-       fire_prob(ix,iy)%loi=ifillvalue
-       fire_prob(ix,iy)%fli=rfillvalue
+       fire_prob(i)%ic=ifillvalue
+       fire_prob(i)%mcoi=ifillvalue
+       fire_prob(i)%loi=ifillvalue
+       fire_prob(i)%fli=rfillvalue
 
-       mc(ix,iy)%r1hr=rfillvalue
-       mc(ix,iy)%r10hr=rfillvalue
-       mc(ix,iy)%r100hr=rfillvalue
-       mc(ix,iy)%r1000hr=rfillvalue
+       mc(i)%r1hr=rfillvalue
+       mc(i)%r10hr=rfillvalue
+       mc(i)%r100hr=rfillvalue
+       mc(i)%r1000hr=rfillvalue
 
-       mc(ix,iy)%rherb=rfillvalue
-       mc(ix,iy)%rwood=rfillvalue
-       mc(ix,iy)%rx1000=rfillvalue
-       mc(ix,iy)%rbndryt=rfillvalue
+       mc(i)%rherb=rfillvalue
+       mc(i)%rwood=rfillvalue
+       mc(i)%rx1000=rfillvalue
+       mc(i)%rbndryt=rfillvalue
 !MARK-5
 
 
-       mark5_fuel(ix,iy)%kb_drought_index=rfillvalue
-       mark5_fuel(ix,iy)%drought_factor=rfillvalue
-       mark5_fuel(ix,iy)%timesincerain=ifillvalue
-       mark5_prob(ix,iy)%fire_danger_index=rfillvalue
+       mark5_fuel(i)%kb_drought_index=rfillvalue
+       mark5_fuel(i)%drought_factor=rfillvalue
+       mark5_fuel(i)%timesincerain=ifillvalue
+       mark5_prob(i)%fire_danger_index=rfillvalue
 
-       rdiag2d(ix,iy,:)=rfillvalue
+       rdiag2d(i,:)=rfillvalue
 !FWI
-       fwi_risk(ix,iy)%fwi=rfillvalue
-       fwi_risk(ix,iy)%ffmc=rfillvalue
-       fwi_risk(ix,iy)%dmc=rfillvalue
-       fwi_risk(ix,iy)%dc=rfillvalue
-       fwi_risk(ix,iy)%isi=rfillvalue
-       fwi_risk(ix,iy)%bui=rfillvalue
-       fwi_risk(ix,iy)%dsr=rfillvalue
-       fwi_risk(ix,iy)%danger_risk=rfillvalue
+       fwi_risk(i)%fwi=rfillvalue
+       fwi_risk(i)%ffmc=rfillvalue
+       fwi_risk(i)%dmc=rfillvalue
+       fwi_risk(i)%dc=rfillvalue
+       fwi_risk(i)%isi=rfillvalue
+       fwi_risk(i)%bui=rfillvalue
+       fwi_risk(i)%dsr=rfillvalue
+       fwi_risk(i)%danger_risk=rfillvalue
 
 
     ENDIF !non-lake or sea point
@@ -1401,8 +1407,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     ! END OF SPATIAL LOOP
     !--------------------
 
-ENDDO !nlon
-ENDDO !nlat
+ENDDO !npoints
 
 !!D)    OUTPUT
 !------------
