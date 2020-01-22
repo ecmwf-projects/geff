@@ -12,7 +12,6 @@ MODULE mo_io_eccodes
 
     USE eccodes
 
-    USE mo_constants
     USE mo_control
     USE mo_fire
     USE mo_fwi
@@ -24,68 +23,89 @@ MODULE mo_io_eccodes
 
     PUBLIC :: io_getdata
     PUBLIC :: io_initialize
-    PUBLIC :: io_open_input
-    PUBLIC :: io_open_output
     PUBLIC :: io_set_grid
-    PUBLIC :: io_setdown
     PUBLIC :: io_write_constant_fields
     PUBLIC :: io_write_restart
     PUBLIC :: io_write_results
 
     PROCEDURE(), POINTER :: assert => assert_dbg
 
+    ! GRIB shortNames
+    CHARACTER(LEN=2) :: crain_vars(1)     = ['tp']
+    CHARACTER(LEN=6) :: crainclim_vars(1) = ['tpclim']
+    CHARACTER(LEN=2) :: ctemp_vars(1)     = ['t2']
+    CHARACTER(LEN=2) :: crh_vars(1)       = ['rh']
+    CHARACTER(LEN=6) :: cwspeed_vars(1)   = ['wspeed']
+    CHARACTER(LEN=2) :: ccc_vars(1)       = ['cc']
+    CHARACTER(LEN=4) :: csnow_vars(1)     = ['snow']
+    CHARACTER(LEN=3) :: cdp_vars(1)       = ['dp']
+    CHARACTER(LEN=9) :: cvs_vars(1)       = ['veg_stage']
+    CHARACTER(LEN=3) :: clsm_vars(1)      = ['lsm']
+    CHARACTER(LEN=3) :: ccv_vars(1)       = ['cv']
+    CHARACTER(LEN=5) :: cslope_vars(1)    = ['slope']
+    CHARACTER(LEN=13) :: ccr_vars(1)      = ['climate_class'] ! climate regions taken from the dataset Koeppen_CRU_GPCCVASClimO
+    CHARACTER(LEN=10) :: cfm_vars(1)      = ['fuel_model']
+
     ! GRIB paramIds
-    INTEGER, PARAMETER :: rain_pid    = 212001
-    INTEGER, PARAMETER :: temp_pid    = 212002
-    INTEGER, PARAMETER :: maxtemp_pid = 212003
-    INTEGER, PARAMETER :: mintemp_pid = 212004
-    INTEGER, PARAMETER :: rh_pid      = 212005
-    INTEGER, PARAMETER :: maxrh_pid   = 212006
-    INTEGER, PARAMETER :: minrh_pid   = 212007
-    INTEGER, PARAMETER :: cc_pid      = 212008
-    INTEGER, PARAMETER :: snow_pid    = 212009
-    INTEGER, PARAMETER :: wspeed_pid  = 212010
-    INTEGER, PARAMETER :: dp_pid      = 212011
-    INTEGER, PARAMETER :: vs_pid      = 212012
+    INTEGER, PARAMETER :: ilsm_pids(1)      = [172]
+    INTEGER, PARAMETER :: irainclim_pids(1) = [228]
+    INTEGER, PARAMETER :: irain_pids(1)     = [228]
+    INTEGER, PARAMETER :: itemp_pids(1)     = [167]
+    INTEGER, PARAMETER :: imaxtemp_pids(1)  = [167]
+    INTEGER, PARAMETER :: imintemp_pids(1)  = [167]
+    INTEGER, PARAMETER :: irh_pids(1)       = [168]
+    INTEGER, PARAMETER :: imaxrh_pids(1)    = [168]
+    INTEGER, PARAMETER :: iminrh_pids(1)    = [168]
+    INTEGER, PARAMETER :: icc_pids(1)       = [164]
+    INTEGER, PARAMETER :: isnow_pids(1)     = [141]
+    INTEGER, PARAMETER :: iwspeed_pids(2)   = [165, 166]
+    INTEGER, PARAMETER :: idp_pids(1)       = [228]
+    INTEGER, PARAMETER :: ivs_pids(1)       = [66]
+    INTEGER, PARAMETER :: icr_pids(1)       = [0]
+    INTEGER, PARAMETER :: ifm_pids(1)       = [0]
+    INTEGER, PARAMETER :: islope_pids(1)    = [163]
+    INTEGER, PARAMETER :: icv_pids(1)       = [28]
 
-    INTEGER, PARAMETER :: mc_r1hr_pid        = 212013
-    INTEGER, PARAMETER :: mc_r10hr_pid       = 212014
-    INTEGER, PARAMETER :: mc_r100hr_pid      = 212015
-    INTEGER, PARAMETER :: mc_r1000hr_pid     = 212016
-    INTEGER, PARAMETER :: mc_rx1000_pid      = 212017
-    INTEGER, PARAMETER :: mc_rherb_pid       = 212018
-    INTEGER, PARAMETER :: mc_rwood_pid       = 212019
+    INTEGER, PARAMETER :: imc_r1hr_pids(1)        = [212001]
+    INTEGER, PARAMETER :: imc_r10hr_pids(1)       = [212002]
+    INTEGER, PARAMETER :: imc_r100hr_pids(1)      = [212003]
+    INTEGER, PARAMETER :: imc_r1000hr_pids(1)     = [212004]
+    INTEGER, PARAMETER :: imc_rx1000_pids(1)      = [212005]
+    INTEGER, PARAMETER :: imc_rherb_pids(1)       = [212006]
+    INTEGER, PARAMETER :: imc_rwood_pids(1)       = [212007]
+    INTEGER, PARAMETER :: imc_rbndryt_pids(1)     = [212008]
 
-    INTEGER, PARAMETER :: fire_prop_ros_pid  = 212020
-    INTEGER, PARAMETER :: fire_prop_sc_pid   = 212021
-    INTEGER, PARAMETER :: fire_prop_erc_pid  = 212022
-    INTEGER, PARAMETER :: fire_prop_bi_pid   = 212023
+    INTEGER, PARAMETER :: ifire_prop_ros_pids(1)  = [212009]
+    INTEGER, PARAMETER :: ifire_prop_sc_pids(1)   = [212010]
+    INTEGER, PARAMETER :: ifire_prop_erc_pids(1)  = [212011]
+    INTEGER, PARAMETER :: ifire_prop_bi_pids(1)   = [212012]
 
-    INTEGER, PARAMETER :: fire_prob_ic_pid   = 212024
-    INTEGER, PARAMETER :: fire_prob_mcoi_pid = 212025
-    INTEGER, PARAMETER :: fire_prob_loi_pid  = 212026
-    INTEGER, PARAMETER :: fire_prob_fli_pid  = 212027
+    INTEGER, PARAMETER :: ifire_prob_ic_pids(1)   = [212013]
+    INTEGER, PARAMETER :: ifire_prob_mcoi_pids(1) = [212014]
+    INTEGER, PARAMETER :: ifire_prob_loi_pids(1)  = [212015]
+    INTEGER, PARAMETER :: ifire_prob_fli_pids(1)  = [212016]
 
-    INTEGER, PARAMETER :: mark5_fuel_kb_drought_index_pid  = 212028
-    INTEGER, PARAMETER :: mark5_fuel_drought_factor_pid    = 212029
-    INTEGER, PARAMETER :: mark5_fuel_moist_pid             = 212030
-    INTEGER, PARAMETER :: mark5_fuel_weight_pid            = 212031
+    INTEGER, PARAMETER :: imark5_fuel_kb_drought_index_pids(1)  = [212017]
+    INTEGER, PARAMETER :: imark5_fuel_drought_factor_pids(1)    = [212018]
+    INTEGER, PARAMETER :: imark5_fuel_moist_pids(1)             = [212019]
+    INTEGER, PARAMETER :: imark5_fuel_weight_pids(1)            = [212020]
+    INTEGER, PARAMETER :: imark5_fuel_timesincerain_pids(1)     = [212021]
 
-    INTEGER, PARAMETER :: mark5_prop_ros_theta0_pid        = 212032
-    INTEGER, PARAMETER :: mark5_prop_ros_theta_pid         = 212033
-    INTEGER, PARAMETER :: mark5_prop_flame_height_pid      = 212034
-    INTEGER, PARAMETER :: mark5_prop_flame_distance_pid    = 212035
-    INTEGER, PARAMETER :: mark5_prob_fire_danger_index_pid = 212036
+    INTEGER, PARAMETER :: imark5_prop_ros_theta0_pids(1)        = [212022]
+    INTEGER, PARAMETER :: imark5_prop_ros_theta_pids(1)         = [212023]
+    INTEGER, PARAMETER :: imark5_prop_flame_height_pids(1)      = [212024]
+    INTEGER, PARAMETER :: imark5_prop_flame_distance_pids(1)    = [212025]
+    INTEGER, PARAMETER :: imark5_prob_fire_danger_index_pids(1) = [212026]
 
-    INTEGER, PARAMETER :: fwi_risk_fwi_pid         = 212037
-    INTEGER, PARAMETER :: fwi_risk_ffmc_pid        = 212038
-    INTEGER, PARAMETER :: fwi_risk_dmc_pid         = 212039
-    INTEGER, PARAMETER :: fwi_risk_dc_pid          = 212040
+    INTEGER, PARAMETER :: ifwi_risk_fwi_pids(1)         = [212027]
+    INTEGER, PARAMETER :: ifwi_risk_ffmc_pids(1)        = [212028]
+    INTEGER, PARAMETER :: ifwi_risk_dmc_pids(1)         = [212029]
+    INTEGER, PARAMETER :: ifwi_risk_dc_pids(1)          = [212030]
 
-    INTEGER, PARAMETER :: fwi_risk_isi_pid         = 212041
-    INTEGER, PARAMETER :: fwi_risk_bui_pid         = 212042
-    INTEGER, PARAMETER :: fwi_risk_dsr_pid         = 212043
-    INTEGER, PARAMETER :: fwi_risk_danger_risk_pid = 212044
+    INTEGER, PARAMETER :: ifwi_risk_isi_pids(1)         = [212031]
+    INTEGER, PARAMETER :: ifwi_risk_bui_pids(1)         = [212032]
+    INTEGER, PARAMETER :: ifwi_risk_dsr_pids(1)         = [212033]
+    INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212034]
 
     TYPE :: GribField
        INTEGER :: fd
@@ -106,6 +126,7 @@ MODULE mo_io_eccodes
        PROCEDURE, PUBLIC :: values_as_integer => gribfield_values_as_integer
        PROCEDURE, PUBLIC :: header => gribfield_header
        PROCEDURE, PUBLIC :: write_other_field => gribfield_write_other_field
+       PROCEDURE, PUBLIC :: write_other_field_as_integer => gribfield_write_other_field_as_integer
        PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
     END TYPE
 
@@ -113,6 +134,7 @@ MODULE mo_io_eccodes
     REAL, PARAMETER :: missingValue = -1.e-20
 
     TYPE(GribField), TARGET :: input(18)
+    TYPE(GribField), POINTER :: ref           => input(1)
 
     TYPE(GribField), POINTER :: grib_lsm      => input(1)
     TYPE(GribField), POINTER :: grib_rain     => input(2)
@@ -127,7 +149,6 @@ MODULE mo_io_eccodes
     TYPE(GribField), POINTER :: grib_snow     => input(11)
     TYPE(GribField), POINTER :: grib_dp       => input(12)
     TYPE(GribField), POINTER :: grib_vs       => input(13)
-
     TYPE(GribField), POINTER :: grib_cr       => input(14)
     TYPE(GribField), POINTER :: grib_fm       => input(15)
     TYPE(GribField), POINTER :: grib_slope    => input(16)
@@ -172,11 +193,58 @@ CONTAINS
 
 
     SUBROUTINE io_initialize
+        TYPE(GribField) :: restart
         INTEGER :: i
+        REAL, ALLOCATABLE :: tmp(:)
 
         IF (TRIM(init_file(1:4)) == 'rest') THEN
             PRINT *, "Initialization type: exact initialization from '" // init_file // "'"
-            CALL assert(.FALSE., "NOTIMP")
+
+            CALL assert(npoints > 0, "npoints > 0")
+            ALLOCATE(tmp(npoints))
+            CALL restart%open_as_restart(init_file)
+
+            CALL restart_next_values('Restart (mc(:)%r1hr)', imc_r1hr_pids(1), tmp)
+            mc(:)%r1hr = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%r10hr)', imc_r10hr_pids(1), tmp)
+            mc(:)%r10hr = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%r100hr)', imc_r100hr_pids(1), tmp)
+            mc(:)%r100hr = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%r1000hr)', imc_r1000hr_pids(1), tmp)
+            mc(:)%r1000hr = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%rherb)', imc_rherb_pids(1), tmp)
+            mc(:)%rherb = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%rwood)', imc_rwood_pids(1), tmp)
+            mc(:)%rwood = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%rx1000)', imc_rx1000_pids(1), tmp)
+            mc(:)%rx1000 = tmp(:)
+
+            CALL restart_next_values('Restart (mc(:)%rbndryt)', imc_rbndryt_pids(1), tmp)
+            mc(:)%rbndryt = tmp(:)
+
+            CALL restart_next_values('Restart (mark5_fuel(:)%kb_drought_index)', imark5_fuel_kb_drought_index_pids(1), tmp)
+            mark5_fuel(:)%kb_drought_index = tmp(:)
+
+            CALL restart_next_values('Restart (mark5_fuel(:)%timesincerain)', imark5_fuel_timesincerain_pids(1), tmp)
+            mark5_fuel(:)%timesincerain = tmp(:)
+
+            CALL restart_next_values('Restart (fwi_risk(:)%ffmc)', ifwi_risk_ffmc_pids(1), tmp)
+            fwi_risk(:)%ffmc = tmp(:)
+
+            CALL restart_next_values('Restart (fwi_risk(:)%dmc)', ifwi_risk_dmc_pids(1), tmp)
+            fwi_risk(:)%dmc = tmp(:)
+
+            CALL restart_next_values('Restart (fwi_risk(:)%dc)', ifwi_risk_dc_pids(1), tmp)
+            fwi_risk(:)%dc = tmp(:)
+
+            CALL restart%close()
+            DEALLOCATE(tmp)
             RETURN
         ENDIF
 
@@ -213,46 +281,38 @@ CONTAINS
                 fwi_risk(i)%dc   = 15.
             END IF
         ENDDO
-    END SUBROUTINE
 
+        IF (ALLOCATED(tmp)) THEN
+            DEALLOCATE(tmp)
+        ENDIF
 
-    SUBROUTINE io_open_input
-        PRINT *, "pass"
-    END SUBROUTINE
+        CONTAINS
 
+        SUBROUTINE restart_next_values(message, paramId, values)
+            CHARACTER(LEN=*), INTENT(IN) :: message
+            INTEGER, INTENT(IN) :: paramId
+            REAL, ALLOCATABLE :: values(:)
 
-    SUBROUTINE io_open_output
-        INTEGER, ALLOCATABLE :: emptyInteger(:)
-        CHARACTER(LEN=1), ALLOCATABLE :: emptyCharacter(:)
-        INTEGER :: i
+            IF (.NOT. ALLOCATED(values)) THEN
+                ALLOCATE(values(npoints))
+            ENDIF
+            CALL assert(ref%Npoints == SIZE(values))
 
-        ! Open output file
-        ncidout = 0
-        CALL codes_open_file(ncidout, output_file, 'w')
-        CALL assert(ncidout /= 0, 'codes_open_file (w): '//output_file)
+            CALL assert(restart%next(), message//': restart%next()')
+            CALL restart%header()
 
-        ! set the arrays/3d structures and diagnostics indices
-        ndiag2d  = 50  ! FIXME: hardcoded!
-        ndaydiag =  1  ! FIXME: hardcoded!
+            CALL assert(restart%Npoints == ref%Npoints, message//': restart%Npoints == ref%Npoints')
+            CALL assert(restart%paramId == paramId, message//': restart%paramId == paramId')
 
-        CALL assert(.NOT. ALLOCATED(rdiag2d), '.NOT. ALLOCATED(nhours)')
-        CALL assert(input(1)%Npoints > 0, 'Npoints > 0')
-        ALLOCATE(rdiag2d(npoints, ndiag2d))
-        rdiag2d = 0.
-
-        ! set dates/times
-        CALL assert(.NOT. ALLOCATED(nhours), '.NOT. ALLOCATED(nhours)')
-        ALLOCATE(nhours(ntimestep))
-        DO i = 1, ntimestep
-            nhours(i) = (i - 1) * dt
-        ENDDO
+            CALL restart%values(values)
+        END SUBROUTINE
     END SUBROUTINE
 
 
     SUBROUTINE io_set_grid
         INTEGER :: i
 
-        CALL grib_lsm%open_as_input(lsmfile ,'Land-sea mask', [clsmvar], [172])
+        CALL grib_lsm%open_as_input(lsmfile ,'Land-sea mask', clsm_vars, ilsm_pids)
         CALL assert(grib_lsm%Npoints > 0)
         npoints = grib_lsm%Npoints
 
@@ -264,107 +324,143 @@ CONTAINS
         CALL assert(grib_lsm%next(), 'grib_lsm%next()')
         CALL grib_lsm%coordinates(lats, lons)
 
-        CALL grib_temp%open_as_input(tempfile, 'Temperature', [ctempvar], [167])
-        CALL grib_mintemp%open_as_input(maxtempfile, 'Maximum daily temperature', [ctempvar], [167])
-        CALL grib_maxtemp%open_as_input(mintempfile, 'Minimum daily temperature', [ctempvar], [167])
-        CALL grib_rh%open_as_input(rhfile ,'Relative humidity', [crhvar], [168])
-        CALL grib_maxrh%open_as_input(maxrhfile ,'Maximum daily relative humidity', [crhvar], [168])
-        CALL grib_minrh%open_as_input(minrhfile ,'Minimum daily relative humidity', [crhvar], [168])
-        CALL grib_rain%open_as_input(rainfile ,'Rainfall', [crainvar], [228])
-        CALL grib_cc%open_as_input(ccfile ,'Cloud cover', [cccvar], [164])
-        CALL grib_wspeed%open_as_input(wspeedfile ,'Wind speed', [cwspeedvar], [165, 166])
-        CALL grib_snow%open_as_input(snowfile ,'Ground snow', [csnowvar], [141])
-        CALL grib_dp%open_as_input(dpfile ,'Duration of precipitation in the previous 24h', [cdpvar], [228])
-        CALL grib_vs%open_as_input(vsfile ,'Vegetation stage', [cvsvar], [66])
-        CALL grib_cr%open_as_input(crfile ,'Climate region', [ccrvar], [0])
-        CALL grib_fm%open_as_input(fmfile ,'Fuel model', [cfmvar], [0])
-        CALL grib_slope%open_as_input(slopefile ,'Slope of sub-gridscale orography', [cslopevar], [163])
-        CALL grib_cv%open_as_input(cvfile ,'Fractional coverage for vegetation (high + low)', [ccvvar], [28])
-        CALL grib_rainclim%open_as_input(rainclimfile ,'Climate rainfall', [crainclimvar], [228])
+        CALL grib_temp%open_as_input(tempfile, 'temperature', ctemp_vars, itemp_pids)
+        CALL grib_mintemp%open_as_input(maxtempfile, 'maximum daily temperature', ctemp_vars, imaxtemp_pids)
+        CALL grib_maxtemp%open_as_input(mintempfile, 'minimum daily temperature', ctemp_vars, imintemp_pids)
+        CALL grib_rh%open_as_input(rhfile ,'relative humidity', crh_vars, irh_pids)
+        CALL grib_maxrh%open_as_input(maxrhfile ,'maximum daily relative humidity', crh_vars, imaxrh_pids)
+        CALL grib_minrh%open_as_input(minrhfile ,'minimum daily relative humidity', crh_vars, iminrh_pids)
+        CALL grib_rain%open_as_input(rainfile ,'rainfall', crain_vars, irain_pids)
+        CALL grib_cc%open_as_input(ccfile ,'cloud cover', ccc_vars, icc_pids)
+        CALL grib_wspeed%open_as_input(wspeedfile ,'wind speed', cwspeed_vars, iwspeed_pids)
+        CALL grib_snow%open_as_input(snowfile ,'ground snow', csnow_vars, isnow_pids)
+        CALL grib_dp%open_as_input(dpfile ,'duration of precipitation in the previous 24h', cdp_vars, idp_pids)
+        CALL grib_vs%open_as_input(vsfile ,'vegetation stage', cvs_vars, ivs_pids)
+        CALL grib_cr%open_as_input(crfile ,'climate region', ccr_vars, icr_pids)
+        CALL grib_fm%open_as_input(fmfile ,'fuel model', cfm_vars, ifm_pids)
+        CALL grib_slope%open_as_input(slopefile ,'slope of sub-gridscale orography', cslope_vars, islope_pids)
+        CALL grib_cv%open_as_input(cvfile ,'fractional coverage for vegetation (high + low)', ccv_vars, icv_pids)
+        CALL grib_rainclim%open_as_input(rainclimfile ,'climate rainfall', crainclim_vars, irainclim_pids)
 
         ntimestep = MAXVAL(input(:)%count)
-        CALL assert(input(1)%count == 1 .OR.input(1)%count == ntimestep)
+        CALL assert(input(1)%count == 1 .OR. input(1)%count == ntimestep)
 
         DO i = 2, SIZE(input)
             CALL assert(input(i)%same_geometry(input(1)))
-            CALL assert(input(i)%count == 1 .OR.input(i)%count == ntimestep)
+            CALL assert(input(i)%count == 1 .OR. input(i)%count == ntimestep)
         END DO
     END SUBROUTINE
 
 
-    SUBROUTINE io_setdown
-        CALL assert(.FALSE., "NOTIMP")
-    END SUBROUTINE
-
-
     SUBROUTINE io_write_constant_fields
-        CALL assert(.FALSE., "NOTIMP")
+        INTEGER :: fd, handle
+
+        CALL assert(ref%handle /= 0)
+        IF (LEN(TRIM(constant_file)) == 0 .OR. TRIM(constant_file) == 'none') RETURN
+        CALL codes_open_file(fd, constant_file, 'w')
+
+        CALL ref%write_other_field(fd, ilsm_pids(1), rlsm)
+        CALL ref%write_other_field(fd, icv_pids(1), rcv)
+        CALL ref%write_other_field(fd, irainclim_pids(1), rrainclim)
+
+        CALL ref%write_other_field_as_integer(fd, icr_pids(1), icr)
+        CALL ref%write_other_field_as_integer(fd, ifm_pids(1), ifm)
+        CALL ref%write_other_field_as_integer(fd, islope_pids(1), islope)
+
+        CALL codes_close_file(fd)
+        fd = 0
     END SUBROUTINE
 
 
     SUBROUTINE io_write_restart
-        CALL assert(.FALSE., "NOTIMP")
+        INTEGER :: fd, handle,j
+
+        CALL assert(ref%handle /= 0)
+        IF (LEN(TRIM(init_file)) == 0 .OR. TRIM(init_file) == 'none') RETURN
+        CALL codes_open_file(fd, init_file, 'w')
+
+        CALL ref%write_other_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
+        CALL ref%write_other_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
+        CALL ref%write_other_field(fd, imc_r100hr_pids(1), mc(:)%r100hr)
+        CALL ref%write_other_field(fd, imc_r1000hr_pids(1), mc(:)%r1000hr)
+        CALL ref%write_other_field(fd, imc_rherb_pids(1), mc(:)%rherb)
+        CALL ref%write_other_field(fd, imc_rwood_pids(1), mc(:)%rwood)
+        CALL ref%write_other_field(fd, imc_rx1000_pids(1), mc(:)%rx1000)
+        CALL ref%write_other_field(fd, imc_rbndryt_pids(1), mc(:)%rbndryt)
+
+        CALL ref%write_other_field(fd, imark5_fuel_kb_drought_index_pids(1), mark5_fuel(:)%kb_drought_index)
+        CALL ref%write_other_field(fd, imark5_fuel_timesincerain_pids(1), mark5_fuel(:)%timesincerain)
+
+        CALL ref%write_other_field(fd, ifwi_risk_ffmc_pids(1), fwi_risk(:)%ffmc)
+        CALL ref%write_other_field(fd, ifwi_risk_dmc_pids(1), fwi_risk(:)%dmc)
+        CALL ref%write_other_field(fd, ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
+
+        CALL codes_close_file(fd)
+        fd = 0
     END SUBROUTINE
 
 
     SUBROUTINE io_write_results(istep)
         INTEGER, INTENT(IN) :: istep
+        INTEGER :: fd
         REAL, ALLOCATABLE :: tmp(:)
 
-        CALL assert(ncidout /= 0, 'Output file open: '//output_file)
+        ! Open output file
+        fd = 0
+        CALL codes_open_file(fd, output_file, 'w')
+        CALL assert(fd /= 0, 'codes_open_file (w): '//output_file)
 
-        CALL write_field(rain_pid, rrain)
-        CALL write_field(temp_pid, rtemp)
-        CALL write_field(maxtemp_pid, rmaxtemp)
-        CALL write_field(mintemp_pid, rmintemp)
-        CALL write_field(rh_pid, rrh)
-        CALL write_field(maxrh_pid, rmaxrh)
-        CALL write_field(minrh_pid, rminrh)
-        CALL write_field(cc_pid, rcc)
-        CALL write_field(snow_pid, rsnow)
-        CALL write_field(wspeed_pid, rwspeed)
-        CALL write_field(dp_pid, rdp)
-        CALL write_field_from_integer(vs_pid, ivs)
+        CALL write_field(irain_pids(1), rrain)
+        CALL write_field(itemp_pids(1), rtemp)
+        CALL write_field(imaxtemp_pids(1), rmaxtemp)
+        CALL write_field(imintemp_pids(1), rmintemp)
+        CALL write_field(irh_pids(1), rrh)
+        CALL write_field(imaxrh_pids(1), rmaxrh)
+        CALL write_field(iminrh_pids(1), rminrh)
+        CALL write_field(icc_pids(1), rcc)
+        CALL write_field(isnow_pids(1), rsnow)
+        CALL write_field(iwspeed_pids(1), rwspeed)
+        CALL write_field(idp_pids(1), rdp)
+        CALL write_field_from_integer(ivs_pids(1), ivs)
 
-        CALL write_field(mc_r1hr_pid, mc(:)%r1hr)
-        CALL write_field(mc_r10hr_pid, mc(:)%r10hr)
-        CALL write_field(mc_r100hr_pid, mc(:)%r100hr)
-        CALL write_field(mc_r1000hr_pid, mc(:)%r1000hr)
+        CALL write_field(imc_r1hr_pids(1), mc(:)%r1hr)
+        CALL write_field(imc_r10hr_pids(1), mc(:)%r10hr)
+        CALL write_field(imc_r100hr_pids(1), mc(:)%r100hr)
+        CALL write_field(imc_r1000hr_pids(1), mc(:)%r1000hr)
+        CALL write_field(imc_rx1000_pids(1), mc(:)%rx1000)
+        CALL write_field(imc_rherb_pids(1), mc(:)%rherb)
+        CALL write_field(imc_rwood_pids(1), mc(:)%rwood)
 
-        CALL write_field(mc_rx1000_pid, mc(:)%rx1000)
-        CALL write_field(mc_rherb_pid, mc(:)%rherb)
-        CALL write_field(mc_rwood_pid, mc(:)%rwood)
+        CALL write_field(ifire_prop_ros_pids(1), fire_prop(:)%ros)
+        CALL write_field_from_integer(ifire_prop_sc_pids(1), fire_prop(:)%sc)
+        CALL write_field_from_integer(ifire_prop_erc_pids(1), fire_prop(:)%erc)
+        CALL write_field_from_integer(ifire_prop_bi_pids(1), fire_prop(:)%bi)
 
-        CALL write_field(fire_prop_ros_pid, fire_prop(:)%ros)
-        CALL write_field_from_integer(fire_prop_sc_pid, fire_prop(:)%sc)
-        CALL write_field_from_integer(fire_prop_erc_pid, fire_prop(:)%erc)
-        CALL write_field_from_integer(fire_prop_bi_pid, fire_prop(:)%bi)
+        CALL write_field_from_integer(ifire_prob_ic_pids(1), fire_prob(:)%ic)
+        CALL write_field_from_integer(ifire_prob_mcoi_pids(1), fire_prob(:)%mcoi)
+        CALL write_field_from_integer(ifire_prob_loi_pids(1), fire_prob(:)%loi)
+        CALL write_field(ifire_prob_fli_pids(1), fire_prob(:)%fli)
 
-        CALL write_field_from_integer(fire_prob_ic_pid, fire_prob(:)%ic)
-        CALL write_field_from_integer(fire_prob_mcoi_pid, fire_prob(:)%mcoi)
-        CALL write_field_from_integer(fire_prob_loi_pid, fire_prob(:)%loi)
-        CALL write_field(fire_prob_fli_pid, fire_prob(:)%fli)
+        CALL write_field(imark5_fuel_kb_drought_index_pids(1), mark5_fuel(:)%kb_drought_index)
+        CALL write_field(imark5_fuel_drought_factor_pids(1), mark5_fuel(:)%drought_factor)
+        CALL write_field(imark5_fuel_moist_pids(1), mark5_fuel(:)%moist)
+        CALL write_field(imark5_fuel_weight_pids(1), mark5_fuel(:)%weight)
 
-        CALL write_field(mark5_fuel_kb_drought_index_pid, mark5_fuel(:)%kb_drought_index)
-        CALL write_field(mark5_fuel_drought_factor_pid, mark5_fuel(:)%drought_factor)
-        CALL write_field(mark5_fuel_moist_pid, mark5_fuel(:)%moist)
-        CALL write_field(mark5_fuel_weight_pid, mark5_fuel(:)%weight)
+        CALL write_field(imark5_prop_ros_theta0_pids(1), mark5_prop(:)%ros_theta0)
+        CALL write_field(imark5_prop_ros_theta_pids(1), mark5_prop(:)%ros_theta)
+        CALL write_field(imark5_prop_flame_height_pids(1), mark5_prop(:)%flame_height)
+        CALL write_field(imark5_prop_flame_distance_pids(1), mark5_prop(:)%flame_distance)
+        CALL write_field(imark5_prob_fire_danger_index_pids(1), mark5_prob(:)%fire_danger_index)
 
-        CALL write_field(mark5_prop_ros_theta0_pid, mark5_prop(:)%ros_theta0)
-        CALL write_field(mark5_prop_ros_theta_pid, mark5_prop(:)%ros_theta)
-        CALL write_field(mark5_prop_flame_height_pid, mark5_prop(:)%flame_height)
-        CALL write_field(mark5_prop_flame_distance_pid, mark5_prop(:)%flame_distance)
-        CALL write_field(mark5_prob_fire_danger_index_pid, mark5_prob(:)%fire_danger_index)
+        CALL write_field(ifwi_risk_fwi_pids(1), fwi_risk(:)%fwi)
+        CALL write_field(ifwi_risk_ffmc_pids(1), fwi_risk(:)%ffmc)
+        CALL write_field(ifwi_risk_dmc_pids(1), fwi_risk(:)%dmc)
+        CALL write_field(ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
 
-        CALL write_field(fwi_risk_fwi_pid, fwi_risk(:)%fwi)
-        CALL write_field(fwi_risk_ffmc_pid, fwi_risk(:)%ffmc)
-        CALL write_field(fwi_risk_dmc_pid, fwi_risk(:)%dmc)
-        CALL write_field(fwi_risk_dc_pid,  fwi_risk(:)%dc)
-
-        CALL write_field(fwi_risk_isi_pid, fwi_risk(:)%isi)
-        CALL write_field(fwi_risk_bui_pid, fwi_risk(:)%bui)
-        CALL write_field(fwi_risk_dsr_pid, fwi_risk(:)%dsr)
-        CALL write_field(fwi_risk_danger_risk_pid, fwi_risk(:)%danger_risk)
+        CALL write_field(ifwi_risk_isi_pids(1), fwi_risk(:)%isi)
+        CALL write_field(ifwi_risk_bui_pids(1), fwi_risk(:)%bui)
+        CALL write_field(ifwi_risk_dsr_pids(1), fwi_risk(:)%dsr)
+        CALL write_field(ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
         IF (ALLOCATED(tmp)) THEN
             DEALLOCATE(tmp)
@@ -375,8 +471,8 @@ CONTAINS
         SUBROUTINE write_field(paramid, values)
             INTEGER, INTENT(IN) :: paramid
             REAL, INTENT(IN) :: values(:)
-            ! Note: grib_rain field defines metadata (aside from paramId)
-            CALL grib_rain%write_other_field(ncidout, paramid, values)
+            ! Note: reference field defines metadata (aside from paramId)
+            CALL ref%write_other_field(fd, paramid, values)
         END SUBROUTINE
 
         SUBROUTINE write_field_from_integer(paramid, values)
@@ -386,7 +482,7 @@ CONTAINS
             IF (.NOT. ALLOCATED(tmp)) THEN
                 ALLOCATE(tmp(npoints))
             ENDIF
-            tmp(:) = values(:)
+            tmp = values
             CALL write_field(paramid, tmp)
         END SUBROUTINE
 
@@ -498,7 +594,7 @@ CONTAINS
       INTEGER, DIMENSION(:), INTENT(IN) :: pids
 
       CHARACTER(LEN=20) :: shortName
-      INTEGER :: i, Npoints
+      INTEGER :: i, n
       LOGICAL :: found
 
       ! open file and read messages to the end
@@ -529,8 +625,8 @@ CONTAINS
       DO WHILE (this%next())
           this%count = this%count + 1
           CALL codes_get(this%handle, 'paramId', i)
-          CALL codes_get(this%handle, 'numberOfDataPoints', Npoints)
-          CALL assert(Npoints == this%Npoints .AND. i == this%paramId,&
+          CALL codes_get(this%handle, 'numberOfDataPoints', n)
+          CALL assert(n == this%Npoints .AND. i == this%paramId,&
                       'Input fields should have the same paramId and geometry (numberOfDataPoints)')
       END DO
 
@@ -583,6 +679,18 @@ CONTAINS
       CALL codes_write(handle, fd)
       CALL codes_release(handle)
    END SUBROUTINE
+
+    SUBROUTINE gribfield_write_other_field_as_integer(this, fd, paramid, values)
+       CLASS(GribField), INTENT(INOUT) :: this
+       INTEGER, INTENT(IN) :: fd, paramid
+       INTEGER, INTENT(IN) :: values(:)
+       REAL, ALLOCATABLE :: tmp(:)
+
+       ALLOCATE(tmp(SIZE(values)))
+       tmp = values
+       CALL gribfield_write_other_field(this, fd, paramid, tmp)
+       DEALLOCATE(tmp)
+    END SUBROUTINE
 
    FUNCTION gribfield_same_geometry(this, other) RESULT(yes)
       CLASS(GribField), INTENT(INOUT) :: this, other

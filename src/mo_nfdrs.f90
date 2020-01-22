@@ -7,12 +7,11 @@
 ! does it submit to any jurisdiction.
 
 
-!> @brief Prognostic/diagnostic variables and calculation of the National Fire
-!> Danger Rating System
+!> @brief Prognostic/diagnostic variables for National Fire Danger Rating System
 !> @author Di Giuseppe, F., ECMWF
 MODULE mo_nfdrs
 
-  USE mo_fire
+  USE mo_constants
 
   IMPLICIT NONE
 

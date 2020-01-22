@@ -74,7 +74,7 @@ PROGRAM geff
   TYPE (vegstage_type) :: vegstage
 
   ! local variables
-  INTEGER :: istep,icheck,idate,i,ii,j
+  INTEGER :: istep,icheck,idate=0,i,ii,j
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate
   INTEGER(4) :: restartdate
@@ -127,6 +127,7 @@ PROGRAM geff
   ! local integer scalars
   INTEGER :: jfueltype,jvs
   INTEGER :: jyear,jmonth,jday,jhh
+  INTEGER :: ndaydiag           ! diagnostics every n days
 
   ! fortran timer functions
   REAL :: time1=0.0,time2=0.0
@@ -235,7 +236,6 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   mark5_prob(:)%fire_danger_index=rfillvalue
 
   ! FWI
-
   ALLOCATE(fwi_risk(npoints))
 
   fwi_risk(:)%fwi=rfillvalue
@@ -248,14 +248,20 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   fwi_risk(:)%danger_risk=rfillvalue
 
 
-  CALL io_open_input
-  PRINT*, "Input files: OPENED"
+  ! set structures
+  ALLOCATE(rdiag2d(npoints, 50))  !FIXME: hardcoded
+  rdiag2d = 0.
+
+  ! set dates/times
+  ndaydiag =  1  ! FIXME: hardcoded!
+  ALLOCATE(nhours(ntimestep))
+  DO i = 1, ntimestep
+      nhours(i) = (i - 1) * dt
+  ENDDO
+
 
   CALL io_initialize
   PRINT*, "Initialize: DONE"
-
-  CALL io_open_output
-  PRINT*, "Output file: CREATED"
 
 
   ! -----
@@ -1425,8 +1431,6 @@ ENDDO ! date loop
   ! write
   CALL io_write_constant_fields
 
-
-  CALL io_setdown
 
   PRINT *, 'integration finished'
 

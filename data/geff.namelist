@@ -4,23 +4,23 @@
 ! * output_file   ex. 'geff.nc'
 ! * inidate       ex. 20170404
 ! * initime       ex. 1200
-! * dt            ex. 24
-! * init_file     ex. 'restart.nc'
-! * restart_day   ex. 1
+! * dt            (h) ex. 24
+! * init_file     ex. 'restart.nc.grib'
+! * restart_day   number of steps before writing a restart file, ex. 1
 ! * now           ex. '20170404'
 !
 ! CLIMATE
 ! * tempfile      2m temperature 12 local time (Kelvin)
-! * maxtempfile   2m max temperature in 24 h before (Kelvin)
-! * mintempfile   2m min temperature in 24 h before (Kelvin)
+! * maxtempfile   2m max temperature in 24h before (Kelvin)
+! * mintempfile   2m min temperature in 24h before (Kelvin)
 ! * rhfile        2m relative humidity at 12 local time (%)
-! * maxrhfile     2m max relative humidity in the 24 h before (%)
-! * minrhfile     2m min relative humidity in the 24 h before (%)
-! * rainfile      accumulated precipitation in the 24 h before (mm/day)
+! * maxrhfile     2m max relative humidity in the 24h before (%)
+! * minrhfile     2m min relative humidity in the 24h before (%)
+! * rainfile      accumulated precipitation in the 24h before (mm/day)
 ! * ccfile        Cloud cover file (fraction)
 ! * wspeedfile    wind speed intensity (m/s)
 ! * snowfile      snow cover mask (0/1)
-! * dpfile        duration of precipitation in the previous 24 hours (hours)
+! * dpfile        duration of precipitation in the previous 24h (h)
 ! * vsfile        vegetation stage file (1=cured, 2=pre-green, 3=green, 4=transition)
 !
 ! CONSTDATA

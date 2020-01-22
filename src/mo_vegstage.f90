@@ -11,7 +11,7 @@
 !> @author Di Giuseppe, F., ECMWF
 MODULE mo_vegstage
 
-  USE mo_control
+  USE mo_constants
 
   IMPLICIT NONE
 
