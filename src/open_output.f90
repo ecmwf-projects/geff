@@ -21,27 +21,23 @@ SUBROUTINE open_output
   USE mo_fwi
   IMPLICIT NONE
 
-  ! local variables
-  CHARACTER :: filestr1*3, filestr2*3, strdt*2
 
   ! netcdf vars - only needed locally
   INTEGER :: latvarid, lonvarid, timevarid
 
   ! output file details
   CHARACTER (len = 8)  :: str_date
-
+  CHARACTER (len = 4)  :: str_time
 ! need to make this more flexible for 1,3 or 4 dimensions
 !  REAL, ALLOCATABLE :: zdummy2d(:,:),zdummy3d(:,:,:),zdummy4d(:,:,:,:),time(:)
 
-! --- output files --- 
-  WRITE (strdt,'(I2.2)') INT(dt*24)
- 
 ! 
   !---------------------------
   ! OUTPUT NETCDF FILE
   !---------------------------
-  WRITE(str_date,'(I8)') date1
-  time_units="days since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" 00:00 UTC"
+  WRITE(str_date,'(I8)') inidate
+  WRITE(str_time,'(I4)') initime
+  time_units="hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" "//str_time(1:2)//":"//str_time(3:4)//" UTC"
 !===========================================================
 
   CALL check(NF90_CREATE(path = output_file, cmode=NF90_HDF5, ncid = ncidout))
@@ -246,7 +242,7 @@ END IF
   ! and longitudes of our data grid into the netCDF file.
   CALL check( nf90_put_var(ncidout, latvarid, lats) )
   CALL check( nf90_put_var(ncidout, lonvarid, lons) )
-  CALL check( nf90_put_var(ncidout, timevarid, ndate) )
+  CALL check( nf90_put_var(ncidout, timevarid, nhours) )
 ! write constant fields 
   IF(lnc_lsm)            CALL check( nf90_put_var(ncidout, ncvar_lsm(1),   rlsm , start=(/ 1, 1 /)))
   IF(lnc_cr)             CALL check( nf90_put_var(ncidout, ncvar_cr(1) ,   icr  , start=(/ 1, 1 /)))
