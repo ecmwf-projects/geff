@@ -6,52 +6,42 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-
 !> @brief Prognostic/diagnostic variables for National Fire Danger Rating System
 !> @author Di Giuseppe, F., ECMWF
+!> @author Maciel, P., ECMWF
 MODULE mo_nfdrs
 
-  USE mo_constants
+    USE mo_constants
 
-  IMPLICIT NONE
+    IMPLICIT NONE
 
-! variables needed for the nfdrs calculation
+    ! prognostic
+    TYPE mc_type
+        REAL :: r1hr, r10hr, r100hr, r1000hr, rherb, rwood  ! NOTE: same as fuelweight_type
+        REAL :: rx1000
+        REAL :: rbndryt
+    END TYPE
 
-! prognostic:
+    ! diagnostic
+    TYPE fire_prop_type
+        REAL :: ros      !< rate of spread
+        INTEGER :: sc    !< spread component
+        INTEGER :: erc   !< energy release component
+        INTEGER :: bi    !< burning index
+    END TYPE
 
-  TYPE mc_type
+    TYPE fire_prob_type
+        INTEGER :: ic    !< ignition probability
+        INTEGER :: mcoi  !< human caused fire occurrence
+        INTEGER :: loi   !< lightining coused occurrence index
+        REAL :: fli      !< fire load index
+    END TYPE
 
-    REAL :: r1hr,r10hr,r100hr,r1000hr
-    REAL :: rherb,rwood
-    REAL :: rx1000
-    REAL :: rbndryt
-
-  END type mc_type
-
-  TYPE(mc_type)       ,  ALLOCATABLE :: mc(:)
-
-!diagnostic:
-
-  TYPE fire_prop_type
-     REAL :: ros ! spread component and rate of spread
-     INTEGER :: sc
-     INTEGER :: erc,bi ! energy release component,burning index
-
-  END type fire_prop_type
-
-  TYPE fire_prob_type
-     INTEGER :: ic     !ignition probability
-     INTEGER :: mcoi   ! human caused fire occurrence
-     INTEGER :: loi    ! lightining coused occurrence index
-     REAL :: fli    ! fire load index
-  END type fire_prob_type
-
-  TYPE(fire_prop_type)       ,  ALLOCATABLE :: fire_prop(:)
-  TYPE(fire_prob_type)       ,  ALLOCATABLE :: fire_prob(:)
-
+    TYPE(mc_type), ALLOCATABLE :: mc(:)
+    TYPE(fire_prop_type), ALLOCATABLE :: fire_prop(:)
+    TYPE(fire_prob_type), ALLOCATABLE :: fire_prob(:)
 
 CONTAINS
-
 
 SUBROUTINE emc(temp,rh,remc)
   REAL, INTENT(IN)    :: temp, rh
@@ -217,7 +207,7 @@ SUBROUTINE CAL_DAYLIT (lat,date,daylit)
 
   ratio=tan(zphi)*tan(decl)
   if ((ratio.lt.1.0).and.(ratio.gt.-1.0)) then
-     daylit=24*(1.-ACOS(ratio)/rpi)
+     daylit=24*(1.-ACOS(ratio)/ACOS(-1.0))
   else
      daylit=0
   endif
@@ -269,4 +259,3 @@ END SUBROUTINE ktmp
 
 
 END MODULE mo_nfdrs
-

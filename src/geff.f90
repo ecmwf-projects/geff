@@ -6,7 +6,6 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-
 !> @brief GEFF runtime
 !> @author Di Giuseppe, F., ECMWF
 !> @author Maciel, P., ECMWF
@@ -65,6 +64,7 @@ PROGRAM geff
   USE mo_fwi
   USE mo_io_eccodes
   USE mo_fuelmodel
+  USE mo_utilities
   USE mo_vegstage
   USE mo_version
 
@@ -127,7 +127,7 @@ PROGRAM geff
   ! local integer scalars
   INTEGER :: jfueltype,jvs
   INTEGER :: jyear,jmonth,jday,jhh
-  INTEGER :: ndaydiag           ! diagnostics every n days
+  INTEGER :: ndaydiag = 1          ! diagnostics every n days
 
   ! fortran timer functions
   REAL :: time1=0.0,time2=0.0
@@ -165,103 +165,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   PRINT *, "time units", "hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" &
   & "//str_time(1:2)//":"//str_time(3:4)//" UTC"
 
-  CALL io_set_grid
-
-  !
-  ! allocate/initialize arrays
-  !
-
-  ! meteo
-  ALLOCATE(rrain(npoints))
-  ALLOCATE(rrainclim(npoints))
-  ALLOCATE(rtemp(npoints))
-  ALLOCATE(rmaxtemp(npoints))
-  ALLOCATE(rmintemp(npoints))
-  ALLOCATE(rrh(npoints))
-  ALLOCATE(rmaxrh(npoints))
-  ALLOCATE(rminrh(npoints))
-  ALLOCATE(rcc(npoints))
-  ALLOCATE(rwspeed(npoints))
-  ALLOCATE(rsnow(npoints))
-  ALLOCATE(rdp(npoints))
-  ALLOCATE(ivs(npoints))
-
-  ! constant
-  ALLOCATE(rlsm(npoints))
-  ALLOCATE(rcv(npoints))
-  ALLOCATE(icr(npoints))
-  ALLOCATE(ifm(npoints))
-  ALLOCATE(islope(npoints))
-
-  ! NFDRS
-  ALLOCATE(mc(npoints))
-  ALLOCATE(fire_prop(npoints))
-  ALLOCATE(fire_prob(npoints))
-
-  ! mc(:)%r1hr=rfillvalue
-  ! mc(:)%r10hr=rfillvalue
-  ! mc(:)%r100hr=rfillvalue
-  ! mc(:)%r1000hr=rfillvalue
-  ! mc(:)%rherb=rfillvalue
-  ! mc(:)%rwood=rfillvalue
-  ! mc(:)%rx1000=rfillvalue
-
-  fire_prop(:)%ros=rfillvalue
-  fire_prop(:)%sc=ifillvalue
-  fire_prop(:)%erc=ifillvalue
-  fire_prop(:)%bi=ifillvalue
-
-  fire_prob(:)%ic=ifillvalue
-  fire_prob(:)%mcoi=ifillvalue
-  fire_prob(:)%loi=ifillvalue
-  fire_prob(:)%fli=rfillvalue
-
-  !MARK-5
-  ALLOCATE(mark5_fuel(npoints))
-  ALLOCATE(mark5_prop(npoints))
-  ALLOCATE(mark5_prob(npoints))
-
-  mark5_fuel(:)%moist=rfillvalue
-  mark5_fuel(:)%weight=rfillvalue
-  mark5_fuel(:)%curing=rfillvalue
-  mark5_fuel(:)%kb_drought_index=rfillvalue
-  mark5_fuel(:)%drought_factor=rfillvalue
-  mark5_fuel(:)%timesincerain=rfillvalue
-
-  mark5_prop(:)%ros_theta0=rfillvalue
-  mark5_prop(:)%ros_theta=rfillvalue
-  mark5_prop(:)%flame_height=rfillvalue
-  mark5_prop(:)%flame_distance=rfillvalue
-
-  mark5_prob(:)%fire_danger_index=rfillvalue
-
-  ! FWI
-  ALLOCATE(fwi_risk(npoints))
-
-  fwi_risk(:)%fwi=rfillvalue
-  fwi_risk(:)%ffmc=rfillvalue
-  fwi_risk(:)%dmc=rfillvalue
-  fwi_risk(:)%dc=rfillvalue
-  fwi_risk(:)%isi=rfillvalue
-  fwi_risk(:)%bui=rfillvalue
-  fwi_risk(:)%dsr=rfillvalue
-  fwi_risk(:)%danger_risk=rfillvalue
-
-
-  ! set structures
-  ALLOCATE(rdiag2d(npoints, 50))  !FIXME: hardcoded
-  rdiag2d = 0.
-
-  ! set dates/times
-  ndaydiag =  1  ! FIXME: hardcoded!
-  ALLOCATE(nhours(ntimestep))
-  DO i = 1, ntimestep
-      nhours(i) = (i - 1) * dt
-  ENDDO
-
-
+  PRINT *, "Initialize..."
   CALL io_initialize
-  PRINT*, "Initialize: DONE"
+  PRINT *, "Initialize... DONE"
 
 
   ! -----
@@ -376,7 +282,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
            ! calculations is performed only on land points for all the indices
            !
-      IF (rlsm(ix,iy) .gt. 0.0001 .and. zlat .gt. -60.0 )  THEN      
+      IF (rlsm(i) .gt. 0.0001 .and. zlat .gt. -60.0 )  THEN
             ! 0- set-up conditions 
    !---------------------------------------------------------------------------
 
@@ -415,11 +321,11 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
               ! we wanto to run also on the arctic/climate
               !bounding necessary since the land sea mask in the climatic zone
               !and the IFS land-sea mask are not the same and Koplen is a much lower resolution
-              IF ( icr(i) .LE. 0) THEN
-                 icr(i)=1 ! set icr=1 even if is missing data
-                 lmask_cr=.FALSE. ! record that this point is missing for NFDRS
+              iclima = icr(i)
+              IF (iclima < 1 .OR. 5 < iclima) THEN
+                  iclima = 1 ! set iclima=1 even if is missing data
+                  lmask_cr = .FALSE. ! record that this point is missing for NFDRS
               END IF
-              iclima=icr(i)
 
 
       ! 0.4 vegetation stage
@@ -1396,7 +1302,6 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
        mark5_fuel(i)%timesincerain=ifillvalue
        mark5_prob(i)%fire_danger_index=rfillvalue
 
-       rdiag2d(i,:)=rfillvalue
 !FWI
        fwi_risk(i)%fwi=rfillvalue
        fwi_risk(i)%ffmc=rfillvalue
@@ -1433,30 +1338,4 @@ ENDDO ! date loop
 
 
   PRINT *, 'integration finished'
-
-!---------------------------------------
-CONTAINS
-  SUBROUTINE timer(str,icheck,t1,t2)
-
-  IMPLICIT NONE
-
-  REAL :: t1,t2
-  INTEGER :: icheck
-  CHARACTER*(*) :: str
-
-  CALL cpu_time(t2)
-  PRINT *,'Check point ',icheck,str,1000*t2-t1
-  t1=t2
-  icheck=icheck+1
-
-  RETURN
-  END SUBROUTINE timer
-
-  LOGICAL FUNCTION ISNAN(R)
-     REAL :: R
-     ISNAN = R .NE. R
-  END FUNCTION ISNAN
-
-
 END PROGRAM geff
-

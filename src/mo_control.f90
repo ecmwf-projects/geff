@@ -6,7 +6,6 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-
 !> @brief Control parameters
 !> @author Di Giuseppe, F., ECMWF
 !> @author Maciel, P., ECMWF

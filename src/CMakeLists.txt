@@ -11,6 +11,7 @@ add_executable (geff
     mo_io_eccodes.f90
     mo_mark5.f90
     mo_nfdrs.f90
+    mo_utilities.f90
     mo_vegstage.f90
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
 

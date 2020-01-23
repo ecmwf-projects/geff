@@ -6,10 +6,9 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-
-!> @brief Prognostic/diagnostic variables and calculation of the Canadian FWI
-!> index
+!> @brief Prognostic/diagnostic variables and Canadian FWI
 !> @author Di Giuseppe, F., ECMWF
+!> @author Maciel, P., ECMWF
 MODULE mo_fwi
 
   IMPLICIT NONE
@@ -119,4 +118,3 @@ CONTAINS
 
  END SUBROUTINE  DayLength
 END MODULE mo_fwi
-

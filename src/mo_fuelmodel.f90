@@ -6,81 +6,44 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-
 !> @brief Structures for the fuel model
 !> @author Di Giuseppe, F., ECMWF
+!> @author Maciel, P., ECMWF
 MODULE mo_fuelmodel
 
-  USE mo_control
-
-  IMPLICIT NONE
-
-
-  TYPE fuel_weight
-     REAL :: r1hr,r10hr,r100hr,r1000hr
-     REAL :: rherb,rwood
-
-  END type fuel_weight
-
- TYPE surf2volume
-
-     REAL :: r1hr,r10hr,r100hr,r1000hr
-     REAL :: rherb,rwood
-
-  END type surf2volume
-
-
-
-
-TYPE fuelmodel_type
-
-  CHARACTER (LEN=1)  :: &
-      cfuelmodel_id           ! fuel model id  (A-U)
-  CHARACTER (LEN=50)  :: &
-      cfuelmodel_description  ! fuel model description
-  CHARACTER (LEN=50)  :: &
-     herb_type                ! herbaceaous type (perennial, annual)
-
-
-
-  REAL :: &
-      rdepth                 ,& !depth
-      rmxd                   ,& !moisture of extinsion
-      rhd                    ,& !heat of combustion (dead)
-      rhl                    ,& !heat of combustion (live)
-      rscm                   ,& ! spread component value
-      rwndfc                    !wind reduction factor
-
-
-  TYPE(fuel_weight):: weight
-  TYPE(surf2volume):: s2v
-
-
-
- END TYPE fuelmodel_type
-
-
-
-CONTAINS
-
-  SUBROUTINE define_fuelmodel( ifueltype, fuelmodel )
- !-------------------------------------------------------------------------------
-! Description:
-!   Creates a structure with fuel-specific information. The definition of the
-!   fuel characteristic is controlled by the  ifueltype parameter
-!-------------------------------------------------------------------------------
-! Declarations:
-!===============================================================================
+    USE mo_control
 
     IMPLICIT NONE
 
-    TYPE (fuelmodel_type)        , INTENT (OUT)        ::       &
-         fuelmodel             !fuel model type depends on classification of vegetation of pixel
+    TYPE fuelweight_type
+        REAL :: r1hr, r10hr, r100hr, r1000hr, rherb, rwood
+    END TYPE
 
-    INTEGER,                        INTENT (IN)         ::       &
-       ifueltype
+    TYPE fuelmodel_type
+        CHARACTER (LEN=1) :: cfuelmodel_id            !< fuel model id (A-U)
+        CHARACTER (LEN=50) :: cfuelmodel_description  !< fuel model description
+        CHARACTER (LEN=50) :: herb_type               !< herbaceaous type (perennial, annual)
 
-  ! initialization of the pointer values
+        REAL :: rdepth  !< depth
+        REAL :: rmxd    !< moisture of extinsion
+        REAL :: rhd     !< heat of combustion (dead)
+        REAL :: rhl     !< heat of combustion (live)
+        REAL :: rscm    !< spread component value
+        REAL :: rwndfc  !< wind reduction factor
+
+        TYPE(fuelweight_type):: weight
+        TYPE(fuelweight_type):: s2v  !< surface to volume
+    END TYPE
+
+CONTAINS
+
+    !> @brief Creates a structure with fuel-specific information
+    SUBROUTINE define_fuelmodel(ifueltype, fuelmodel)
+
+    TYPE(fuelmodel_type), INTENT(OUT) :: fuelmodel  ! fuel model type depends on classification of vegetation of pixel
+    INTEGER, INTENT(IN) :: ifueltype
+
+    ! initialization of the pointer values
 
     fuelmodel%cfuelmodel_id="0"
     fuelmodel%cfuelmodel_description="none"
