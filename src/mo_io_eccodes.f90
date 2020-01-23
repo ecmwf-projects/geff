@@ -208,9 +208,8 @@ CONTAINS
 
         ! use land-sea mask as reference field
         CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', clsm_vars, ilsm_pids)
-        ref => grib_lsm
 
-        npoints = ref%npoints
+        npoints = grib_lsm%npoints
         PRINT *, '*** data dimensions  *** ', npoints
 
         CALL assert(npoints > 0)
@@ -218,8 +217,8 @@ CONTAINS
         ALLOCATE(lats(npoints))
         ALLOCATE(lons(npoints))
 
-        CALL assert(ref%next(), 'io_initialize: ref%next()')
-        CALL ref%coordinates(lats, lons)
+        CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
+        CALL grib_lsm%coordinates(lats, lons)
 
         CALL grib_temp%open_as_input(tempfile, 'temperature', ctemp_vars, itemp_pids)
         CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', ctemp_vars, imaxtemp_pids)
@@ -346,7 +345,6 @@ CONTAINS
 
             CALL restart%close()
             DEALLOCATE(tmp)
-
             RETURN
         ENDIF
 
@@ -486,9 +484,14 @@ CONTAINS
 
     SUBROUTINE io_write_constant_fields
         INTEGER :: fd, handle
+        LOGICAL, SAVE :: lwritten = .FALSE.
 
+        IF (lwritten .OR. LEN(TRIM(constant_file)) == 0) RETURN
+        lwritten = .TRUE.
+
+        CALL reference_grib()  ! sets 'ref'
         CALL assert(ref%handle /= 0)
-        IF (LEN(TRIM(constant_file)) == 0 .OR. TRIM(constant_file) == 'none') RETURN
+
         CALL codes_open_file(fd, constant_file, 'w')
 
         CALL ref%write_other_field(fd, ilsm_pids(1), rlsm)
@@ -506,9 +509,14 @@ CONTAINS
 
     SUBROUTINE io_write_restart
         INTEGER :: fd, handle
+        LOGICAL, SAVE :: lwritten = .FALSE.
 
+        IF (lwritten .OR. LEN(TRIM(init_file)) == 0) RETURN
+        lwritten = .TRUE.
+
+        CALL reference_grib()  ! sets 'ref'
         CALL assert(ref%handle /= 0)
-        IF (LEN(TRIM(init_file)) == 0 .OR. TRIM(init_file) == 'none') RETURN
+
         CALL codes_open_file(fd, init_file, 'w')
 
         CALL ref%write_other_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
@@ -531,16 +539,24 @@ CONTAINS
         fd = 0
     END SUBROUTINE
 
-
     SUBROUTINE io_write_results(istep)
-        INTEGER, INTENT(IN) :: istep
+        INTEGER, INTENT(IN) :: istep  ! NOTE: ignored
         INTEGER :: fd
         REAL, ALLOCATABLE :: tmp(:)
+        LOGICAL, SAVE :: lwritten = .FALSE.
 
         ! Open output file
         fd = 0
-        CALL codes_open_file(fd, output_file, 'w')
+        IF (lwritten) THEN
+            CALL codes_open_file(fd, output_file, 'a')
+        ELSE
+            CALL codes_open_file(fd, output_file, 'w')
+        ENDIF
         CALL assert(fd /= 0, 'codes_open_file (w): '//output_file)
+        lwritten = .TRUE.
+
+        CALL reference_grib()  ! sets 'ref'
+        CALL assert(ref%handle /= 0)
 
         CALL write_field(irain_pids(1), rrain)
         CALL write_field(itemp_pids(1), rtemp)
@@ -594,6 +610,8 @@ CONTAINS
         CALL write_field(ifwi_risk_dsr_pids(1), fwi_risk(:)%dsr)
         CALL write_field(ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
+        CALL codes_close_file(fd)
+
         IF (ALLOCATED(tmp)) THEN
             DEALLOCATE(tmp)
         ENDIF
@@ -603,7 +621,6 @@ CONTAINS
         SUBROUTINE write_field(paramid, values)
             INTEGER, INTENT(IN) :: paramid
             REAL, INTENT(IN) :: values(:)
-            ! Note: reference field defines metadata (aside from paramId)
             CALL ref%write_other_field(fd, paramid, values)
         END SUBROUTINE
 
@@ -621,15 +638,27 @@ CONTAINS
     END SUBROUTINE
 
     FUNCTION EmptyGribField() RESULT(g)
-      TYPE(GribField) :: g
-      g%fd = 0
-      g%handle = 0
-      g%paramId = 0
-      g%shortName = ''
-      g%name = ''
-      g%npoints = 0
-      g%count = 0
+        TYPE(GribField) :: g
+        g%fd = 0
+        g%handle = 0
+        g%paramId = 0
+        g%shortName = ''
+        g%name = ''
+        g%npoints = 0
+        g%count = 0
     END FUNCTION
+
+    !> @brief set reference GRIB, which defines metadata (date/time/step/..., aside from paramId)
+    SUBROUTINE reference_grib()
+        INTEGER :: i
+        IF (ref%count > 1) RETURN
+        DO i = 1, SIZE(input)
+            IF (input(i)%count > 1) THEN
+                ref => input(i)
+                EXIT
+            ENDIF
+        ENDDO
+    END SUBROUTINE
 
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
         CLASS(GribField), INTENT(IN) :: this
@@ -650,11 +679,7 @@ CONTAINS
     SUBROUTINE gribfield_values(this, values)
         CLASS(GribField), INTENT(IN) :: this
         REAL, ALLOCATABLE, INTENT(INOUT) :: values(:)
-
-        ! Note: this routine reorders the input; when the data structures are one-dimensional
-        ! arrays, it can be read directly which is much more efficient
-        REAL, ALLOCATABLE :: tmp(:)
-        INTEGER :: i, n
+        INTEGER :: n
 
         CALL assert(ALLOCATED(values), 'gribfield_values values allocated')
         CALL assert(SIZE(values) == this%npoints, 'gribfield_values values size mismatch)')
@@ -668,22 +693,14 @@ CONTAINS
     SUBROUTINE gribfield_values_as_integer(this, values)
         CLASS(GribField), INTENT(IN) :: this
         INTEGER, ALLOCATABLE, INTENT(INOUT) :: values(:)
-        INTEGER :: n
+        REAL, ALLOCATABLE :: rvalues(:)
+        CALL assert(ALLOCATED(values), 'gribfield_values_as_integer values allocated')
 
-        ! Note: this routine reorders the input; when the data structures are one-dimensional
-        ! arrays, it can be read directly which is much more efficient
-        REAL, ALLOCATABLE :: tmp(:)
+        ALLOCATE(rvalues(SIZE(values)))
+        CALL gribfield_values(this, rvalues)
 
-        CALL assert(ALLOCATED(values), 'gribfield_values values allocated')
-        CALL assert(SIZE(values) == this%npoints, 'gribfield_values values size mismatch)')
-
-        CALL codes_get_size(this%handle, "values", n)
-        CALL assert(SIZE(values) == n, 'gribfield_values codes_get_size("values") mismatch')
-
-        ALLOCATE(tmp(this%npoints))
-        CALL codes_get(this%handle, "values", tmp)
-        values(:) = tmp(:)
-        DEALLOCATE(tmp)
+        values = rvalues
+        DEALLOCATE(rvalues)
     END SUBROUTINE
 
     SUBROUTINE gribfield_header(this)

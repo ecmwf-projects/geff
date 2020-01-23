@@ -47,5 +47,6 @@ MODULE mo_control
 
     REAL :: rfillvalue=-9999.0 ! missing value
     INTEGER :: ifillvalue=-9999 ! missing value
+    LOGICAL :: lwritten_results
 
 END MODULE mo_control
