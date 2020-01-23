@@ -63,159 +63,7 @@ SUBROUTINE emc(temp,rh,remc)
   ELSE IF ( rh .ge. 50) THEN
      remc=21.0606+0.005565*rh**2-0.00035*rh*tempfh-0.483199*rh
   ENDIF
-
-
-  RETURN
 END SUBROUTINE emc
-
-
-INTEGER FUNCTION  juldate(date)
- ! From gregorian date to julian date (do not consider partial day )
-
-  INTEGER, INTENT(IN) :: date
-
-  INTEGER, PARAMETER :: igreg=15+31*(10+12*1582)
-  INTEGER:: yyyy,mm,dd
-  INTEGER:: jy,jm,jd,ja
-
-  yyyy=date/10000
-  mm=(date-yyyy*10000)/100
-  dd=date-(yyyy*10000+mm*100)
-
-  IF (mm.gt.2) then
-     jy=yyyy
-     jm=mm+1
-  ELSE
-     jy=yyyy-1
-     jm=mm+13
-  ENDIF
-  juldate=int(365.25*jy)+int(30.6001*jm)+dd+1720995
-  IF (dd+31*(mm+12*yyyy).GE.igreg) THEN
-     ja=int(0.01*jy)
-     juldate=juldate+2-ja+int(0.25*ja)
-  ENDIF
-  RETURN
-END FUNCTION juldate
-
-
-INTEGER FUNCTION  day_of_year(date)
- ! From gregorian date to julian date (do not consider partial day )
-
-  INTEGER, INTENT(IN) :: date
-
-  INTEGER:: yyyy,mm,dd
-  INTEGER:: k
-  LOGICAL:: LEAP
-
-  yyyy=date/10000
-  mm=(date-yyyy*10000)/100
-  dd=date-(yyyy*10000+mm*100)
-
-  LEAP = .FALSE.
-  IF (MOD(yyyy,4) .EQ. 0) LEAP = .TRUE.
-  IF (MOD(yyyy,100) .EQ. 0) LEAP = .FALSE.
-  IF (MOD(yyyy,400) .EQ. 0) LEAP = .TRUE.
-
-  IF (LEAP) THEN
-     K = 1
-  ELSE
-     K = 2
-  END IF
-
-  day_of_year = ((275*mm)/9) - K*((mm+9)/12) + dd - 30
-
-  RETURN
-END FUNCTION day_of_year
-
-
-INTEGER FUNCTION  gregdate(julian)
-! from julian day to gregorian dates as yyyymmdd
-
-  INTEGER, INTENT(IN)  :: julian
-  INTEGER :: y,d,m,jul
-
-  jul = julian - 1721119
-  y = (4 * jul - 1) / 146097
-  jul = 4 * jul - 1 - 146097 * y
-  d = jul / 4
-  jul = (4 * d + 3) / 1461
-  d = 4 * d + 3 - 1461 * jul
-  d = (d + 4) / 4
-  m = (5 * d - 3) / 153
-  d = 5 * d - 3 - 153 * m
-  d = (d + 5) / 5
-  y = 100 * y + jul
-  if ( m < 10 )then
-     m = m + 3
-  else
-     m = m - 9
-     y = y + 1
-  end if
-
-  gregdate =y*10000+m*100+d
-  RETURN
-END FUNCTION gregdate
-
-
-SUBROUTINE ADD_DAY (date,time,hh,newdate)
-
-   INTEGER, INTENT(IN)  :: date,time,hh
-   INTEGER, INTENT(OUT) :: newdate
-
-   ! local
-
-   INTEGER:: jul,nday
-
-   nday=INT((hh+time)/24.)
-
-
-   jul=juldate(date)
-   jul=jul+nday
-   newdate=gregdate(jul)
-
-  RETURN
-END SUBROUTINE ADD_DAY
-
-
-SUBROUTINE CAL_DAYLIT (lat,date,daylit)
-
-  REAL, INTENT(IN)    :: lat   ! latitude in degrees
-  INTEGER,INTENT(IN)  :: date ! yyyymmdd to be transformed in julian day 1-365
-  REAL, INTENT(OUT)   :: daylit
-
-! local variables
-
-
-  INTEGER:: jdate !julian day 1-365
-  REAL:: zphi,decl, ratio
-
-! duration of daylight depends on  the latitude and the julian day
-! I have introduced a corrcetion for  the 'Arctic Circle' bug.  In previous revisions,
-! this module would cause a DOMAIN math error for the ACOS function.
-! this would occur for certain winter dates and latitudes above the
-! arctic circle; i.e. days when there is no sunlight.  To fix this
-! problem, the intermediate variable RATIO was created.  It is set to
-! the argument of the ACOS function, checked for the proper domain,
-! and then passed to the ACOS function.  In other words, the formula
-! now sets DAYLIT (hours of daylight) to zero for days/latitudes outside
-! the domain of ACOS.
-
-  jdate=day_of_year(date)
-  zphi=lat*0.01745 !duration of daylight
-  decl=0.41008*SIN((jdate-82.)*0.01745)
-
-
-  ratio=tan(zphi)*tan(decl)
-  if ((ratio.lt.1.0).and.(ratio.gt.-1.0)) then
-     daylit=24*(1.-ACOS(ratio)/ACOS(-1.0))
-  else
-     daylit=0
-  endif
-  !if (daylit .gt. 14) then
-  !   PRINT *,"decl",decl,lat,zphi,rpi,daylit
-  !endif
-END SUBROUTINE CAL_DAYLIT
-
 
 SUBROUTINE kwet(mc1000,increment,rkwet)
 
@@ -235,7 +83,6 @@ SUBROUTINE kwet(mc1000,increment,rkwet)
  !overwrite the above if the increment in moisture content is negative
 
  IF (increment  .LE.  0) rkwet=1.0
-   RETURN
 END SUBROUTINE kwet
 
 
@@ -253,8 +100,6 @@ SUBROUTINE ktmp(tmin,tmax,rktmp)
  rktmp=1.0
 
  IF ( ((tminfh+tmaxfh)*0.5) <= 50 ) rktmp=0.6
-
-  RETURN
 END SUBROUTINE ktmp
 
 

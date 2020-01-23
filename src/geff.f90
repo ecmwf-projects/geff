@@ -175,14 +175,14 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   ! -----
 
   ! define the date at which to dump the restart
-  CALL ADD_DAY (inidate,initime, (restart_day-1)*24,restartdate)
-  PRINT *, "Restart date:",restartdate, "Restart time:", initime
+  restartdate = add_day(inidate, initime, (restart_day-1)*24)
+  PRINT *, "Restart date:", restartdate, "Restart time:", initime
 
   DO istep=1,ntimestep
 
      IF (ltimer) CALL timer('go  ',icheck,time1,time2) !set up timer
 
-     CALL ADD_DAY (inidate,initime, nhours(istep),actualdate)
+     actualdate = add_day(inidate, initime, nhours(istep))
 
      jyear=INT(actualdate/10000.)
      jmonth=INT((actualdate-jyear*10000.)/100.)
@@ -388,28 +388,19 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
 
        !duration of daylight
-       CALL CAL_DAYLIT (zlat,actualdate,daylit)
+       daylit = daylight(zlat, actualdate)
 
        ! weighted 24-hour average EMC
        zemcbar=(daylit*zminem +(24.0-daylit)*zmaxem)/24.0
        zbndryh=((24-zdp)*zemcbar+zdp*(0.5*zdp+41.0))/24.0
 
-       !update value for MC100
-
-   !1.3 --- 100hr fuel
+       !1.3 --- MC 100hr fuel
        mc(i)%r100hr=MAX(mc(i)%r100hr,0.0)
        mc(i)%r100hr=mc(i)%r100hr+(zbndryh-mc(i)%r100hr)*(1.0-0.87*EXP(-0.24))
 
-
-     !1.4 --- 1000hr fuel
-       !
-
-
+       !1.4 --- MC 1000hr fuel
        mc(i)%rbndryt=(((24-zdp)*zemcbar+zdp*(2.5*zdp+76.0))/24.0 +6*mc(i)%rbndryt)/7.0
-
-
        mc(i)%r1000hr= mc(i)%r1000hr + ( mc(i)%rbndryt -  mc(i)%r1000hr)*(1.00-0.82*EXP(-0.168))
-
        mc(i)%rx1000=MAX( mc(i)%rx1000,0.0)
        mc(i)%r1000hr=MAX( mc(i)%r1000hr,0.0)
 
