@@ -107,33 +107,30 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212034]
 
     TYPE :: GribField
-       INTEGER :: fd
-       INTEGER :: handle
-       INTEGER :: paramId
-       CHARACTER(LEN=20) :: shortName
-       CHARACTER(LEN=200) :: name
-       INTEGER :: npoints
-       INTEGER :: count
+        INTEGER :: fd
+        INTEGER :: handle
+        INTEGER :: paramId
+        CHARACTER(LEN=20) :: shortName
+        CHARACTER(LEN=200) :: name
+        INTEGER :: npoints
+        INTEGER :: count
     CONTAINS
-       PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
-       PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
-       PROCEDURE, PUBLIC :: open_as_restart => gribfield_open_as_restart
-       PROCEDURE, PUBLIC :: next => gribfield_next
-       PROCEDURE, PUBLIC :: close => gribfield_close
-       PROCEDURE, PUBLIC :: coordinates => gribfield_coordinates
-       PROCEDURE, PUBLIC :: values => gribfield_values
-       PROCEDURE, PUBLIC :: values_as_integer => gribfield_values_as_integer
-       PROCEDURE, PUBLIC :: header => gribfield_header
-       PROCEDURE, PUBLIC :: write_other_field => gribfield_write_other_field
-       PROCEDURE, PUBLIC :: write_other_field_as_integer => gribfield_write_other_field_as_integer
-       PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
+        PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
+        PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
+        PROCEDURE, PUBLIC :: open_as_restart => gribfield_open_as_restart
+        PROCEDURE, PUBLIC :: next => gribfield_next
+        PROCEDURE, PUBLIC :: close => gribfield_close
+        PROCEDURE, PUBLIC :: coordinates => gribfield_coordinates
+        PROCEDURE, PUBLIC :: values => gribfield_values
+        PROCEDURE, PUBLIC :: values_as_integer => gribfield_values_as_integer
+        PROCEDURE, PUBLIC :: header => gribfield_header
+        PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
     END TYPE
 
     ! missing value indicator (NetCDF's rfillvalue, rpopdensity<0 checks imply negative)
     REAL, PARAMETER :: missingValue = -1.e-20
 
     TYPE(GribField), TARGET :: input(18)
-    TYPE(GribField), POINTER :: ref           => input(1)
 
     TYPE(GribField), POINTER :: grib_lsm      => input(1)
     TYPE(GribField), POINTER :: grib_rain     => input(2)
@@ -206,7 +203,7 @@ CONTAINS
         INTEGER :: i
         REAL, ALLOCATABLE :: tmp(:)
 
-        ! use land-sea mask as reference field
+        ! use land-sea mask to define geometry
         CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', clsm_vars, ilsm_pids)
 
         npoints = grib_lsm%npoints
@@ -253,7 +250,7 @@ CONTAINS
         DO i = 1, SIZE(input)
             IF (i > 1) CALL assert(input(i)%same_geometry(input(1)))
             CALL assert(input(i)%count == 1 .OR. input(i)%count == ntimestep)
-        END DO
+        ENDDO
 
         ALLOCATE(rlsm(npoints))
         ! CALL assert(grib_lsm%next())  ! already called (above)
@@ -381,103 +378,103 @@ CONTAINS
                 fwi_risk(i)%ffmc = 85.
                 fwi_risk(i)%dmc  =  6.
                 fwi_risk(i)%dc   = 15.
-            END IF
+            ENDIF
         ENDDO
 
     CONTAINS
 
-        SUBROUTINE next_values(message, grib, paramId, values)
-            CHARACTER(LEN=*), INTENT(IN) :: message
-            TYPE(GribField), INTENT(INOUT) :: grib
-            INTEGER, INTENT(IN) :: paramId
-            REAL, ALLOCATABLE, INTENT(INOUT) :: values(:)
+    SUBROUTINE next_values(message, grib, paramId, values)
+        CHARACTER(LEN=*), INTENT(IN) :: message
+        TYPE(GribField), INTENT(INOUT) :: grib
+        INTEGER, INTENT(IN) :: paramId
+        REAL, ALLOCATABLE, INTENT(INOUT) :: values(:)
 
-            IF (.NOT. ALLOCATED(values)) ALLOCATE(values(npoints))
-            CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
+        IF (.NOT. ALLOCATED(values)) ALLOCATE(values(npoints))
+        CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
 
-            CALL assert(grib%next(), message//' grib%next()')
-            CALL grib%header()
+        CALL assert(grib%next(), message//' grib%next()')
+        CALL grib%header()
 
-            CALL assert(grib%npoints == npoints, message//' grib%npoints == npoints')
-            CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
+        CALL assert(grib%npoints == npoints, message//' grib%npoints == npoints')
+        CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
 
-            CALL grib%values(values)
-        END SUBROUTINE
+        CALL grib%values(values)
+    END SUBROUTINE
 
-        SUBROUTINE next_values_as_integer(message, grib, paramId, values)
-            CHARACTER(LEN=*), INTENT(IN) :: message
-            TYPE(GribField), INTENT(INOUT) :: grib
-            INTEGER, INTENT(IN) :: paramId
-            INTEGER, ALLOCATABLE, INTENT(INOUT) :: values(:)
-            REAL, ALLOCATABLE :: rvalues(:)
-            CALL next_values(message, grib, paramId, rvalues)
-            IF (.NOT. ALLOCATED(values)) ALLOCATE(values(npoints))
-            values = rvalues
-            IF (ALLOCATED(rvalues)) DEALLOCATE(rvalues)
-        END SUBROUTINE
+    SUBROUTINE next_values_as_integer(message, grib, paramId, values)
+        CHARACTER(LEN=*), INTENT(IN) :: message
+        TYPE(GribField), INTENT(INOUT) :: grib
+        INTEGER, INTENT(IN) :: paramId
+        INTEGER, ALLOCATABLE, INTENT(INOUT) :: values(:)
+        REAL, ALLOCATABLE :: rvalues(:)
+        CALL next_values(message, grib, paramId, rvalues)
+        IF (.NOT. ALLOCATED(values)) ALLOCATE(values(npoints))
+        values = rvalues
+        IF (ALLOCATED(rvalues)) DEALLOCATE(rvalues)
+    END SUBROUTINE
 
-        FUNCTION EmptyMCType() RESULT(e)
-            TYPE(mc_type) :: e
-            e%r1hr    = rfillvalue
-            e%r10hr   = rfillvalue
-            e%r100hr  = rfillvalue
-            e%r1000hr = rfillvalue
-            e%rherb   = rfillvalue
-            e%rwood   = rfillvalue
-            e%rx1000  = rfillvalue
-            e%rbndryt = rfillvalue
-        END FUNCTION
+    FUNCTION EmptyMCType() RESULT(e)
+        TYPE(mc_type) :: e
+        e%r1hr    = rfillvalue
+        e%r10hr   = rfillvalue
+        e%r100hr  = rfillvalue
+        e%r1000hr = rfillvalue
+        e%rherb   = rfillvalue
+        e%rwood   = rfillvalue
+        e%rx1000  = rfillvalue
+        e%rbndryt = rfillvalue
+    END FUNCTION
 
-        FUNCTION EmptyFirePropType() RESULT(e)
-            TYPE(fire_prop_type) :: e
-            e%ros  = rfillvalue
-            e%sc   = ifillvalue
-            e%erc  = ifillvalue
-            e%bi   = ifillvalue
-        END FUNCTION
+    FUNCTION EmptyFirePropType() RESULT(e)
+        TYPE(fire_prop_type) :: e
+        e%ros  = rfillvalue
+        e%sc   = ifillvalue
+        e%erc  = ifillvalue
+        e%bi   = ifillvalue
+    END FUNCTION
 
-        FUNCTION EmptyFireProbType() RESULT(e)
-            TYPE(fire_prob_type) :: e
-            e%ic   = ifillvalue
-            e%mcoi = ifillvalue
-            e%loi  = ifillvalue
-            e%fli  = rfillvalue
-        END FUNCTION
+    FUNCTION EmptyFireProbType() RESULT(e)
+        TYPE(fire_prob_type) :: e
+        e%ic   = ifillvalue
+        e%mcoi = ifillvalue
+        e%loi  = ifillvalue
+        e%fli  = rfillvalue
+    END FUNCTION
 
-        FUNCTION EmptyMark5FuelType() RESULT(e)
-            TYPE(mark5_fuel_type) :: e
-            e%moist            = rfillvalue
-            e%weight           = rfillvalue
-            e%curing           = rfillvalue
-            e%kb_drought_index = rfillvalue
-            e%drought_factor   = rfillvalue
-            e%timesincerain    = rfillvalue
-        END FUNCTION
+    FUNCTION EmptyMark5FuelType() RESULT(e)
+        TYPE(mark5_fuel_type) :: e
+        e%moist            = rfillvalue
+        e%weight           = rfillvalue
+        e%curing           = rfillvalue
+        e%kb_drought_index = rfillvalue
+        e%drought_factor   = rfillvalue
+        e%timesincerain    = rfillvalue
+    END FUNCTION
 
-        FUNCTION EmptyMark5PropType() RESULT(e)
-            TYPE(mark5_prop_type) :: e
-            e%ros_theta0     = rfillvalue
-            e%ros_theta      = rfillvalue
-            e%flame_height   = rfillvalue
-            e%flame_distance = rfillvalue
-        END FUNCTION
+    FUNCTION EmptyMark5PropType() RESULT(e)
+        TYPE(mark5_prop_type) :: e
+        e%ros_theta0     = rfillvalue
+        e%ros_theta      = rfillvalue
+        e%flame_height   = rfillvalue
+        e%flame_distance = rfillvalue
+    END FUNCTION
 
-        FUNCTION EmptyMark5ProbType() RESULT(e)
-            TYPE(mark5_prob_type) :: e
-            e%fire_danger_index = rfillvalue
-        END FUNCTION
+    FUNCTION EmptyMark5ProbType() RESULT(e)
+        TYPE(mark5_prob_type) :: e
+        e%fire_danger_index = rfillvalue
+    END FUNCTION
 
-        FUNCTION EmptyFWIRiskType() RESULT(e)
-            TYPE (fwi_risk_type) :: e
-            e%fwi         = rfillvalue
-            e%ffmc        = rfillvalue
-            e%dmc         = rfillvalue
-            e%dc          = rfillvalue
-            e%isi         = rfillvalue
-            e%bui         = rfillvalue
-            e%dsr         = rfillvalue
-            e%danger_risk = rfillvalue
-        END FUNCTION
+    FUNCTION EmptyFWIRiskType() RESULT(e)
+        TYPE (fwi_risk_type) :: e
+        e%fwi         = rfillvalue
+        e%ffmc        = rfillvalue
+        e%dmc         = rfillvalue
+        e%dc          = rfillvalue
+        e%isi         = rfillvalue
+        e%bui         = rfillvalue
+        e%dsr         = rfillvalue
+        e%danger_risk = rfillvalue
+    END FUNCTION
 
     END SUBROUTINE
 
@@ -489,18 +486,15 @@ CONTAINS
         IF (lwritten .OR. LEN(TRIM(constant_file)) == 0) RETURN
         lwritten = .TRUE.
 
-        CALL reference_grib()  ! sets 'ref'
-        CALL assert(ref%handle /= 0)
-
         CALL codes_open_file(fd, constant_file, 'w')
 
-        CALL ref%write_other_field(fd, ilsm_pids(1), rlsm)
-        CALL ref%write_other_field(fd, icv_pids(1), rcv)
-        CALL ref%write_other_field(fd, irainclim_pids(1), rrainclim)
+        CALL write_field(fd, ilsm_pids(1), rlsm)
+        CALL write_field(fd, icv_pids(1), rcv)
+        CALL write_field(fd, irainclim_pids(1), rrainclim)
 
-        CALL ref%write_other_field_as_integer(fd, icr_pids(1), icr)
-        CALL ref%write_other_field_as_integer(fd, ifm_pids(1), ifm)
-        CALL ref%write_other_field_as_integer(fd, islope_pids(1), islope)
+        CALL write_field_from_integer(fd, icr_pids(1), icr)
+        CALL write_field_from_integer(fd, ifm_pids(1), ifm)
+        CALL write_field_from_integer(fd, islope_pids(1), islope)
 
         CALL codes_close_file(fd)
         fd = 0
@@ -514,26 +508,23 @@ CONTAINS
         IF (lwritten .OR. LEN(TRIM(init_file)) == 0) RETURN
         lwritten = .TRUE.
 
-        CALL reference_grib()  ! sets 'ref'
-        CALL assert(ref%handle /= 0)
-
         CALL codes_open_file(fd, init_file, 'w')
 
-        CALL ref%write_other_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
-        CALL ref%write_other_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
-        CALL ref%write_other_field(fd, imc_r100hr_pids(1), mc(:)%r100hr)
-        CALL ref%write_other_field(fd, imc_r1000hr_pids(1), mc(:)%r1000hr)
-        CALL ref%write_other_field(fd, imc_rherb_pids(1), mc(:)%rherb)
-        CALL ref%write_other_field(fd, imc_rwood_pids(1), mc(:)%rwood)
-        CALL ref%write_other_field(fd, imc_rx1000_pids(1), mc(:)%rx1000)
-        CALL ref%write_other_field(fd, imc_rbndryt_pids(1), mc(:)%rbndryt)
+        CALL write_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
+        CALL write_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
+        CALL write_field(fd, imc_r100hr_pids(1), mc(:)%r100hr)
+        CALL write_field(fd, imc_r1000hr_pids(1), mc(:)%r1000hr)
+        CALL write_field(fd, imc_rherb_pids(1), mc(:)%rherb)
+        CALL write_field(fd, imc_rwood_pids(1), mc(:)%rwood)
+        CALL write_field(fd, imc_rx1000_pids(1), mc(:)%rx1000)
+        CALL write_field(fd, imc_rbndryt_pids(1), mc(:)%rbndryt)
 
-        CALL ref%write_other_field(fd, imark5_fuel_kb_drought_index_pids(1), mark5_fuel(:)%kb_drought_index)
-        CALL ref%write_other_field(fd, imark5_fuel_timesincerain_pids(1), mark5_fuel(:)%timesincerain)
+        CALL write_field(fd, imark5_fuel_kb_drought_index_pids(1), mark5_fuel(:)%kb_drought_index)
+        CALL write_field(fd, imark5_fuel_timesincerain_pids(1), mark5_fuel(:)%timesincerain)
 
-        CALL ref%write_other_field(fd, ifwi_risk_ffmc_pids(1), fwi_risk(:)%ffmc)
-        CALL ref%write_other_field(fd, ifwi_risk_dmc_pids(1), fwi_risk(:)%dmc)
-        CALL ref%write_other_field(fd, ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
+        CALL write_field(fd, ifwi_risk_ffmc_pids(1), fwi_risk(:)%ffmc)
+        CALL write_field(fd, ifwi_risk_dmc_pids(1), fwi_risk(:)%dmc)
+        CALL write_field(fd, ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
 
         CALL codes_close_file(fd)
         fd = 0
@@ -555,86 +546,61 @@ CONTAINS
         CALL assert(fd /= 0, 'codes_open_file (w): '//output_file)
         lwritten = .TRUE.
 
-        CALL reference_grib()  ! sets 'ref'
-        CALL assert(ref%handle /= 0)
+        CALL write_field(fd, irain_pids(1), rrain)
+        CALL write_field(fd, itemp_pids(1), rtemp)
+        CALL write_field(fd, imaxtemp_pids(1), rmaxtemp)
+        CALL write_field(fd, imintemp_pids(1), rmintemp)
+        CALL write_field(fd, irh_pids(1), rrh)
+        CALL write_field(fd, imaxrh_pids(1), rmaxrh)
+        CALL write_field(fd, iminrh_pids(1), rminrh)
+        CALL write_field(fd, icc_pids(1), rcc)
+        CALL write_field(fd, isnow_pids(1), rsnow)
+        CALL write_field(fd, iwspeed_pids(1), rwspeed)
+        CALL write_field(fd, idp_pids(1), rdp)
+        CALL write_field_from_integer(fd, ivs_pids(1), ivs)
 
-        CALL write_field(irain_pids(1), rrain)
-        CALL write_field(itemp_pids(1), rtemp)
-        CALL write_field(imaxtemp_pids(1), rmaxtemp)
-        CALL write_field(imintemp_pids(1), rmintemp)
-        CALL write_field(irh_pids(1), rrh)
-        CALL write_field(imaxrh_pids(1), rmaxrh)
-        CALL write_field(iminrh_pids(1), rminrh)
-        CALL write_field(icc_pids(1), rcc)
-        CALL write_field(isnow_pids(1), rsnow)
-        CALL write_field(iwspeed_pids(1), rwspeed)
-        CALL write_field(idp_pids(1), rdp)
-        CALL write_field_from_integer(ivs_pids(1), ivs)
+        CALL write_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
+        CALL write_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
+        CALL write_field(fd, imc_r100hr_pids(1), mc(:)%r100hr)
+        CALL write_field(fd, imc_r1000hr_pids(1), mc(:)%r1000hr)
+        CALL write_field(fd, imc_rx1000_pids(1), mc(:)%rx1000)
+        CALL write_field(fd, imc_rherb_pids(1), mc(:)%rherb)
+        CALL write_field(fd, imc_rwood_pids(1), mc(:)%rwood)
 
-        CALL write_field(imc_r1hr_pids(1), mc(:)%r1hr)
-        CALL write_field(imc_r10hr_pids(1), mc(:)%r10hr)
-        CALL write_field(imc_r100hr_pids(1), mc(:)%r100hr)
-        CALL write_field(imc_r1000hr_pids(1), mc(:)%r1000hr)
-        CALL write_field(imc_rx1000_pids(1), mc(:)%rx1000)
-        CALL write_field(imc_rherb_pids(1), mc(:)%rherb)
-        CALL write_field(imc_rwood_pids(1), mc(:)%rwood)
+        CALL write_field(fd, ifire_prop_ros_pids(1), fire_prop(:)%ros)
+        CALL write_field_from_integer(fd, ifire_prop_sc_pids(1), fire_prop(:)%sc)
+        CALL write_field_from_integer(fd, ifire_prop_erc_pids(1), fire_prop(:)%erc)
+        CALL write_field_from_integer(fd, ifire_prop_bi_pids(1), fire_prop(:)%bi)
 
-        CALL write_field(ifire_prop_ros_pids(1), fire_prop(:)%ros)
-        CALL write_field_from_integer(ifire_prop_sc_pids(1), fire_prop(:)%sc)
-        CALL write_field_from_integer(ifire_prop_erc_pids(1), fire_prop(:)%erc)
-        CALL write_field_from_integer(ifire_prop_bi_pids(1), fire_prop(:)%bi)
+        CALL write_field_from_integer(fd, ifire_prob_ic_pids(1), fire_prob(:)%ic)
+        CALL write_field_from_integer(fd, ifire_prob_mcoi_pids(1), fire_prob(:)%mcoi)
+        CALL write_field_from_integer(fd, ifire_prob_loi_pids(1), fire_prob(:)%loi)
+        CALL write_field(fd, ifire_prob_fli_pids(1), fire_prob(:)%fli)
 
-        CALL write_field_from_integer(ifire_prob_ic_pids(1), fire_prob(:)%ic)
-        CALL write_field_from_integer(ifire_prob_mcoi_pids(1), fire_prob(:)%mcoi)
-        CALL write_field_from_integer(ifire_prob_loi_pids(1), fire_prob(:)%loi)
-        CALL write_field(ifire_prob_fli_pids(1), fire_prob(:)%fli)
+        CALL write_field(fd, imark5_fuel_kb_drought_index_pids(1), mark5_fuel(:)%kb_drought_index)
+        CALL write_field(fd, imark5_fuel_drought_factor_pids(1), mark5_fuel(:)%drought_factor)
+        CALL write_field(fd, imark5_fuel_moist_pids(1), mark5_fuel(:)%moist)
+        CALL write_field(fd, imark5_fuel_weight_pids(1), mark5_fuel(:)%weight)
 
-        CALL write_field(imark5_fuel_kb_drought_index_pids(1), mark5_fuel(:)%kb_drought_index)
-        CALL write_field(imark5_fuel_drought_factor_pids(1), mark5_fuel(:)%drought_factor)
-        CALL write_field(imark5_fuel_moist_pids(1), mark5_fuel(:)%moist)
-        CALL write_field(imark5_fuel_weight_pids(1), mark5_fuel(:)%weight)
+        CALL write_field(fd, imark5_prop_ros_theta0_pids(1), mark5_prop(:)%ros_theta0)
+        CALL write_field(fd, imark5_prop_ros_theta_pids(1), mark5_prop(:)%ros_theta)
+        CALL write_field(fd, imark5_prop_flame_height_pids(1), mark5_prop(:)%flame_height)
+        CALL write_field(fd, imark5_prop_flame_distance_pids(1), mark5_prop(:)%flame_distance)
+        CALL write_field(fd, imark5_prob_fire_danger_index_pids(1), mark5_prob(:)%fire_danger_index)
 
-        CALL write_field(imark5_prop_ros_theta0_pids(1), mark5_prop(:)%ros_theta0)
-        CALL write_field(imark5_prop_ros_theta_pids(1), mark5_prop(:)%ros_theta)
-        CALL write_field(imark5_prop_flame_height_pids(1), mark5_prop(:)%flame_height)
-        CALL write_field(imark5_prop_flame_distance_pids(1), mark5_prop(:)%flame_distance)
-        CALL write_field(imark5_prob_fire_danger_index_pids(1), mark5_prob(:)%fire_danger_index)
+        CALL write_field(fd, ifwi_risk_fwi_pids(1), fwi_risk(:)%fwi)
+        CALL write_field(fd, ifwi_risk_ffmc_pids(1), fwi_risk(:)%ffmc)
+        CALL write_field(fd, ifwi_risk_dmc_pids(1), fwi_risk(:)%dmc)
+        CALL write_field(fd, ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
 
-        CALL write_field(ifwi_risk_fwi_pids(1), fwi_risk(:)%fwi)
-        CALL write_field(ifwi_risk_ffmc_pids(1), fwi_risk(:)%ffmc)
-        CALL write_field(ifwi_risk_dmc_pids(1), fwi_risk(:)%dmc)
-        CALL write_field(ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
-
-        CALL write_field(ifwi_risk_isi_pids(1), fwi_risk(:)%isi)
-        CALL write_field(ifwi_risk_bui_pids(1), fwi_risk(:)%bui)
-        CALL write_field(ifwi_risk_dsr_pids(1), fwi_risk(:)%dsr)
-        CALL write_field(ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
+        CALL write_field(fd, ifwi_risk_isi_pids(1), fwi_risk(:)%isi)
+        CALL write_field(fd, ifwi_risk_bui_pids(1), fwi_risk(:)%bui)
+        CALL write_field(fd, ifwi_risk_dsr_pids(1), fwi_risk(:)%dsr)
+        CALL write_field(fd, ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
         CALL codes_close_file(fd)
 
-        IF (ALLOCATED(tmp)) THEN
-            DEALLOCATE(tmp)
-        ENDIF
-
-    CONTAINS
-
-        SUBROUTINE write_field(paramid, values)
-            INTEGER, INTENT(IN) :: paramid
-            REAL, INTENT(IN) :: values(:)
-            CALL ref%write_other_field(fd, paramid, values)
-        END SUBROUTINE
-
-        SUBROUTINE write_field_from_integer(paramid, values)
-            INTEGER, INTENT(IN) :: paramid
-            INTEGER, INTENT(IN) :: values(:)
-            CALL assert(SIZE(values) == npoints)
-            IF (.NOT. ALLOCATED(tmp)) THEN
-                ALLOCATE(tmp(npoints))
-            ENDIF
-            tmp = values
-            CALL write_field(paramid, tmp)
-        END SUBROUTINE
-
+        IF (ALLOCATED(tmp)) DEALLOCATE(tmp)
     END SUBROUTINE
 
     FUNCTION EmptyGribField() RESULT(g)
@@ -647,18 +613,6 @@ CONTAINS
         g%npoints = 0
         g%count = 0
     END FUNCTION
-
-    !> @brief set reference GRIB, which defines metadata (date/time/step/..., aside from paramId)
-    SUBROUTINE reference_grib()
-        INTEGER :: i
-        IF (ref%count > 1) RETURN
-        DO i = 1, SIZE(input)
-            IF (input(i)%count > 1) THEN
-                ref => input(i)
-                EXIT
-            ENDIF
-        ENDDO
-    END SUBROUTINE
 
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
         CLASS(GribField), INTENT(IN) :: this
@@ -679,13 +633,17 @@ CONTAINS
     SUBROUTINE gribfield_values(this, values)
         CLASS(GribField), INTENT(IN) :: this
         REAL, ALLOCATABLE, INTENT(INOUT) :: values(:)
-        INTEGER :: n
+        INTEGER :: n, bitmapPresent
 
         CALL assert(ALLOCATED(values), 'gribfield_values values allocated')
-        CALL assert(SIZE(values) == this%npoints, 'gribfield_values values size mismatch)')
+        CALL assert(SIZE(values) == this%npoints, 'gribfield_values: values size mismatch)')
 
         CALL codes_get_size(this%handle, "values", n)
-        CALL assert(SIZE(values) == n, 'gribfield_values codes_get_size("values") mismatch')
+        CALL assert(SIZE(values) == n, 'gribfield_values: codes_get_size("values") mismatch')
+
+        ! ensure all missing values use the same indicator ('set' before 'get')
+        CALL codes_get(this%handle, "bitmapPresent", bitmapPresent)
+        IF (bitmapPresent /= 0) CALL codes_set(this%handle, "missingValue", missingValue)
 
         CALL codes_get(this%handle, "values", values)
     END SUBROUTINE
@@ -694,7 +652,7 @@ CONTAINS
         CLASS(GribField), INTENT(IN) :: this
         INTEGER, ALLOCATABLE, INTENT(INOUT) :: values(:)
         REAL, ALLOCATABLE :: rvalues(:)
-        CALL assert(ALLOCATED(values), 'gribfield_values_as_integer values allocated')
+        CALL assert(ALLOCATED(values), 'gribfield_values_as_integer: values allocated')
 
         ALLOCATE(rvalues(SIZE(values)))
         CALL gribfield_values(this, rvalues)
@@ -716,142 +674,152 @@ CONTAINS
         CALL assert(this%npoints > 0, 'numberOfDataPoints > 0')
     END SUBROUTINE
 
-   FUNCTION gribfield_next(this) RESULT(r)
-      CLASS(GribField), INTENT(INOUT) :: this
-      INTEGER :: iret
-      LOGICAL :: r
-      IF (this%handle /= 0) CALL codes_release(this%handle)
-      CALL codes_grib_new_from_file(this%fd, this%handle, iret)
-      r = iret /= CODES_END_OF_FILE
-      CALL assert(.NOT. r .OR. iret == 0 .AND. this%handle /= 0, 'codes_grib_new_from_file')
-   END FUNCTION
+    FUNCTION gribfield_next(this) RESULT(r)
+        CLASS(GribField), INTENT(INOUT) :: this
+        INTEGER :: iret
+        LOGICAL :: r
+        IF (this%handle /= 0) CALL codes_release(this%handle)
+        CALL codes_grib_new_from_file(this%fd, this%handle, iret)
+        r = iret /= CODES_END_OF_FILE
+        CALL assert(.NOT. r .OR. iret == 0 .AND. this%handle /= 0, 'codes_grib_new_from_file')
+    END FUNCTION
 
-   SUBROUTINE gribfield_close(this)
-      CLASS(GribField), INTENT(INOUT) :: this
-      IF (this%handle /= 0) CALL codes_release(this%handle)
-      this%handle = 0
-      CALL codes_close_file(this%fd)
-      this%fd = 0
-   END SUBROUTINE
-
-   SUBROUTINE gribfield_open_as_input(this, file, var, names, pids)
-      CLASS(GribField), INTENT(INOUT) :: this
-
-      CHARACTER(LEN=*), INTENT(IN) :: file
-      CHARACTER(LEN=*), INTENT(IN) :: var
-      CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: names
-      INTEGER, DIMENSION(:), INTENT(IN) :: pids
-
-      CHARACTER(LEN=20) :: shortName
-      INTEGER :: i, n
-      LOGICAL :: found
-
-      ! open file and read messages to the end
-      CALL codes_open_file(this%fd, file, 'r')
-      CALL assert(this%next(), 'file "'//TRIM(file)//'": '//TRIM(var)//' GRIB not found')
-
-      ! first GRIB message: get header (variable name/id and geometry), then
-      ! next GRIB messages: confirm numberOfDataPoints, increment count
-      CALL this%header()
-
-      found = SIZE(names) .EQ. 0 .AND. SIZE(pids) .EQ. 0
-      IF (.NOT. found) THEN
-          DO i = 1, SIZE(names)
-              found = this%shortName .EQ. names(i)
-              IF (found) EXIT
-          END DO
-      END IF
-      IF (.NOT. found) THEN
-          DO i = 1, SIZE(pids)
-              found = this%paramId .EQ. pids(i)
-              IF (found) EXIT
-          END DO
-      END IF
-      CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' name not found')
-      PRINT *, 'Found '//TRIM(var)//' variable called: ', TRIM(this%shortName), ' with paramId=', this%paramId
-
-      this%count = 1
-      DO WHILE (this%next())
-          this%count = this%count + 1
-          CALL codes_get(this%handle, 'paramId', i)
-          CALL codes_get(this%handle, 'numberOfDataPoints', n)
-          CALL assert(n == this%npoints .AND. i == this%paramId,&
-                      'Input fields should have the same paramId and geometry (numberOfDataPoints)')
-      END DO
-
-      ! end reached, re-open the file to read messages one-by-one
-      CALL this%close()
-      CALL codes_open_file(this%fd, file, 'r')
-      CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
-   END SUBROUTINE
-
-   SUBROUTINE gribfield_open_as_output(this, file)
-      CLASS(GribField), INTENT(INOUT) :: this
-      CHARACTER(LEN=*), INTENT(IN) :: file
-
-      this%fd = 0
-      this%handle = 0
-      CALL assert(LEN(file) > 0, 'file "'//TRIM(file)//'": invalid file name')
-      CALL codes_open_file(this%fd, file, 'a')
-      CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (a)')
-   END SUBROUTINE
-
-   SUBROUTINE gribfield_open_as_restart(this, file)
-      CLASS(GribField), INTENT(INOUT) :: this
-      CHARACTER(LEN=*), INTENT(IN) :: file
-
-      this%fd = 0
-      this%handle = 0
-      CALL assert(LEN(file) > 0, 'file "'//TRIM(file)//'": invalid file name')
-      CALL codes_open_file(this%fd, file, 'r')
-      CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
-   END SUBROUTINE
-
-   SUBROUTINE gribfield_write_other_field(this, fd, paramid, values)
-      CLASS(GribField), INTENT(INOUT) :: this
-      INTEGER, INTENT(IN) :: fd, paramid
-      REAL, INTENT(IN) :: values(:)
-      INTEGER :: handle
-
-      CALL assert(fd /= 0 .AND. paramid > 0, 'gribfield_write_other_field: requirements')
-      CALL assert(this%npoints == SIZE(values), 'gribfield_write_other_field: values size')
-
-      handle = 0
-      CALL codes_clone(this%handle, handle)
-      CALL assert(handle /= 0, 'gribfield_write_other_field: codes_clone')
-
-      CALL codes_set(handle, 'paramId', paramid)
-      CALL codes_set(handle, 'missingValue', missingValue)
-      IF (ANY(values == missingValue)) CALL codes_set(handle, 'bitmapPresent', 1)
-      CALL codes_set(handle, 'values', PACK(values, MASK=.TRUE.))
-
-      CALL codes_write(handle, fd)
-      CALL codes_release(handle)
-   END SUBROUTINE
-
-    SUBROUTINE gribfield_write_other_field_as_integer(this, fd, paramid, values)
-       CLASS(GribField), INTENT(INOUT) :: this
-       INTEGER, INTENT(IN) :: fd, paramid
-       INTEGER, INTENT(IN) :: values(:)
-       REAL, ALLOCATABLE :: tmp(:)
-
-       ALLOCATE(tmp(SIZE(values)))
-       tmp = values
-       CALL gribfield_write_other_field(this, fd, paramid, tmp)
-       DEALLOCATE(tmp)
+    SUBROUTINE gribfield_close(this)
+        CLASS(GribField), INTENT(INOUT) :: this
+        IF (this%handle /= 0) CALL codes_release(this%handle)
+        this%handle = 0
+        CALL codes_close_file(this%fd)
+        this%fd = 0
     END SUBROUTINE
 
-   FUNCTION gribfield_same_geometry(this, other) RESULT(yes)
-      CLASS(GribField), INTENT(INOUT) :: this, other
-      LOGICAL :: yes
-      yes = this%npoints == other%npoints
-      yes = yes .AND. (this%count == 1 .OR. other%count == 1 .OR. this%count == other%count)
-      IF (.not. yes) THEN
-          PRINT *, "%ERROR: fields don't have the same geometry: ",&
-          char(10), "(paramId=", this%paramId, ", numberOfDataPoints=", this%npoints, ", count=", this%count,")",&
-          char(10), "(paramId=", other%paramId, ", numberOfDataPoints=", other%npoints, ", count=", other%count,")"
-          STOP 1
-      END IF
-   END FUNCTION
+    SUBROUTINE gribfield_open_as_input(this, file, var, names, pids)
+        CLASS(GribField), INTENT(INOUT) :: this
+
+        CHARACTER(LEN=*), INTENT(IN) :: file
+        CHARACTER(LEN=*), INTENT(IN) :: var
+        CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: names
+        INTEGER, DIMENSION(:), INTENT(IN) :: pids
+
+        CHARACTER(LEN=20) :: shortName
+        INTEGER :: i, n
+        LOGICAL :: found
+
+        ! open file and read messages to the end
+        CALL codes_open_file(this%fd, file, 'r')
+        CALL assert(this%next(), 'file "'//TRIM(file)//'": '//TRIM(var)//' GRIB not found')
+
+        ! first GRIB message: get header (variable name/id and geometry), then
+        ! next GRIB messages: confirm numberOfDataPoints, increment count
+        CALL this%header()
+
+        found = SIZE(names) .EQ. 0 .AND. SIZE(pids) .EQ. 0
+        IF (.NOT. found) THEN
+            DO i = 1, SIZE(names)
+                found = this%shortName .EQ. names(i)
+                IF (found) EXIT
+            ENDDO
+        ENDIF
+        IF (.NOT. found) THEN
+            DO i = 1, SIZE(pids)
+                found = this%paramId .EQ. pids(i)
+                IF (found) EXIT
+            ENDDO
+        ENDIF
+        CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' name not found')
+        PRINT *, 'Found '//TRIM(var)//' variable called: ', TRIM(this%shortName), ' with paramId=', this%paramId
+
+        this%count = 1
+        DO WHILE (this%next())
+            this%count = this%count + 1
+            CALL codes_get(this%handle, 'paramId', i)
+            CALL codes_get(this%handle, 'numberOfDataPoints', n)
+            CALL assert(n == this%npoints .AND. i == this%paramId,&
+            'Input fields should have the same paramId and geometry (numberOfDataPoints)')
+        ENDDO
+
+        ! end reached, re-open the file to read messages one-by-one
+        CALL this%close()
+        CALL codes_open_file(this%fd, file, 'r')
+        CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
+    END SUBROUTINE
+
+    SUBROUTINE gribfield_open_as_output(this, file)
+        CLASS(GribField), INTENT(INOUT) :: this
+        CHARACTER(LEN=*), INTENT(IN) :: file
+
+        this%fd = 0
+        this%handle = 0
+        CALL assert(LEN(file) > 0, 'file "'//TRIM(file)//'": invalid file name')
+        CALL codes_open_file(this%fd, file, 'a')
+        CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (a)')
+    END SUBROUTINE
+
+    SUBROUTINE gribfield_open_as_restart(this, file)
+        CLASS(GribField), INTENT(INOUT) :: this
+        CHARACTER(LEN=*), INTENT(IN) :: file
+
+        this%fd = 0
+        this%handle = 0
+        CALL assert(LEN(file) > 0, 'file "'//TRIM(file)//'": invalid file name')
+        CALL codes_open_file(this%fd, file, 'r')
+        CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
+    END SUBROUTINE
+
+    SUBROUTINE write_field(fd, paramid, values)
+        INTEGER, INTENT(IN) :: fd, paramid
+        REAL, INTENT(IN) :: values(:)
+        INTEGER :: handle, I
+        TYPE(GribField), POINTER, SAVE :: ref => input(1)
+
+        ! reference defines metadata (date/time/step/..., aside from paramId)
+        IF (.NOT. (ref%count > 1)) THEN
+            DO i = 2, SIZE(input)
+                IF (input(i)%count > 1) THEN
+                    ref => input(i)
+                    EXIT
+                ENDIF
+            ENDDO
+        ENDIF
+        CALL assert(ref%handle /= 0)
+
+        CALL assert(fd /= 0 .AND. paramid > 0, 'write_field: requirements')
+        CALL assert(ref%npoints == SIZE(values), 'write_field: values size')
+
+        handle = 0
+        CALL codes_clone(ref%handle, handle)
+        CALL assert(handle /= 0, 'write_field: codes_clone')
+
+        CALL codes_set(handle, 'paramId', paramid)
+        CALL codes_set(handle, 'missingValue', missingValue)
+        IF (ANY(values == missingValue)) CALL codes_set(handle, 'bitmapPresent', 1)
+        CALL codes_set(handle, 'values', PACK(values, MASK=.TRUE.))
+
+        CALL codes_write(handle, fd)
+        CALL codes_release(handle)
+    END SUBROUTINE
+
+    SUBROUTINE write_field_from_integer(fd, paramid, values)
+        INTEGER, INTENT(IN) :: fd, paramid
+        INTEGER, INTENT(IN) :: values(:)
+        REAL, ALLOCATABLE :: tmp(:)
+
+        ALLOCATE(tmp(SIZE(values)))
+        tmp = values
+        CALL write_field(fd, paramid, tmp)
+        DEALLOCATE(tmp)
+    END SUBROUTINE
+
+    FUNCTION gribfield_same_geometry(this, other) RESULT(yes)
+        CLASS(GribField), INTENT(INOUT) :: this, other
+        LOGICAL :: yes
+        yes = this%npoints == other%npoints
+        yes = yes .AND. (this%count == 1 .OR. other%count == 1 .OR. this%count == other%count)
+        IF (.not. yes) THEN
+            PRINT *, "%ERROR: fields don't have the same geometry: ",&
+            char(10), "(paramId=", this%paramId, ", numberOfDataPoints=", this%npoints, ", count=", this%count,")",&
+            char(10), "(paramId=", other%paramId, ", numberOfDataPoints=", other%npoints, ", count=", other%count,")"
+            STOP 1
+        ENDIF
+    END FUNCTION
 
 END MODULE
