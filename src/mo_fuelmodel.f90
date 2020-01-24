@@ -11,12 +11,17 @@
 !> @author Maciel, P., ECMWF
 MODULE mo_fuelmodel
 
-    USE mo_control
+    USE mo_constants
 
     IMPLICIT NONE
 
     TYPE fuelweight_type
-        REAL :: r1hr, r10hr, r100hr, r1000hr, rherb, rwood
+        REAL :: r1hr    = rfillvalue
+        REAL :: r10hr   = rfillvalue
+        REAL :: r100hr  = rfillvalue
+        REAL :: r1000hr = rfillvalue
+        REAL :: rherb   = rfillvalue
+        REAL :: rwood   = rfillvalue
     END TYPE
 
     TYPE fuelmodel_type
@@ -24,18 +29,27 @@ MODULE mo_fuelmodel
         CHARACTER (LEN=50) :: cfuelmodel_description  !< fuel model description
         CHARACTER (LEN=50) :: herb_type               !< herbaceaous type (perennial, annual)
 
-        REAL :: rdepth  !< depth
-        REAL :: rmxd    !< moisture of extinsion
-        REAL :: rhd     !< heat of combustion (dead)
-        REAL :: rhl     !< heat of combustion (live)
-        REAL :: rscm    !< spread component value
-        REAL :: rwndfc  !< wind reduction factor
+        REAL :: rdepth = rfillvalue  !< [ft] depth
+        REAL :: rmxd   = rfillvalue  !< [%] moisture of extinsion
+        REAL :: rhd    = rfillvalue  !< [watt kg^-1] heat of combustion (dead)
+        REAL :: rhl    = rfillvalue  !< [watt kg^-1] heat of combustion (live)
+        REAL :: rscm   = rfillvalue  !< spread component value
+        REAL :: rwndfc = rfillvalue  !< wind reduction factor
 
-        TYPE(fuelweight_type):: weight
-        TYPE(fuelweight_type):: s2v  !< surface to volume
+        TYPE(fuelweight_type):: weight  = fuelweight_type()  !< [ton acre^-1] fuel loads
+        TYPE(fuelweight_type):: s2v     = fuelweight_type()  !< [ft^-1] surface to volume ratio
     END TYPE
 
 CONTAINS
+
+    FUNCTION EmptyFuelModelType() RESULT(e)
+        TYPE(fuelmodel_type) :: e
+        e%cfuelmodel_id          = '0'
+        e%cfuelmodel_description = 'none'
+        e%herb_type              = 'perennial'
+        e%weight = fuelweight_type()
+        e%s2v    = fuelweight_type()
+    END FUNCTION
 
     !> @brief Creates a structure with fuel-specific information
     SUBROUTINE define_fuelmodel(ifueltype, fuelmodel)
@@ -43,31 +57,8 @@ CONTAINS
     TYPE(fuelmodel_type), INTENT(OUT) :: fuelmodel  ! fuel model type depends on classification of vegetation of pixel
     INTEGER, INTENT(IN) :: ifueltype
 
-    ! initialization of the pointer values
-
-    fuelmodel%cfuelmodel_id="0"
-    fuelmodel%cfuelmodel_description="none"
-    fuelmodel%herb_type="perennial" ! otherwise expressly specified annual
-    fuelmodel%rdepth= rfillvalue
-    fuelmodel%rmxd=rfillvalue     ! (%)
-    fuelmodel%rhd=rfillvalue   ! watts/kg
-    fuelmodel%rhl=rfillvalue   ! watts/kg
-    fuelmodel%rscm=rfillvalue
-    fuelmodel%rwndfc=rfillvalue
-
-    fuelmodel%weight%r1hr    =rfillvalue
-    fuelmodel%weight%r10hr   =rfillvalue
-    fuelmodel%weight%r100hr  =rfillvalue
-    fuelmodel%weight%r1000hr =rfillvalue
-    fuelmodel%weight%rherb   =rfillvalue
-    fuelmodel%weight%rwood   =rfillvalue
-
-    fuelmodel%s2v%r1hr    =rfillvalue
-    fuelmodel%s2v%r10hr   =rfillvalue
-    fuelmodel%s2v%r100hr  =rfillvalue
-    fuelmodel%s2v%r1000hr =rfillvalue
-    fuelmodel%s2v%rherb   =rfillvalue
-    fuelmodel%s2v%rwood   =rfillvalue
+    ! initialization
+    fuelmodel = EmptyFuelModelType()
 
     SELECT CASE (ifueltype)
        CASE(1)

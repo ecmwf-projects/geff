@@ -29,22 +29,6 @@ MODULE mo_io_eccodes
     PUBLIC :: io_write_restart
     PUBLIC :: io_write_results
 
-    ! GRIB shortNames
-    CHARACTER(LEN=2) :: crain_vars(1)     = ['tp']
-    CHARACTER(LEN=6) :: crainclim_vars(1) = ['tpclim']
-    CHARACTER(LEN=2) :: ctemp_vars(1)     = ['t2']
-    CHARACTER(LEN=2) :: crh_vars(1)       = ['rh']
-    CHARACTER(LEN=6) :: cwspeed_vars(1)   = ['wspeed']
-    CHARACTER(LEN=2) :: ccc_vars(1)       = ['cc']
-    CHARACTER(LEN=4) :: csnow_vars(1)     = ['snow']
-    CHARACTER(LEN=3) :: cdp_vars(1)       = ['dp']
-    CHARACTER(LEN=9) :: cvs_vars(1)       = ['veg_stage']
-    CHARACTER(LEN=3) :: clsm_vars(1)      = ['lsm']
-    CHARACTER(LEN=3) :: ccv_vars(1)       = ['cv']
-    CHARACTER(LEN=5) :: cslope_vars(1)    = ['slope']
-    CHARACTER(LEN=13) :: ccr_vars(1)      = ['climate_class'] ! climate regions taken from the dataset Koeppen_CRU_GPCCVASClimO
-    CHARACTER(LEN=10) :: cfm_vars(1)      = ['fuel_model']
-
     ! GRIB paramIds
     INTEGER, PARAMETER :: ilsm_pids(1)      = [172]
     INTEGER, PARAMETER :: irainclim_pids(1) = [228]
@@ -107,13 +91,13 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212034]
 
     TYPE :: GribField
-        INTEGER :: fd
-        INTEGER :: handle
-        INTEGER :: paramId
-        CHARACTER(LEN=20) :: shortName
-        CHARACTER(LEN=200) :: name
-        INTEGER :: npoints
-        INTEGER :: count
+        INTEGER :: fd       = 0
+        INTEGER :: handle   = 0
+        INTEGER :: paramId  = 0
+        CHARACTER(LEN=20) :: shortName = ''
+        CHARACTER(LEN=200) :: name     = ''
+        INTEGER :: npoints  = 0
+        INTEGER :: count    = 0
     CONTAINS
         PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
         PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
@@ -127,8 +111,8 @@ MODULE mo_io_eccodes
         PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
     END TYPE
 
-    ! missing value indicator (NetCDF's rfillvalue, rpopdensity<0 checks imply negative)
-    REAL, PARAMETER :: missingValue = -1.e-20
+    ! missing value indicator
+    REAL, PARAMETER :: missingValue = rfillvalue !FIXME: -1.e20
 
     TYPE(GribField), TARGET :: input(18)
 
@@ -157,44 +141,46 @@ CONTAINS
 
     SUBROUTINE io_getdata(istep)
         INTEGER, INTENT(IN) :: istep
+        REAL, ALLOCATABLE :: tmp(:)
 
-        CALL next_values(grib_rain, 'io_getdata: grib_rain', rrain)
-        CALL next_values(grib_temp, 'io_getdata: grib_temp', rtemp)
-        CALL next_values(grib_maxtemp, 'io_getdata: grib_maxtemp', rmaxtemp)
-        CALL next_values(grib_mintemp, 'io_getdata: grib_mintemp', rmintemp)
-        CALL next_values(grib_rh, 'io_getdata: grib_rh', rrh)
-        CALL next_values(grib_maxrh, 'io_getdata: grib_maxrh', rmaxrh)
-        CALL next_values(grib_minrh, 'io_getdata: grib_minrh', rminrh)
-        CALL next_values(grib_cc, 'io_getdata: grib_cc', rcc)
-        CALL next_values(grib_wspeed, 'io_getdata: grib_wspeed', rwspeed)
-        CALL next_values(grib_snow, 'io_getdata: grib_snow', rsnow)
-        CALL next_values(grib_dp, 'io_getdata: grib_dp', rdp)
-        CALL next_values_as_integer(grib_vs, 'io_getdata: grib_vs', ivs)
+        CALL assert(npoints > 0)
+        IF (istep == 1) RETURN
 
-    CONTAINS
+        IF (grib_rain%count    > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain)
+        IF (grib_temp%count    > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp)
+        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp)
+        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp)
+        IF (grib_rh%count      > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh)
+        IF (grib_maxrh%count   > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
+        IF (grib_minrh%count   > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh)
+        IF (grib_cc%count      > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc)
+        IF (grib_wspeed%count  > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
+        IF (grib_snow%count    > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow)
+        IF (grib_dp%count      > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp)
 
-        SUBROUTINE next_values(grib, message, values)
-            TYPE(GribField), INTENT(INOUT) :: grib
-            CHARACTER(LEN=*), INTENT(IN) :: message
-            REAL, INTENT(INOUT), ALLOCATABLE :: values(:)
-            IF (istep > 1 .AND. grib%count > 1) THEN
-                CALL assert(grib%next(), message)
-                CALL grib%values(values)
-            ENDIF
-        END SUBROUTINE
+        IF (grib_vs%count > 1) THEN
+            ALLOCATE(tmp(npoints))
+            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp)
+            ivs = tmp
+            DEALLOCATE(tmp)
+        ENDIF
+    END SUBROUTINE
 
-        SUBROUTINE next_values_as_integer(grib, message, values)
-            TYPE(GribField), INTENT(INOUT) :: grib
-            CHARACTER(LEN=*), INTENT(IN) :: message
-            INTEGER, INTENT(INOUT), ALLOCATABLE :: values(:)
-            REAL, ALLOCATABLE :: rvalues(:)
-            IF (istep > 1 .AND. grib%count > 1) THEN
-                ALLOCATE(rvalues(grib%npoints))
-                CALL next_values(grib, message, rvalues)
-                values = rvalues
-                DEALLOCATE(rvalues)
-            ENDIF
-        END SUBROUTINE
+
+    SUBROUTINE next_values(message, grib, paramId, values)
+        CHARACTER(LEN=*), INTENT(IN) :: message
+        TYPE(GribField), INTENT(INOUT) :: grib
+        INTEGER, INTENT(IN) :: paramId
+        REAL, INTENT(INOUT), ALLOCATABLE :: values(:)
+        CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
+
+        CALL assert(grib%next(), message//' grib%next()')
+        CALL grib%header()
+
+        CALL assert(grib%npoints == npoints, message//' grib%npoints == npoints')
+        CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
+
+        CALL grib%values(values)
     END SUBROUTINE
 
 
@@ -204,36 +190,35 @@ CONTAINS
         REAL, ALLOCATABLE :: tmp(:)
 
         ! use land-sea mask to define geometry
-        CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', clsm_vars, ilsm_pids)
+        CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
 
         npoints = grib_lsm%npoints
-        PRINT *, '*** data dimensions  *** ', npoints
+        PRINT *, 'npoints: ', npoints
 
         CALL assert(npoints > 0)
-        CALL assert(.NOT. ALLOCATED(lons) .AND. .NOT. ALLOCATED(lats))
         ALLOCATE(lats(npoints))
         ALLOCATE(lons(npoints))
 
         CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
         CALL grib_lsm%coordinates(lats, lons)
 
-        CALL grib_temp%open_as_input(tempfile, 'temperature', ctemp_vars, itemp_pids)
-        CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', ctemp_vars, imaxtemp_pids)
-        CALL grib_mintemp%open_as_input(mintempfile, 'minimum daily temperature', ctemp_vars, imintemp_pids)
-        CALL grib_rh%open_as_input(rhfile, 'relative humidity', crh_vars, irh_pids)
-        CALL grib_maxrh%open_as_input(maxrhfile, 'maximum daily relative humidity', crh_vars, imaxrh_pids)
-        CALL grib_minrh%open_as_input(minrhfile, 'minimum daily relative humidity', crh_vars, iminrh_pids)
-        CALL grib_rain%open_as_input(rainfile, 'rainfall', crain_vars, irain_pids)
-        CALL grib_cc%open_as_input(ccfile, 'cloud cover', ccc_vars, icc_pids)
-        CALL grib_wspeed%open_as_input(wspeedfile, 'wind speed', cwspeed_vars, iwspeed_pids)
-        CALL grib_snow%open_as_input(snowfile, 'ground snow', csnow_vars, isnow_pids)
-        CALL grib_dp%open_as_input(dpfile, 'duration of precipitation in the previous 24h', cdp_vars, idp_pids)
-        CALL grib_vs%open_as_input(vsfile, 'vegetation stage', cvs_vars, ivs_pids)
-        CALL grib_cr%open_as_input(crfile, 'climate region', ccr_vars, icr_pids)
-        CALL grib_fm%open_as_input(fmfile, 'fuel model', cfm_vars, ifm_pids)
-        CALL grib_slope%open_as_input(slopefile, 'slope of sub-gridscale orography', cslope_vars, islope_pids)
-        CALL grib_cv%open_as_input(cvfile, 'fractional coverage for vegetation (high + low)', ccv_vars, icv_pids)
-        CALL grib_rainclim%open_as_input(rainclimfile, 'climate rainfall', crainclim_vars, irainclim_pids)
+        CALL grib_temp%open_as_input(tempfile, 'temperature', itemp_pids)
+        CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', imaxtemp_pids)
+        CALL grib_mintemp%open_as_input(mintempfile, 'minimum daily temperature', imintemp_pids)
+        CALL grib_rh%open_as_input(rhfile, 'relative humidity', irh_pids)
+        CALL grib_maxrh%open_as_input(maxrhfile, 'maximum daily relative humidity', imaxrh_pids)
+        CALL grib_minrh%open_as_input(minrhfile, 'minimum daily relative humidity', iminrh_pids)
+        CALL grib_rain%open_as_input(rainfile, 'rainfall', irain_pids)
+        CALL grib_cc%open_as_input(ccfile, 'cloud cover', icc_pids)
+        CALL grib_wspeed%open_as_input(wspeedfile, 'wind speed', iwspeed_pids)
+        CALL grib_snow%open_as_input(snowfile, 'ground snow', isnow_pids)
+        CALL grib_dp%open_as_input(dpfile, 'duration of precipitation in the previous 24h', idp_pids)
+        CALL grib_vs%open_as_input(vsfile, 'vegetation stage', ivs_pids)
+        CALL grib_cr%open_as_input(crfile, 'climate region', icr_pids)
+        CALL grib_fm%open_as_input(fmfile, 'fuel model', ifm_pids)
+        CALL grib_slope%open_as_input(slopefile, 'slope of sub-gridscale orography', islope_pids)
+        CALL grib_cv%open_as_input(cvfile, 'fractional coverage for vegetation (high + low)', icv_pids)
+        CALL grib_rainclim%open_as_input(rainclimfile, 'climate rainfall', irainclim_pids)
 
         ! fields/variables defined in time (SIZE() = ntimestep)
         ntimestep = MAXVAL(input(:)%count)
@@ -247,6 +232,8 @@ CONTAINS
         ! fields/variables defined in space (SIZE() = npoints)
         CALL assert(npoints > 0, "io_initialize: npoints > 0")
 
+        ALLOCATE(tmp(npoints))
+
         DO i = 1, SIZE(input)
             IF (i > 1) CALL assert(input(i)%same_geometry(input(1)))
             CALL assert(input(i)%count == 1 .OR. input(i)%count == ntimestep)
@@ -256,50 +243,86 @@ CONTAINS
         ! CALL assert(grib_lsm%next())  ! already called (above)
         CALL grib_lsm%values(rlsm)
 
+        ALLOCATE(rrain(npoints))
         CALL next_values('io_initialize: grib_rain', grib_rain, grib_rain%paramId, rrain)
+
+        ALLOCATE(rtemp(npoints))
         CALL next_values('io_initialize: grib_temp', grib_temp, grib_temp%paramId, rtemp)
+
+        ALLOCATE(rmaxtemp(npoints))
         CALL next_values('io_initialize: grib_maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp)
+
+        ALLOCATE(rmintemp(npoints))
         CALL next_values('io_initialize: grib_mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp)
+
+        ALLOCATE(rrh(npoints))
         CALL next_values('io_initialize: grib_rh', grib_rh, grib_rh%paramId, rrh)
+
+        ALLOCATE(rmaxrh(npoints))
         CALL next_values('io_initialize: grib_maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
+
+        ALLOCATE(rminrh(npoints))
         CALL next_values('io_initialize: grib_minrh', grib_minrh, grib_minrh%paramId, rminrh)
+
+        ALLOCATE(rcc(npoints))
         CALL next_values('io_initialize: grib_cc', grib_cc, grib_cc%paramId, rcc)
+
+        ALLOCATE(rwspeed(npoints))
         CALL next_values('io_initialize: grib_wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
+
+        ALLOCATE(rsnow(npoints))
         CALL next_values('io_initialize: grib_snow', grib_snow, grib_snow%paramId, rsnow)
+
+        ALLOCATE(rdp(npoints))
         CALL next_values('io_initialize: grib_dp', grib_dp, grib_dp%paramId, rdp)
-        CALL next_values_as_integer('io_initialize: grib_vs', grib_vs, grib_vs%paramId, ivs)
-        CALL next_values_as_integer('io_initialize: grib_cr', grib_cr, grib_cr%paramId, icr)
-        CALL next_values_as_integer('io_initialize: grib_fm', grib_fm, grib_fm%paramId, ifm)
-        CALL next_values_as_integer('io_initialize: grib_slope', grib_slope, grib_slope%paramId, islope)
+
+        ALLOCATE(rcv(npoints))
         CALL next_values('io_initialize: grib_cv', grib_cv, grib_cv%paramId, rcv)
+
+        ALLOCATE(rrainclim(npoints))
         CALL next_values('io_initialize: grib_rainclim', grib_rainclim, grib_rainclim%paramId, rrainclim)
 
+        ALLOCATE(ivs(npoints))
+        CALL next_values('io_initialize: grib_vs', grib_vs, grib_vs%paramId, tmp)
+        ivs = tmp
+
+        ALLOCATE(icr(npoints))
+        CALL next_values('io_initialize: grib_cr', grib_cr, grib_cr%paramId, tmp)
+        icr = tmp
+
+        ALLOCATE(ifm(npoints))
+        CALL next_values('io_initialize: grib_fm', grib_fm, grib_fm%paramId, tmp)
+        ifm = tmp
+
+        ALLOCATE(islope(npoints))
+        CALL next_values('io_initialize: grib_slope', grib_slope, grib_slope%paramId, tmp)
+        islope = tmp
+
         ALLOCATE(mc(npoints))
-        mc = EmptyMCType()
+        mc = mc_type()
 
         ALLOCATE(fire_prop(npoints))
-        fire_prop = EmptyFirePropType()
+        fire_prop = fire_prop_type()
 
         ALLOCATE(fire_prob(npoints))
-        fire_prob = EmptyFireProbType()
+        fire_prob = fire_prob_type()
 
         ALLOCATE(mark5_fuel(npoints))
-        mark5_fuel = EmptyMark5FuelType()
+        mark5_fuel = mark5_fuel_type()
 
         ALLOCATE(mark5_prop(npoints))
-        mark5_prop = EmptyMark5PropType()
+        mark5_prop = mark5_prop_type()
 
         ALLOCATE(mark5_prob(npoints))
-        mark5_prob = EmptyMark5ProbType()
+        mark5_prob = mark5_prob_type()
 
         ALLOCATE(fwi_risk(npoints))
-        fwi_risk = EmptyFWIRiskType()
+        fwi_risk = fwi_risk_type()
 
         IF (TRIM(init_file(1:4)) == 'rest') THEN
             PRINT *, "Initialization type: exact initialization from '" // init_file // "'"
 
             CALL restart%open_as_restart(init_file)
-            ALLOCATE(tmp(npoints))
 
             CALL next_values('restart mc%r1hr', restart, imc_r1hr_pids(1), tmp)
             mc(:)%r1hr = tmp
@@ -341,143 +364,46 @@ CONTAINS
             fwi_risk(:)%dc = tmp
 
             CALL restart%close()
-            DEALLOCATE(tmp)
-            RETURN
+        ELSE
+            PRINT *, 'Initialization type: artificial conditions'
+
+            ! Here the loop is necessary
+            ! Dead fuel
+            DO i = 1, npoints
+                IF (rlsm(i) .GT. 0.00001 )   THEN
+                    IF (1 <= icr(i) .AND. icr(i) <= 5) THEN
+                        mc(i)%r100hr  =  5. + (5. * icr(i))
+                        mc(i)%r1000hr = 10. + (5. * icr(i))
+                        mc(i)%rbndryt = 10. + (5. * icr(i))
+                        mc(i)%rx1000  = 10. + (5. * icr(i))
+                    ENDIF
+
+                    mark5_fuel(i)%kb_drought_index = 0. ! saturation of the soil
+                    mark5_fuel(i)%timesincerain = 0.
+
+                    ! For the FWI moisture code values (FFMC=85, DMC=6, DC=15) provide a
+                    ! reasonable set of conditions for post-snowmelt springtime conditions
+                    ! in eastern/central Canada, the Northern U.S., and Alaska; physically
+                    ! these spring start-up values represent about 3 days of drying from
+                    ! complete moisture saturation of the fuel layer. In areas or years
+                    ! with particularly dry winters (or parts of the world without
+                    ! significant snow cover) these start-up values for FFMC and DMC may
+                    ! still be appropriate as these two elements respond relatively quickly
+                    ! to changes in the weather. The DC component however, because of its
+                    ! very long response time, can take considerable time to adjust to
+                    ! unrealistic initial values and some effort to estimate over-winter
+                    ! value of the DC may be necessary. Users can look again to Lawson and
+                    ! Armitage (2008) for a more detailed description of code calculation
+                    ! startup issues and the over-winter adjustment process.
+                    fwi_risk(i)%ffmc = 85.
+                    fwi_risk(i)%dmc  =  6.
+                    fwi_risk(i)%dc   = 15.
+                ENDIF
+            ENDDO
         ENDIF
 
-        PRINT *, 'Initialization type: artificial conditions'
-
-        ! Here the loop is necessary
-        ! Dead fuel
-        DO i = 1, npoints
-            IF (rlsm(i) .GT. 0.00001 )   THEN
-                IF (1 <= icr(i) .AND. icr(i) <= 5) THEN
-                    mc(i)%r100hr  =  5. + (5. * icr(i))
-                    mc(i)%r1000hr = 10. + (5. * icr(i))
-                    mc(i)%rbndryt = 10. + (5. * icr(i))
-                    mc(i)%rx1000  = 10. + (5. * icr(i))
-                ENDIF
-
-                mark5_fuel(i)%kb_drought_index = 0. ! saturation of the soil
-                mark5_fuel(i)%timesincerain = 0.
-
-                ! For the FWI moisture code values (FFMC=85, DMC=6, DC=15) provide a
-                ! reasonable set of conditions for post-snowmelt springtime conditions
-                ! in eastern/central Canada, the Northern U.S., and Alaska; physically
-                ! these spring start-up values represent about 3 days of drying from
-                ! complete moisture saturation of the fuel layer. In areas or years
-                ! with particularly dry winters (or parts of the world without
-                ! significant snow cover) these start-up values for FFMC and DMC may
-                ! still be appropriate as these two elements respond relatively quickly
-                ! to changes in the weather. The DC component however, because of its
-                ! very long response time, can take considerable time to adjust to
-                ! unrealistic initial values and some effort to estimate over-winter
-                ! value of the DC may be necessary. Users can look again to Lawson and
-                ! Armitage (2008) for a more detailed description of code calculation
-                ! startup issues and the over-winter adjustment process.
-                fwi_risk(i)%ffmc = 85.
-                fwi_risk(i)%dmc  =  6.
-                fwi_risk(i)%dc   = 15.
-            ENDIF
-        ENDDO
-
-    CONTAINS
-
-    SUBROUTINE next_values(message, grib, paramId, values)
-        CHARACTER(LEN=*), INTENT(IN) :: message
-        TYPE(GribField), INTENT(INOUT) :: grib
-        INTEGER, INTENT(IN) :: paramId
-        REAL, ALLOCATABLE, INTENT(INOUT) :: values(:)
-
-        IF (.NOT. ALLOCATED(values)) ALLOCATE(values(npoints))
-        CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
-
-        CALL assert(grib%next(), message//' grib%next()')
-        CALL grib%header()
-
-        CALL assert(grib%npoints == npoints, message//' grib%npoints == npoints')
-        CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
-
-        CALL grib%values(values)
+        DEALLOCATE(tmp)
     END SUBROUTINE
-
-    SUBROUTINE next_values_as_integer(message, grib, paramId, values)
-        CHARACTER(LEN=*), INTENT(IN) :: message
-        TYPE(GribField), INTENT(INOUT) :: grib
-        INTEGER, INTENT(IN) :: paramId
-        INTEGER, ALLOCATABLE, INTENT(INOUT) :: values(:)
-        REAL, ALLOCATABLE :: rvalues(:)
-        CALL next_values(message, grib, paramId, rvalues)
-        IF (.NOT. ALLOCATED(values)) ALLOCATE(values(npoints))
-        values = rvalues
-        IF (ALLOCATED(rvalues)) DEALLOCATE(rvalues)
-    END SUBROUTINE
-
-    FUNCTION EmptyMCType() RESULT(e)
-        TYPE(mc_type) :: e
-        e%r1hr    = rfillvalue
-        e%r10hr   = rfillvalue
-        e%r100hr  = rfillvalue
-        e%r1000hr = rfillvalue
-        e%rherb   = rfillvalue
-        e%rwood   = rfillvalue
-        e%rx1000  = rfillvalue
-        e%rbndryt = rfillvalue
-    END FUNCTION
-
-    FUNCTION EmptyFirePropType() RESULT(e)
-        TYPE(fire_prop_type) :: e
-        e%ros  = rfillvalue
-        e%sc   = ifillvalue
-        e%erc  = ifillvalue
-        e%bi   = ifillvalue
-    END FUNCTION
-
-    FUNCTION EmptyFireProbType() RESULT(e)
-        TYPE(fire_prob_type) :: e
-        e%ic   = ifillvalue
-        e%mcoi = ifillvalue
-        e%loi  = ifillvalue
-        e%fli  = rfillvalue
-    END FUNCTION
-
-    FUNCTION EmptyMark5FuelType() RESULT(e)
-        TYPE(mark5_fuel_type) :: e
-        e%moist            = rfillvalue
-        e%weight           = rfillvalue
-        e%curing           = rfillvalue
-        e%kb_drought_index = rfillvalue
-        e%drought_factor   = rfillvalue
-        e%timesincerain    = rfillvalue
-    END FUNCTION
-
-    FUNCTION EmptyMark5PropType() RESULT(e)
-        TYPE(mark5_prop_type) :: e
-        e%ros_theta0     = rfillvalue
-        e%ros_theta      = rfillvalue
-        e%flame_height   = rfillvalue
-        e%flame_distance = rfillvalue
-    END FUNCTION
-
-    FUNCTION EmptyMark5ProbType() RESULT(e)
-        TYPE(mark5_prob_type) :: e
-        e%fire_danger_index = rfillvalue
-    END FUNCTION
-
-    FUNCTION EmptyFWIRiskType() RESULT(e)
-        TYPE (fwi_risk_type) :: e
-        e%fwi         = rfillvalue
-        e%ffmc        = rfillvalue
-        e%dmc         = rfillvalue
-        e%dc          = rfillvalue
-        e%isi         = rfillvalue
-        e%bui         = rfillvalue
-        e%dsr         = rfillvalue
-        e%danger_risk = rfillvalue
-    END FUNCTION
-
-    END SUBROUTINE
-
 
     SUBROUTINE io_write_constant_fields
         INTEGER :: fd, handle
@@ -499,7 +425,6 @@ CONTAINS
         CALL codes_close_file(fd)
         fd = 0
     END SUBROUTINE
-
 
     SUBROUTINE io_write_restart
         INTEGER :: fd, handle
@@ -603,17 +528,6 @@ CONTAINS
         IF (ALLOCATED(tmp)) DEALLOCATE(tmp)
     END SUBROUTINE
 
-    FUNCTION EmptyGribField() RESULT(g)
-        TYPE(GribField) :: g
-        g%fd = 0
-        g%handle = 0
-        g%paramId = 0
-        g%shortName = ''
-        g%name = ''
-        g%npoints = 0
-        g%count = 0
-    END FUNCTION
-
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
         CLASS(GribField), INTENT(IN) :: this
         REAL, ALLOCATABLE, INTENT(INOUT) :: latitudes(:)
@@ -692,15 +606,13 @@ CONTAINS
         this%fd = 0
     END SUBROUTINE
 
-    SUBROUTINE gribfield_open_as_input(this, file, var, names, pids)
+    SUBROUTINE gribfield_open_as_input(this, file, var, pids)
         CLASS(GribField), INTENT(INOUT) :: this
 
         CHARACTER(LEN=*), INTENT(IN) :: file
         CHARACTER(LEN=*), INTENT(IN) :: var
-        CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: names
         INTEGER, DIMENSION(:), INTENT(IN) :: pids
 
-        CHARACTER(LEN=20) :: shortName
         INTEGER :: i, n
         LOGICAL :: found
 
@@ -712,21 +624,13 @@ CONTAINS
         ! next GRIB messages: confirm numberOfDataPoints, increment count
         CALL this%header()
 
-        found = SIZE(names) .EQ. 0 .AND. SIZE(pids) .EQ. 0
-        IF (.NOT. found) THEN
-            DO i = 1, SIZE(names)
-                found = this%shortName .EQ. names(i)
-                IF (found) EXIT
-            ENDDO
-        ENDIF
-        IF (.NOT. found) THEN
-            DO i = 1, SIZE(pids)
-                found = this%paramId .EQ. pids(i)
-                IF (found) EXIT
-            ENDDO
-        ENDIF
-        CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' name not found')
-        PRINT *, 'Found '//TRIM(var)//' variable called: ', TRIM(this%shortName), ' with paramId=', this%paramId
+        found = .FALSE.
+        DO i = 1, SIZE(pids)
+            found = this%paramId .EQ. pids(i)
+            IF (found) EXIT
+        ENDDO
+        CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' field not found')
+        PRINT *, 'Found '//TRIM(var)//' field with paramId=', this%paramId
 
         this%count = 1
         DO WHILE (this%next())
@@ -768,7 +672,7 @@ CONTAINS
     SUBROUTINE write_field(fd, paramid, values)
         INTEGER, INTENT(IN) :: fd, paramid
         REAL, INTENT(IN) :: values(:)
-        INTEGER :: handle, I
+        INTEGER :: handle, i, bitmapPresent
         TYPE(GribField), POINTER, SAVE :: ref => input(1)
 
         ! reference defines metadata (date/time/step/..., aside from paramId)
@@ -791,7 +695,11 @@ CONTAINS
 
         CALL codes_set(handle, 'paramId', paramid)
         CALL codes_set(handle, 'missingValue', missingValue)
-        IF (ANY(values == missingValue)) CALL codes_set(handle, 'bitmapPresent', 1)
+
+        bitmapPresent = 0
+        IF (ANY(values == missingValue)) bitmapPresent = 1
+        CALL codes_set(handle, 'bitmapPresent', bitmapPresent)
+
         CALL codes_set(handle, 'values', PACK(values, MASK=.TRUE.))
 
         CALL codes_write(handle, fd)

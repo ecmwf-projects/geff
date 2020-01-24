@@ -11,28 +11,30 @@
 !> @author Maciel, P., ECMWF
 MODULE mo_mark5
 
+    USE mo_constants
+
     IMPLICIT NONE
 
     ! intermediate (fuel) variables
     TYPE mark5_fuel_type
-        REAL :: moist             !< fuel moisture content
-        REAL :: weight            !< fuel weight
-        REAL :: curing            !< degree of curing
-        REAL :: kb_drought_index  !< Keetch-Byram drought index (0 no drought - 203 severe drought)
-        REAL :: drought_factor    !< drought factor
-        REAL :: timesincerain
+        REAL :: moist             = rfillvalue  !< fuel moisture content
+        REAL :: weight            = rfillvalue  !< fuel weight
+        REAL :: curing            = rfillvalue  !< degree of curing
+        REAL :: kb_drought_index  = rfillvalue  !< Keetch-Byram drought index (0 no drought - 203 severe drought)
+        REAL :: drought_factor    = rfillvalue  !< drought factor
+        REAL :: timesincerain     = rfillvalue
     END TYPE
 
     ! Mark 5 (fuel) status
     TYPE mark5_prop_type
-        REAL :: ros_theta0      !< spread component
-        REAL :: ros_theta       !< spread rate
-        REAL :: flame_height
-        REAL :: flame_distance  !< distance at which flame can be seen
+        REAL :: ros_theta0        = rfillvalue  !< spread component
+        REAL :: ros_theta         = rfillvalue  !< spread rate
+        REAL :: flame_height      = rfillvalue
+        REAL :: flame_distance    = rfillvalue  !< distance at which flame can be seen
     END TYPE
 
     TYPE mark5_prob_type
-        REAL :: fire_danger_index
+        REAL :: fire_danger_index = rfillvalue
     END TYPE
 
     TYPE(mark5_fuel_type), ALLOCATABLE :: mark5_fuel(:)

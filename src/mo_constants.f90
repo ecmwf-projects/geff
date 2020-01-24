@@ -26,5 +26,8 @@ MODULE mo_constants
     
     INTEGER, PARAMETER :: ndayinyear=365
 
+    REAL, PARAMETER :: rfillvalue=-9999.0 ! missing value
+    INTEGER, PARAMETER :: ifillvalue=-9999 ! missing value
+
 END MODULE
 

@@ -16,25 +16,31 @@ MODULE mo_nfdrs
     IMPLICIT NONE
 
     ! prognostic
+    ! NOTE: first size members are the same as fuelweight_type
     TYPE mc_type
-        REAL :: r1hr, r10hr, r100hr, r1000hr, rherb, rwood  ! NOTE: same as fuelweight_type
-        REAL :: rx1000
-        REAL :: rbndryt
+        REAL :: r1hr    = rfillvalue
+        REAL :: r10hr   = rfillvalue
+        REAL :: r100hr  = rfillvalue
+        REAL :: r1000hr = rfillvalue
+        REAL :: rherb   = rfillvalue
+        REAL :: rwood   = rfillvalue
+        REAL :: rx1000  = rfillvalue
+        REAL :: rbndryt = rfillvalue
     END TYPE
 
     ! diagnostic
     TYPE fire_prop_type
-        REAL :: ros      !< rate of spread
-        INTEGER :: sc    !< spread component
-        INTEGER :: erc   !< energy release component
-        INTEGER :: bi    !< burning index
+        REAL :: ros     = rfillvalue  !< rate of spread
+        INTEGER :: sc   = ifillvalue  !< spread component
+        INTEGER :: erc  = ifillvalue  !< energy release component
+        INTEGER :: bi   = ifillvalue  !< burning index
     END TYPE
 
     TYPE fire_prob_type
-        INTEGER :: ic    !< ignition probability
-        INTEGER :: mcoi  !< human caused fire occurrence
-        INTEGER :: loi   !< lightining coused occurrence index
-        REAL :: fli      !< fire load index
+        INTEGER :: ic   = ifillvalue  !< ignition probability
+        INTEGER :: mcoi = ifillvalue  !< human caused fire occurrence
+        INTEGER :: loi  = ifillvalue  !< lightining coused occurrence index
+        REAL :: fli     = rfillvalue  !< fire load index
     END TYPE
 
     TYPE(mc_type), ALLOCATABLE :: mc(:)

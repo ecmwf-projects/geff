@@ -11,24 +11,22 @@
 !> @author Maciel, P., ECMWF
 MODULE mo_fwi
 
-  IMPLICIT NONE
+    USE mo_constants
 
-! variables needed for the FWI  calculation
+    IMPLICIT NONE
 
-! intermediate (fuel) variables:
+    TYPE fwi_risk_type
+        REAL :: fwi         = rfillvalue  !< fire weather index
+        REAL :: ffmc        = rfillvalue  !< fine fuel moisture content
+        REAL :: dmc         = rfillvalue  !< Duff moisture content
+        REAL :: dc          = rfillvalue  !< Drought code
+        REAL :: isi         = rfillvalue  !< initial spread index
+        REAL :: bui         = rfillvalue  !< Built-up index
+        REAL :: dsr         = rfillvalue  !< Daily Severity Rating
+        REAL :: danger_risk = rfillvalue  !< fwi subdivided into classes
+    END type
 
-  TYPE fwi_risk_type
-    REAL :: fwi              ! fire weather index
-    REAL :: ffmc             ! fine fuel moisture content
-    REAL :: dmc              ! Duff moisture content
-    REAL :: dc               ! Drought code
-    REAL :: isi              ! initial spread index
-    REAL :: bui              ! Built-up index
-    REAL :: dsr              ! Daily Severity Rating
-    REAL :: danger_risk      ! fwi subdivided into classes
- END type fwi_risk_type
-
-  TYPE(fwi_risk_type)       ,  ALLOCATABLE :: fwi_risk(:)
+    TYPE(fwi_risk_type), ALLOCATABLE :: fwi_risk(:)
 
 CONTAINS
 !=================================

@@ -67,6 +67,7 @@ PROGRAM geff
   USE mo_utilities
   USE mo_vegstage
   USE mo_version
+  USE mo_control
 
   IMPLICIT NONE
 
@@ -1265,43 +1266,18 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
     fwi_risk(i)%dsr=0.0272*(fwi_risk(i)%fwi**(1.77))
 
  ELSE  ! not a valid point for calculation
-!NFDRS
-       fire_prop(i)%ros=rfillvalue
-       fire_prop(i)%sc=ifillvalue
-       fire_prop(i)%erc=ifillvalue
-       fire_prop(i)%bi=ifillvalue
+        !NFDRS
+        mc(i) = mc_type()
+        fire_prop(i) = fire_prop_type()
+        fire_prob(i) = fire_prob_type()
 
-       fire_prob(i)%ic=ifillvalue
-       fire_prob(i)%mcoi=ifillvalue
-       fire_prob(i)%loi=ifillvalue
-       fire_prob(i)%fli=rfillvalue
+        !MARK-5
+        mark5_fuel(i) = mark5_fuel_type()
+        mark5_prop(i) = mark5_prop_type()
+        mark5_prob(i) = mark5_prob_type()
 
-       mc(i)%r1hr=rfillvalue
-       mc(i)%r10hr=rfillvalue
-       mc(i)%r100hr=rfillvalue
-       mc(i)%r1000hr=rfillvalue
-
-       mc(i)%rherb=rfillvalue
-       mc(i)%rwood=rfillvalue
-       mc(i)%rx1000=rfillvalue
-       mc(i)%rbndryt=rfillvalue
-!MARK-5
-
-
-       mark5_fuel(i)%kb_drought_index=rfillvalue
-       mark5_fuel(i)%drought_factor=rfillvalue
-       mark5_fuel(i)%timesincerain=ifillvalue
-       mark5_prob(i)%fire_danger_index=rfillvalue
-
-!FWI
-       fwi_risk(i)%fwi=rfillvalue
-       fwi_risk(i)%ffmc=rfillvalue
-       fwi_risk(i)%dmc=rfillvalue
-       fwi_risk(i)%dc=rfillvalue
-       fwi_risk(i)%isi=rfillvalue
-       fwi_risk(i)%bui=rfillvalue
-       fwi_risk(i)%dsr=rfillvalue
-       fwi_risk(i)%danger_risk=rfillvalue
+        !FWI
+        fwi_risk(i) = fwi_risk_type()
 
 
     ENDIF !non-lake or sea point

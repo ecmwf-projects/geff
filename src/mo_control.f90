@@ -45,8 +45,4 @@ MODULE mo_control
     CHARACTER(LEN=200) :: crfile
     CHARACTER(LEN=200) :: fmfile
 
-    REAL :: rfillvalue=-9999.0 ! missing value
-    INTEGER :: ifillvalue=-9999 ! missing value
-    LOGICAL :: lwritten_results
-
 END MODULE mo_control
