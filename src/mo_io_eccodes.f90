@@ -80,15 +80,15 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: imark5_prop_flame_distance_pids(1)    = [212025]
     INTEGER, PARAMETER :: imark5_prob_fire_danger_index_pids(1) = [212026]
 
-    INTEGER, PARAMETER :: ifwi_risk_fwi_pids(1)         = [212027]
-    INTEGER, PARAMETER :: ifwi_risk_ffmc_pids(1)        = [212028]
-    INTEGER, PARAMETER :: ifwi_risk_dmc_pids(1)         = [212029]
-    INTEGER, PARAMETER :: ifwi_risk_dc_pids(1)          = [212030]
+    INTEGER, PARAMETER :: ifwi_risk_fwi_pids(1)         = [260540]
+    INTEGER, PARAMETER :: ifwi_risk_ffmc_pids(1)        = [260541]
+    INTEGER, PARAMETER :: ifwi_risk_dmc_pids(1)         = [260542]
+    INTEGER, PARAMETER :: ifwi_risk_dc_pids(1)          = [260543]
 
-    INTEGER, PARAMETER :: ifwi_risk_isi_pids(1)         = [212031]
-    INTEGER, PARAMETER :: ifwi_risk_bui_pids(1)         = [212032]
-    INTEGER, PARAMETER :: ifwi_risk_dsr_pids(1)         = [212033]
-    INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212034]
+    INTEGER, PARAMETER :: ifwi_risk_isi_pids(1)         = [260544]
+    INTEGER, PARAMETER :: ifwi_risk_bui_pids(1)         = [260545]
+    INTEGER, PARAMETER :: ifwi_risk_dsr_pids(1)         = [260546]
+    INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212027]
 
     TYPE :: GribField
         INTEGER :: fd       = 0
