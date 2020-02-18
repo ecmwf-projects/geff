@@ -13,7 +13,7 @@ MODULE mo_constants
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: nweather=4
-  INTEGER, PARAMETER :: nclima=5 ! 1 arid 2 semiarid 3 humid 3 wet 5 artic
+  INTEGER, PARAMETER :: nclima=5 ! 1 arid 2 semiarid 3 humid 4 wet 5 artic
   INTEGER, PARAMETER :: nslope=5
   INTEGER, PARAMETER :: nlightclass=6
   REAL, PARAMETER    :: rtopoundsft2=0.0459137 ! conversion factor from tons/acre to pounds/ft^2
