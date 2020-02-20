@@ -693,6 +693,9 @@ CONTAINS
         CALL codes_clone(ref%handle, handle)
         CALL assert(handle /= 0, 'write_field: codes_clone')
 
+        ! FIXME fix GRIB2-only fields from GRIB1
+        IF (paramid > 260000) CALL codes_set(handle, 'edition', 2)
+
         CALL codes_set(handle, 'paramId', paramid)
         CALL codes_set(handle, 'missingValue', missingValue)
 
