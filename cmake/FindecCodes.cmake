@@ -11,11 +11,11 @@
 #  find_package (eccodes COMPONENTS C REQUIRED)
 #  target_link_libraries (myTarget PRIVATE eccodes::eccodes)
 
-find_path (eccodes_INCLUDES eccodes.h HINTS "${eccodes_DIR}" "${ECCODES_DIR}" ENV "${eccodes_DIR}" "${ECCODES_DIR}" PATH_SUFFIXES "" "include" DOC "ecCodes includes")
+find_path (eccodes_INCLUDES eccodes.h HINTS "${eccodes_DIR}" "${ECCODES_DIR}" ENV eccodes_DIR ECCODES_DIR PATH_SUFFIXES "" "include" DOC "ecCodes includes")
 
 macro (eccodes_check_interface lang header libs)
     find_path (eccodes_INCLUDES_${lang} NAMES ${header} HINTS "${eccodes_INCLUDES}" "${eccodes_DIR}" "${ECCODES_DIR}" DOC "ecCodes includes (${lang} interface)" NO_DEFAULT_PATH)
-    find_library (eccodes_LIBRARIES_${lang} NAMES ${libs} HINTS "${eccodes_DIR}" "${ECCODES_DIR}" ENV "${eccodes_DIR}" "${ECCODES_DIR}" PATH_SUFFIXES "" "lib" DOC "ecCodes libraries (${lang} interface)" NO_DEFAULT_PATH)
+    find_library (eccodes_LIBRARIES_${lang} NAMES ${libs} HINTS "${eccodes_DIR}" "${ECCODES_DIR}" ENV eccodes_DIR ECCODES_DIR PATH_SUFFIXES "" "lib" DOC "ecCodes libraries (${lang} interface)" NO_DEFAULT_PATH)
     mark_as_advanced (eccodes_LIBRARIES_${lang} eccodes_INCLUDES_${lang})
 
     if (eccodes_INCLUDES_${lang} AND eccodes_LIBRARIES_${lang})
