@@ -1,0 +1,91 @@
+#!/usr/bin/python3
+
+import sys
+import argparse
+from eccodes import *
+from PIL import Image
+import numpy
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--missing", choices=[None, "middle", "index"], default=None)
+parser.add_argument(
+    "--index", help="value at index to set as missing value", default=-1
+)
+parser.add_argument("--param", help="GRIB parameter identifier", default=-1)
+parser.add_argument(
+    "--sample",
+    help="GRIB sample",
+    default="/home/pmaciel/git/mars-client-bundle/eccodes/samples/regular_ll_sfc_grib2.tmpl",
+)
+parser.add_argument(
+    "--area", nargs=4, help="N/W/S/E", metavar="A", default=[90, -180, -90, 180]
+)
+parser.add_argument(
+    "images", type=str, metavar="image", nargs="+", help="image to convert"
+)
+
+args = parser.parse_args()
+print(args)
+
+
+def main():
+
+    args = parser.parse_args()
+    print(args)
+
+    assert len(args.area) == 4
+    n, w, s, e = args.area
+    assert s < n and w < e
+
+    for image in args.images:
+        img = Image.open(image)
+
+        ni, nj = img.size
+        print(ni, nj)
+
+        with open(args.sample, "rb") as sample:
+            h = codes_grib_new_from_file(sample)
+
+            # metadata
+            if args.param >= 0:
+                codes_set(h, "paramId", args.param)
+
+            di = (e - w) / ni
+            dj = (n - s) / nj
+
+            codes_set(h, "Ni", ni)
+            codes_set(h, "Nj", nj)
+
+            codes_set(h, "iDirectionIncrementInDegrees", di)
+            codes_set(h, "jDirectionIncrementInDegrees", dj)
+
+            # expand bounding box
+            eps = 1 / (2 * codes_get(h, "angularPrecision"))
+            codes_set(h, "latitudeOfFirstGridPointInDegrees", min(90, n + eps - dj / 2))
+            codes_set(h, "latitudeOfLastGridPointInDegrees", max(-90, s - eps + dj / 2))
+            codes_set(h, "longitudeOfFirstGridPointInDegrees", w - eps + di / 2)
+            codes_set(h, "longitudeOfLastGridPointInDegrees", e + eps - di / 2)
+
+            # set values, missing value(s)
+            values = numpy.array(img, dtype=numpy.float).flatten()
+
+            if args.missing == "middle":
+                codes_set(h, "missingValue", values[int(len(values) / 2)])
+                codes_set(h, "bitmapPresent", 1)
+            elif args.missing == "index":
+                codes_set(h, "missingValue", values[args.index])
+                codes_set(h, "bitmapPresent", 1)
+            else:
+                codes_set(h, "bitmapPresent", 0)
+
+            codes_set_values(h, values)
+
+            # write, close
+            with open(image + ".grib2", "wb") as f:
+                codes_write(h, f)
+            codes_release(h)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
