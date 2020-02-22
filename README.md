@@ -48,3 +48,23 @@ While it was principally designed for gridded data, it can operate with any kind
 
 * 2014/03 Initial version
 
+
+### Climate region GRIB files were generated this way:
+
+* The (data/Koeppen*) GRIBs are generated with data from [here](http://koeppen-geiger.vu-wien.ac.at/present.htm)
+  - look under GeoTIFF images, GPCC VASClimO Late 1976 - 2000, Fine (mislabeled as Coarse)
+  - the particular file of interest is [this](http://www.fao.org/geonetwork/srv/en/resources.get?id=36913&fname=Koeppen_CRU_GPCCVASClimO_Late_d.zip&access=private)
+
+* the image Koeppen_CRU_GPCCVASClimO_Late_d.tif should represent a:
+  - regular lat/lon grid
+  - 1/12 degree by 1/12 degree resolution (approx. 5km, shifted)
+  - area = N/W/S/E = 90/-180/-90/180
+
+* convert to GRIB, setting missing values to whatever is set at lat/lon = 0/0 (sea):
+  - ./scripts/grib-from-image Koeppen_CRU_GPCCVASClimO_Late_d.tif --missing=middle --param=212028
+
+* interpolate to O1280 and O640 using nearest neighbour method:
+  - mir Koeppen_CRU_GPCCVASClimO_Late_d.tif{,.O1280}.grib2 --gridname=O1280 --interpolation=nn
+  - mir Koeppen_CRU_GPCCVASClimO_Late_d.tif{,.O640}.grib2 --gridname=O640 --interpolation=nn
+
+
