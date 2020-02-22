@@ -4,7 +4,8 @@ if (BUILD_TESTING)
 
     file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.f90")
     foreach(_file ${_files})
-        get_filename_component(_name "${_file}" NAME_WLE)
+        get_filename_component(_basename "${_file}" NAME)
+        get_filename_component(_name "${_basename}" NAME_WE)
 
         add_executable("${_name}" "${_file}")
         add_test(NAME "${_name}" COMMAND "${_name}")

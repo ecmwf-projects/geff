@@ -11,6 +11,16 @@
 #  find_package (eccodes COMPONENTS C REQUIRED)
 #  target_link_libraries (myTarget PRIVATE eccodes::eccodes)
 
+
+# ecbuild_bundle: set target eccodes::eccodes from eccodes_f90
+if (ENABLE_FORTRAN AND TARGET eccodes_f90)
+    add_library (eccodes::eccodes INTERFACE IMPORTED)
+    get_target_property (eccodes_f90_INCLUDES eccodes_f90 Fortran_MODULE_DIRECTORY)
+    set_target_properties (eccodes::eccodes PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${eccodes_f90_INCLUDES}" INTERFACE_LINK_LIBRARIES eccodes_f90)
+    set (eccodes_FOUND TRUE)
+    return()
+endif()
+
 find_path (eccodes_INCLUDES eccodes.h HINTS "${eccodes_DIR}" "${ECCODES_DIR}" ENV eccodes_DIR ECCODES_DIR PATH_SUFFIXES "" "include" DOC "ecCodes includes")
 
 macro (eccodes_check_interface lang header libs)
@@ -39,8 +49,10 @@ else()
     eccodes_check_interface (C eccodes.h eccodes)
 endif()
 
-list (REMOVE_DUPLICATES eccodes_libs)
-set (eccodes_LIBRARIES "${eccodes_libs}" CACHE PATH "ecCodes libraries")
+if (eccodes_libs)
+    list (REMOVE_DUPLICATES eccodes_libs)
+    set (eccodes_LIBRARIES "${eccodes_libs}" CACHE PATH "ecCodes libraries")
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set eccodes_FOUND to TRUE if
 # all listed variables are TRUE
