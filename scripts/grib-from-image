@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import sys
 import argparse
@@ -12,7 +12,7 @@ parser.add_argument("--missing", choices=[None, "middle", "index"], default=None
 parser.add_argument(
     "--index", help="value at index to set as missing value", default=-1
 )
-parser.add_argument("--param", help="GRIB parameter identifier", default=-1)
+parser.add_argument("--param", type=int, help="GRIB parameter identifier", default=-1)
 parser.add_argument(
     "--sample",
     help="GRIB sample",
@@ -23,6 +23,12 @@ parser.add_argument(
 )
 parser.add_argument(
     "images", type=str, metavar="image", nargs="+", help="image to convert"
+)
+parser.add_argument(
+    "--max-image-pixels",
+    type=int,
+    help="control images pixel limit",
+    default=Image.MAX_IMAGE_PIXELS,
 )
 
 args = parser.parse_args()
@@ -37,6 +43,8 @@ def main():
     assert len(args.area) == 4
     n, w, s, e = args.area
     assert s < n and w < e
+
+    Image.MAX_IMAGE_PIXELS = args.max_image_pixels
 
     for image in args.images:
         img = Image.open(image)

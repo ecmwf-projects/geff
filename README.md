@@ -49,22 +49,18 @@ While it was principally designed for gridded data, it can operate with any kind
 * 2014/03 Initial version
 
 
-### Climate region GRIB files were generated this way:
+### Climate regions
 
-* The (data/Koeppen*) GRIBs are generated with data from [here](http://koeppen-geiger.vu-wien.ac.at/present.htm)
-  - look under GeoTIFF images, GPCC VASClimO Late 1976 - 2000, Fine (mislabeled as Coarse)
-  - the particular file of interest is [this](http://www.fao.org/geonetwork/srv/en/resources.get?id=36913&fname=Koeppen_CRU_GPCCVASClimO_Late_d.zip&access=private)
+* The (data/Beck*) GRIBs are generated with data from [here](www.gloh2o.org/koppen), documented [here](https://www.nature.com/articles/sdata2018214) and to be cited as Beck et al. [2018]:
+  - Beck, H.E., N.E. Zimmermann, T.R. McVicar, N. Vergopolan, A. Berg, E.F. Wood: Present and future Köppen-Geiger climate classification maps at 1-km resolution, Nature Scientific Data, 2018.
+  - the particular file of interest is Beck_KG_V1_present_0p0083.tif (below refered as "img"), and should represent a:
+    - regular lat/lon grid
+    - 30''/30'' resolution (approx. 1km, shifted)
+    - area = N/W/S/E = 90/-180/-90/180
 
-* the image Koeppen_CRU_GPCCVASClimO_Late_d.tif should represent a:
-  - regular lat/lon grid
-  - 1/12 degree by 1/12 degree resolution (approx. 5km, shifted)
-  - area = N/W/S/E = 90/-180/-90/180
-
-* convert to GRIB, setting missing values to whatever is set at lat/lon = 0/0 (sea):
-  - ./scripts/grib-from-image Koeppen_CRU_GPCCVASClimO_Late_d.tif --missing=middle --param=212028
-
-* interpolate to O1280 and O640 using nearest neighbour method:
-  - mir Koeppen_CRU_GPCCVASClimO_Late_d.tif{,.O1280}.grib2 --gridname=O1280 --interpolation=nn
-  - mir Koeppen_CRU_GPCCVASClimO_Late_d.tif{,.O640}.grib2 --gridname=O640 --interpolation=nn
-
+* Convert to GRIB, setting missing values to whatever is set at lat/lon = 0/0 (sea), and interpolate using nearest neighbour method:
+  - scripts/grib-from-image img --max-image-pixels=933120000 --missing=middle --param=212028
+  - grib_set -s subdivisionsOfBasicAngle=240,iDirectionIncrement=2,jDirectionIncrement=2,latitudeOfFirstGridPoint=21599,longitudeOfFirstGridPoint=-43199,latitudeOfLastGridPoint=-21599,longitudeOfLastGridPoint=43199 img{,.fixed}.grib2
+  - MIR_GRIB_INPUT_BUFFER_SIZE=1044474569 mir --gridname=O1280 --interpolation=nn img{.fixed,.O1280}.grib2
+  - MIR_GRIB_INPUT_BUFFER_SIZE=1044474569 mir --gridname=O640 --interpolation=nn img{.fixed,.O640}.grib2
 

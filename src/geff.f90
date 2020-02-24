@@ -6,57 +6,48 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-!> @brief GEFF runtime
+!> @brief GEFF runtime. Code structure:
+!>
+!> A. set-up conditions
+!>   1. weather type
+!>   2. fuel model based on the JRC climatological maps
+!>   3. climate class
+!>   4. vegetation stage
+!>   5. mean slope
+!>
+!> B. NFDRS
+!>   1. calculate moisture/loading content for the various fuel models (prognostic part)
+!>     1. 1hr fuel
+!>     2. 10hr fuel
+!>     3. 100hr fuel
+!>     4. 1000hr fuel
+!>     5. herbaceous and wood
+!>   2. Fire Model indices (diagnostic part)
+!>     1. Fire characteristics /properties (fire_prop)
+!>       1. Spread component
+!>       2. Energy Release
+!>       3. Burning Index
+!>     2. Fire occurrence probability (fire_prob)
+!>       1. ignition probability
+!>       2. Human caused fire occurrence index
+!>       3. Lightning-caused fire occurrence index
+!>       4. Fire load index
+!>     3. Mask outputs for wet/snow/dew  conditions
+!>
+!> C. MARK-5
+!>
+!> D. FWI
+!>   1. The fine fuel moisture code
+!>   2. The duff moisture /content code
+!>   3. The Drought Code
+!>   4. Initial Spread Index
+!>   5. Build-up Index
+!>
+!> E. output
+!
 !> @author Di Giuseppe, F., ECMWF
 !> @author Maciel, P., ECMWF
 PROGRAM geff
-
-! --- order of code ---
-
-  ! 0- set-up conditions
-  !---------------------------------------------------------------------------
-     ! 0.1 weather type for the pixel
-     ! 0.2 fuel model for the pixel based on the JRC climatological maps
-     ! 0.3 climate class for the pixel
-     ! 0.4 vegetation stage
-     ! 0.5 mean slope
-
-!!A)  NFDRS
-  ! 1. calculate moisture/loading content for the various
-  !       fuel models (prognostic part)
-  !-----------------------------------------------------------------------------
-     ! 1.1 --- 1hr fuel
-     ! 1.2 --- 10hr fuel
-     ! 1.3 --- 100hr fuel
-     ! 1.4 --- 1000hr fuel
-     ! 1.5 --- herbaceous and wood
-  ! 2- Fire Model indeces (diagnostic part)
-  !---------------------------------------------------------------------------
-     !2.1 Fire characteristics /properties (fire_prop)
-       !2.1.1 Spread component
-       !2.1.2 Energy Release
-       !2.1.3 Burning Index
-    !2.2 Fire occurrence probability (fire_prob)
-       !2.2.1 ignition probability
-       !2.2.2 Human caused fire occurrence index
-       !2.2.3 Lightning-caused fire occurrence index
-       !2.2.4 Fire load index
-    !2.3 Mask outputs for wet/snow/dew  conditions
-       !--------------------
-
-!!B)  MARK-5
-
-!!C)  FWI
-  ! 1 The fine fuel moisture code
-  ! 2 The duff moisture /content code
-  ! 3 The Drought Code
-  !---------------------------------------------------------------------------
-  ! 4 Initial Spread Index
-  ! 5 Buildup Index
-  !----------------------------------------------------------------------------
-!! D- Netcdf output
-  !----------------------------------------------------
-!============================================================================================
 
   USE mo_fire
   USE mo_nfdrs
