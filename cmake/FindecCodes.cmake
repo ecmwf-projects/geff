@@ -13,10 +13,10 @@
 
 
 # ecbuild_bundle: set target eccodes::eccodes from eccodes_f90
-if (ENABLE_FORTRAN AND TARGET eccodes_f90)
+if (NOT TARGET eccodes::eccodes AND TARGET eccodes_f90)
     add_library (eccodes::eccodes INTERFACE IMPORTED)
-    get_target_property (eccodes_f90_INCLUDES eccodes_f90 Fortran_MODULE_DIRECTORY)
-    set_target_properties (eccodes::eccodes PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${eccodes_f90_INCLUDES}" INTERFACE_LINK_LIBRARIES eccodes_f90)
+    get_target_property (eccodes_INCLUDES_f90 eccodes_f90 Fortran_MODULE_DIRECTORY)
+    set_target_properties (eccodes::eccodes PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${eccodes_INCLUDES_f90}" INTERFACE_LINK_LIBRARIES eccodes_f90)
     set (eccodes_FOUND TRUE)
     return()
 endif()
