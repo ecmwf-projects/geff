@@ -672,7 +672,7 @@ CONTAINS
     SUBROUTINE write_field(fd, paramid, values)
         INTEGER, INTENT(IN) :: fd, paramid
         REAL, INTENT(IN) :: values(:)
-        INTEGER :: handle, i, bitmapPresent
+        INTEGER :: handle, i, bitmapPresent, edition
         TYPE(GribField), POINTER, SAVE :: ref => input(1)
 
         ! reference defines metadata (date/time/step/..., aside from paramId)
@@ -694,7 +694,10 @@ CONTAINS
         CALL assert(handle /= 0, 'write_field: codes_clone')
 
         ! FIXME fix GRIB2-only fields from GRIB1
-        IF (paramid > 260000) CALL codes_set(handle, 'edition', 2)
+        IF (paramid > 260000) THEN
+            CALL codes_get(handle, 'edition', edition)
+            IF (edition == 1 ) CALL codes_set(handle, 'edition', 2)
+        ENDIF
 
         CALL codes_set(handle, 'paramId', paramid)
         CALL codes_set(handle, 'missingValue', missingValue)
