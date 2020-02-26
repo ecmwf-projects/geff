@@ -43,9 +43,9 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: isnow_pids(1)     = [141]
     INTEGER, PARAMETER :: iwspeed_pids(2)   = [165, 166]
     INTEGER, PARAMETER :: idp_pids(1)       = [228]
-    INTEGER, PARAMETER :: ivs_pids(1)       = [66]
-    INTEGER, PARAMETER :: icr_pids(1)       = [0]
-    INTEGER, PARAMETER :: ifm_pids(1)       = [0]
+    INTEGER, PARAMETER :: ivs_pids(1)       = [212030]
+    INTEGER, PARAMETER :: icr_pids(1)       = [212028]
+    INTEGER, PARAMETER :: ifm_pids(1)       = [212029]
     INTEGER, PARAMETER :: islope_pids(1)    = [163]
     INTEGER, PARAMETER :: icv_pids(1)       = [28]
 
