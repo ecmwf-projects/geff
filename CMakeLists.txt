@@ -7,7 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 if (NOT TARGET eccodes_f90)
-    message(FATAL_ERROR "eccodes Fortran library: attempting to find package")
+    message(STATUS "eccodes Fortran library: attempting to find package")
     find_package(eccodes REQUIRED HINTS eccodes_DIR)
     if (NOT TARGET eccodes_f90)
         message(FATAL_ERROR "eccodes Fortran library (eccodes_f90) not found")
