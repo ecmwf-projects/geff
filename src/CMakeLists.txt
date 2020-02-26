@@ -15,6 +15,6 @@ add_executable (geff
     mo_vegstage.f90
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
 
-target_link_libraries (geff PRIVATE eccodes::eccodes)
+target_link_libraries (geff PRIVATE eccodes_f90)
 set_target_properties (geff PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
