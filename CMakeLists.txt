@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 project(geff VERSION 4.0.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff" LANGUAGES Fortran)
 

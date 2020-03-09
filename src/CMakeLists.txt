@@ -1,7 +1,7 @@
 
-configure_file (mo_version.f90.in mo_version.f90 @ONLY)
+configure_file(mo_version.f90.in mo_version.f90 @ONLY)
 
-add_executable (geff
+add_executable(geff
     geff.f90
     mo_constants.f90
     mo_control.f90
@@ -15,6 +15,8 @@ add_executable (geff
     mo_vegstage.f90
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
 
-target_link_libraries (geff PRIVATE eccodes_f90)
-set_target_properties (geff PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+target_link_libraries(geff PRIVATE eccodes_f90)
+set_target_properties(geff PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+install(TARGETS geff RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
