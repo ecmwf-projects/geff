@@ -48,20 +48,3 @@ While it was principally designed for gridded data, it can operate with any kind
 
 * 2014/03 Initial version
 
-
-### Climate fields
-
-* Climate regions: GRIBs are generated with data from [here](www.gloh2o.org/koppen), documented [here](https://www.nature.com/articles/sdata2018214) and to be cited as Beck et al. [2018]:
-  - Beck, H.E., N.E. Zimmermann, T.R. McVicar, N. Vergopolan, A. Berg, E.F. Wood: Present and future Köppen-Geiger climate classification maps at 1-km resolution, Nature Scientific Data, 2018.
-
-  The particular file of interest is Beck_KG_V1_present_0p0083.tif and should represent a:
-  - regular lat/lon grid
-  - 30''/30'' resolution (approx. 1km, shifted)
-  - area = N/W/S/E = 90/-180/-90/180
-
-* Fuel model: GRIBs are generated from a JRC-provided NetCDF under:
-  - /gpfs/lxop/cems_geff/emos/data/egeff/GlobalFuelMap_v1_modif01.nc
-  Conversion starts with GDAL translating to GeoTIFF, and extending the input domain North/Southward before nearest-neighbour interpolation.
-
-* Vegetation stage: follows a normal nearest-neighbour interpolation from NetCDF to GRIB1, with a GEFF-compliant paramId and bitsPerValue=4.
-
