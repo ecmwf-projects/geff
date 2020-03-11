@@ -126,9 +126,13 @@ CONTAINS
 
     INTEGER FUNCTION add_day(date, time, hh)
         INTEGER, INTENT(IN)  :: date, time, hh
-        INTEGER :: jul
-
-        jul = gregorian_to_julian(date) + INT((hh+time)/24.)
+        INTEGER :: jul, hour
+        IF (time.gt.24) THEN
+            hour = INT(time/100.)
+        ELSE
+            hour = time    
+        ENDIF
+        jul = gregorian_to_julian(date) + INT((hh+hour)/24.)
         add_day = julian_to_gregorian(jul)
     END FUNCTION
 
