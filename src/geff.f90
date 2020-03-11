@@ -154,7 +154,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
   PRINT *, 'now (reference date): ', now
   PRINT *, 'dt (hours): ', dt
-  PRINT *, "time units", "hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" &
+  PRINT *, "time units: ", "hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" &
   & "//str_time(1:2)//":"//str_time(3:4)//" UTC"
 
   PRINT *, "Initialize..."
