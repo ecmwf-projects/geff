@@ -8,6 +8,11 @@ if (BUILD_TESTING)
         get_filename_component(_name "${_basename}" NAME_WE)
 
         add_executable("${_name}" "${_file}")
+        target_link_libraries("${_name}" PRIVATE eccodes_f90)
+        if (TARGET atlas_f)
+            target_link_libraries("${_name}" PRIVATE atlas_f)
+        endif()
+
         add_test(NAME "${_name}" COMMAND "${_name}")
         if (_name MATCHES "-fail$")
             set_tests_properties("${_name}" PROPERTIES WILL_FAIL TRUE)

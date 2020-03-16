@@ -1,29 +1,42 @@
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
 
-project(geff VERSION 4.0.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff" LANGUAGES Fortran)
+file(READ "VERSION" VERSION)
+project(geff VERSION ${VERSION} LANGUAGES Fortran HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff")
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 
+# build
 if (NOT TARGET eccodes_f90)
-    message(STATUS "eccodes Fortran library: attempting to find package")
+    message(STATUS "ecCodes Fortran library: attempting to find package")
     find_package(eccodes REQUIRED HINTS eccodes_DIR)
     if (NOT TARGET eccodes_f90)
-        message(FATAL_ERROR "eccodes Fortran library (eccodes_f90) not found")
+        message(FATAL_ERROR "ecCodes Fortran library (eccodes_f90) not found")
     endif()
 endif()
 
+if (NOT TARGET atlas_f)
+    message(STATUS "Atlas Fortran library: attempting to find package")
+    find_package(atlas REQUIRED HINTS atlas_DIR)
+    if (NOT TARGET atlas_f)
+        message(NOTICE "Atlas Fortran library (atlas_f) not found, interpolation not available")
+    endif()
+endif()
 
 add_subdirectory(src)
 
 
+# test
 include(CTest)
 add_subdirectory(tests)
 
 
+# package
 set(CPACK_PACKAGE_CONTACT "ECMWF")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Global ECMWF Fire Forecasting (GEFF) model")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Global ECMWF Fire Forecasting")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 
 set(CPACK_SOURCE_GENERATOR "TBZ2")
