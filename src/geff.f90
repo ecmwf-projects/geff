@@ -212,7 +212,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
            zrainclim=MAX(rrainclim(i),0.0) ! for the Keetch-byram
            zlat=lats(i)                                                ! index the ammount of annual
                                                            ! precipitation is limited to 2,032mm/year
-           ilightning=0!MAX(MIN(ilal(i),6),0) ! lightining class limited to 6
+           ilightning=1!MAX(MIN(ilal(i),6),0) ! lightining class limited to 6
 
 
            !TEST 1
