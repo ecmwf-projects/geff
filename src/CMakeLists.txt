@@ -15,8 +15,14 @@ add_executable(geff
     mo_vegstage.f90
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
 
-target_link_libraries(geff PRIVATE eccodes_f90)
-if (TARGET atlas_f)
-    target_link_libraries(geff PRIVATE atlas_f)
+target_link_libraries(geff PUBLIC eccodes_f90)
+if (HAVE_GEFF_INTERPOLATION)
+    target_link_libraries(geff PUBLIC atlas_f)
+    target_sources(geff PRIVATE mo_interpolation.f90)
+else()
+    target_sources(geff PRIVATE mo_no_interpolation.f90)
 endif()
+
+add_executable(interpol interpol.f90)
+target_link_libraries(interpol PUBLIC eccodes_f90 atlas_f)
 

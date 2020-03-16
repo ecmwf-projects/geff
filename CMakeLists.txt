@@ -18,11 +18,11 @@ if (NOT TARGET eccodes_f90)
     endif()
 endif()
 
-if (NOT TARGET atlas_f)
+if (HAVE_GEFF_INTERPOLATION AND NOT TARGET atlas_f)
     message(STATUS "Atlas Fortran library: attempting to find package")
     find_package(atlas REQUIRED HINTS atlas_DIR)
     if (NOT TARGET atlas_f)
-        message(NOTICE "Atlas Fortran library (atlas_f) not found, interpolation not available")
+        message(FATAL_ERROR "Atlas Fortran library (atlas_f) not found, interpolation not available")
     endif()
 endif()
 
@@ -38,9 +38,7 @@ add_subdirectory(tests)
 set(CPACK_PACKAGE_CONTACT "ECMWF")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Global ECMWF Fire Forecasting")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
-
 set(CPACK_SOURCE_GENERATOR "TBZ2")
 set(CPACK_SOURCE_IGNORE_FILES "/.git/;.gitignore;.vscode;CMakeLists.txt.user*;/data/*;${CPACK_SOURCE_IGNORE_FILES}")
-
 include(CPack)
 

@@ -6,8 +6,7 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-!> @brief Module for meteorological constant fields and fire variables
-!> @brief Tunable constants for model
+!> @brief Utility functions
 !> @author Di Giuseppe, F., ECMWF
 !> @author Maciel, P., ECMWF
 MODULE mo_utilities
