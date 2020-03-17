@@ -31,9 +31,15 @@ PROGRAM interpol
     PRINT *, 'gridName='//gridName
 
     CALL g%open_as_input(fileName, "dummy")
+    CALL assert(g%next(), 'g%next()')
+
     CALL assert(g%npoints > 0, "g%npoints > 0")
     ALLOCATE(valuesA(g%npoints))
 
+    CALL g%values(valuesA)
+    print *, valuesA(1)
+    print *, valuesA(2)
+    print *, valuesA(3)
 CONTAINS
 
 
@@ -66,14 +72,17 @@ SUBROUTINE interpolation(method, gridNameA, gridNameB, valuesA, valuesB)
     CALL config%set("type", method)
     interpol = atlas_Interpolation(config, gridA, gridB)
 
-    ! Create function spaces for each mesh
+    ! Create function spaces
     fsA = interpol%source()
     fsB = interpol%target()
 
     ! Create fields and initialise source field
     fieldA  = fsA%create_field(name="A", KIND=atlas_real(atlas_kind_real64))
     fieldB  = fsB%create_field(name="B", KIND=atlas_real(atlas_kind_real64))
-print *, fieldA%size()
+
+    IF (ALLOCATED(valuesB) .AND. SIZE(valuesB) .NE. fieldB%size()) DEALLOCATE(valuesB)
+    IF (.NOT. ALLOCATED(valuesB)) ALLOCATE(valuesB(fieldB%size()))
+
     !CALL initialise_field_hill(fsA, fieldA)
 
     ! Interpolate
