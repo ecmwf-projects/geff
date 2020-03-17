@@ -89,7 +89,7 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_dsr_pids(1)         = [260546]
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212027]
 
-    TYPE :: GribField
+    TYPE, PUBLIC :: GribField
         INTEGER :: fd       = 0
         INTEGER :: handle   = 0
         INTEGER :: paramId  = 0
@@ -579,7 +579,7 @@ CONTAINS
 
         CHARACTER(LEN=*), INTENT(IN) :: file
         CHARACTER(LEN=*), INTENT(IN) :: var
-        INTEGER, DIMENSION(:), INTENT(IN) :: pids
+        INTEGER, DIMENSION(:), INTENT(IN), OPTIONAL :: pids
 
         INTEGER :: i, n
         LOGICAL :: found
@@ -592,11 +592,13 @@ CONTAINS
         ! next GRIB messages: confirm numberOfDataPoints, increment count
         CALL this%header()
 
-        found = .FALSE.
-        DO i = 1, SIZE(pids)
-            found = this%paramId .EQ. pids(i)
-            IF (found) EXIT
-        ENDDO
+        found = .NOT. PRESENT(pids) .OR. SIZE(pids) .EQ. 0
+        IF (.NOT. found) THEN
+            DO i = 1, SIZE(pids)
+                found = this%paramId .EQ. pids(i)
+                IF (found) EXIT
+            ENDDO
+        ENDIF
         CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' field not found')
         PRINT *, 'Found '//TRIM(var)//' field with paramId=', this%paramId
 

@@ -6,35 +6,35 @@
 ! granted to it by virtue of its status as an intergovernmental organisation nor
 ! does it submit to any jurisdiction.
 
-!> @brief GEFF runtime. Code structure:
+!> @brief GEFF interpolation testing
 !> @author Di Giuseppe, F., ECMWF
 !> @author Maciel, P., ECMWF
 PROGRAM interpol
 
     USE atlas_module
     USE mo_io_eccodes
+    USE mo_utilities
 
     IMPLICIT NONE
 
-    CHARACTER*256 ARG
-    INTEGER I
+    CHARACTER(LEN=256) :: fileName
+    CHARACTER(LEN=20) :: gridName
     INTEGER IARGC
 
+    TYPE(GribField) :: g
     REAL, ALLOCATABLE :: valuesA(:)
 
-    ALLOCATE(valuesA(5248))   ! O32
-    !ALLOCATE(valuesA(18688))  ! O64
+    CALL assert(IARGC() == 2, "x")
+    CALL GETARG(1, fileName)
+    CALL GETARG(2, gridName)
+    PRINT *, 'fileName='//fileName
+    PRINT *, 'gridName='//gridName
 
+    CALL g%open_as_input(fileName, "dummy")
+    CALL assert(g%npoints > 0, "g%npoints > 0")
+    ALLOCATE(valuesA(g%npoints))
 
-    DO I = 1, IARGC()
-        CALL GETARG(I,ARG)
-        PRINT *, 'ARG='//ARG
-    ENDDO
-
-
-
-contains
-
+CONTAINS
 
 
 SUBROUTINE interpolation(method, gridNameA, gridNameB, valuesA, valuesB)
@@ -92,17 +92,6 @@ print *, fieldA%size()
     CALL trace%final()
     CALL atlas_library%finalise()
 ENDSUBROUTINE
-
-
-
-
-
-
-
-
-
-
-
 
 
 ENDPROGRAM
