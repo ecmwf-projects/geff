@@ -22,12 +22,13 @@ MODULE mo_interpolationx
 CONTAINS
 
 
-    SUBROUTINE interpolation(gridNameA, valuesA, gridNameB, valuesB, method)
+    SUBROUTINE interpolation(method, gridNameA, gridNameB, valuesA, valuesB)
+        CHARACTER(LEN=20), INTENT(IN) :: method
         CHARACTER(LEN=20), INTENT(IN) :: gridNameA
         CHARACTER(LEN=20), INTENT(IN) :: gridNameB
         REAL, ALLOCATABLE, INTENT(IN) :: valuesA(:)
+
         REAL, ALLOCATABLE, INTENT(INOUT) :: valuesB(:)
-        CHARACTER(LEN=20), INTENT(IN) :: method
 
         TYPE(atlas_Grid)          :: gridA
         TYPE(atlas_Grid)          :: gridB
@@ -42,11 +43,11 @@ CONTAINS
         CALL atlas_library%initialise()
         trace = atlas_Trace("mo_interpolation", __LINE__, "Here")
 
-        ! Setup interpolators
-        config = atlas_Config()
+        ! Setup interpolation
         gridA = atlas_Grid(gridNameA)
         gridB = atlas_Grid(gridNameB)
 
+        config = atlas_Config()
         CALL config%set("type", method)
         interpol = atlas_Interpolation(config, gridA, gridB)
 
@@ -57,7 +58,7 @@ CONTAINS
         ! Create fields and initialise source field
         fieldA  = fsA%create_field(name="A", KIND=atlas_real(atlas_kind_real64))
         fieldB  = fsB%create_field(name="B", KIND=atlas_real(atlas_kind_real64))
-
+print *, fieldA%size()
         CALL initialise_field_hill(fsA, fieldA)
 
         ! Interpolate
