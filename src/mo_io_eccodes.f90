@@ -673,7 +673,7 @@ CONTAINS
         INTEGER, INTENT(IN) :: fd, paramid
         REAL, INTENT(IN) :: values(:)
         INTEGER :: handle, i, bitmapPresent, edition
-        TYPE(GribField), POINTER, SAVE :: ref => input(3)
+        TYPE(GribField), POINTER, SAVE :: ref => input(2)
 
         ! reference defines metadata (date/time/step/..., aside from paramId)
         IF (.NOT. (ref%count > 1)) THEN
