@@ -1280,7 +1280,7 @@ ENDDO !npoints
 
 !!D)    OUTPUT
 !------------
-    IF (LEN(TRIM(output_file))) THEN
+    IF (LEN(TRIM(output_file)) > 0) THEN
         CALL io_write_results(istep)
     ENDIF
 
