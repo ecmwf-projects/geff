@@ -127,7 +127,7 @@ PROGRAM geff
 &            ltimer=.false.      ! turn the cpu timer on for the first timestep
   LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm, lrestart=.TRUE.
 
-NAMELIST /control/ output_file, inidate, initime, dt, init_file, restart_day, now
+NAMELIST /control/ output_file, output_constant, inidate, initime, dt, init_file, restart_day, now
 NAMELIST /climate/ tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
 NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
@@ -275,7 +275,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
            ! calculations is performed only on land points for all the indices
            !
       IF (rlsm(i) .gt. 0.0001 .and. zlat .gt. -60.0 )  THEN
-            ! 0- set-up conditions 
+            ! 0- set-up conditions
    !---------------------------------------------------------------------------
 
 
@@ -1289,10 +1289,6 @@ ENDDO !npoints
 
 
 ENDDO ! date loop
-
-
-  ! write
-  CALL io_write_constant_fields
 
 
   PRINT *, 'integration finished'

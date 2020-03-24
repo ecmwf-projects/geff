@@ -25,7 +25,6 @@ MODULE mo_io_eccodes
 
     PUBLIC :: io_getdata
     PUBLIC :: io_initialize
-    PUBLIC :: io_write_constant_fields
     PUBLIC :: io_write_restart
     PUBLIC :: io_write_results
 
@@ -405,27 +404,6 @@ CONTAINS
         DEALLOCATE(tmp)
     END SUBROUTINE
 
-    SUBROUTINE io_write_constant_fields
-        INTEGER :: fd, handle
-        LOGICAL, SAVE :: lwritten = .FALSE.
-
-        IF (lwritten .OR. LEN(TRIM(constant_file)) == 0) RETURN
-        lwritten = .TRUE.
-
-        CALL codes_open_file(fd, constant_file, 'w')
-
-        CALL write_field(fd, ilsm_pids(1), rlsm)
-        CALL write_field(fd, icv_pids(1), rcv)
-        CALL write_field(fd, irainclim_pids(1), rrainclim)
-
-        CALL write_field_from_integer(fd, icr_pids(1), icr)
-        CALL write_field_from_integer(fd, ifm_pids(1), ifm)
-        CALL write_field_from_integer(fd, islope_pids(1), islope)
-
-        CALL codes_close_file(fd)
-        fd = 0
-    END SUBROUTINE
-
     SUBROUTINE io_write_restart
         INTEGER :: fd, handle
         LOGICAL, SAVE :: lwritten = .FALSE.
@@ -518,7 +496,17 @@ CONTAINS
         CALL write_field(fd, ifwi_risk_dsr_pids(1), fwi_risk(:)%dsr)
         CALL write_field(fd, ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
+        IF (output_constant) THEN
+            CALL write_field(fd, ilsm_pids(1), rlsm)
+            CALL write_field(fd, icv_pids(1), rcv)
+            CALL write_field(fd, irainclim_pids(1), rrainclim)
+            CALL write_field_from_integer(fd, icr_pids(1), icr)
+            CALL write_field_from_integer(fd, ifm_pids(1), ifm)
+            CALL write_field_from_integer(fd, islope_pids(1), islope)
+        ENDIF
+
         CALL codes_close_file(fd)
+        fd = 0
     END SUBROUTINE
 
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
