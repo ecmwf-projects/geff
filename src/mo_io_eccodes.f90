@@ -319,8 +319,8 @@ CONTAINS
         ALLOCATE(fwi_risk(npoints))
         fwi_risk = fwi_risk_type()
 
-        IF (TRIM(init_file(1:4)) == 'rest') THEN
-            PRINT *, "Initialization type: exact initialization from '" // init_file // "'"
+        IF (LEN(TRIM(init_file)) > 0) THEN
+            PRINT *, "Initialization type: exact initialization from '" // TRIM(init_file) // "'"
 
             CALL restart%open_as_restart(init_file)
 
@@ -458,18 +458,13 @@ CONTAINS
     SUBROUTINE io_write_results(istep)
         INTEGER, INTENT(IN) :: istep  ! NOTE: ignored
         INTEGER :: fd
-        REAL, ALLOCATABLE :: tmp(:)
-        LOGICAL, SAVE :: lwritten = .FALSE.
+        CHARACTER, SAVE :: cmode = 'w'
 
         ! Open output file
         fd = 0
-        IF (lwritten) THEN
-            CALL codes_open_file(fd, output_file, 'a')
-        ELSE
-            CALL codes_open_file(fd, output_file, 'w')
-        ENDIF
-        CALL assert(fd /= 0, 'codes_open_file (w): '//output_file)
-        lwritten = .TRUE.
+        CALL codes_open_file(fd, output_file, cmode)
+        CALL assert(fd /= 0, 'codes_open_file ('//cmode//'): '//TRIM(output_file))
+        cmode = 'a'
 
         CALL write_field(fd, irain_pids(1), rrain)
         CALL write_field(fd, itemp_pids(1), rtemp)
@@ -524,8 +519,6 @@ CONTAINS
         CALL write_field(fd, ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
         CALL codes_close_file(fd)
-
-        IF (ALLOCATED(tmp)) DEALLOCATE(tmp)
     END SUBROUTINE
 
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
@@ -706,7 +699,7 @@ CONTAINS
         IF (ANY(values == missingValue)) bitmapPresent = 1
         CALL codes_set(handle, 'bitmapPresent', bitmapPresent)
 
-        CALL codes_set(handle, 'values', PACK(values, MASK=.TRUE.))
+        CALL codes_set(handle, 'values', values)
 
         CALL codes_write(handle, fd)
         CALL codes_release(handle)
