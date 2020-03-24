@@ -30,18 +30,18 @@ MODULE mo_io_eccodes
 
     ! GRIB paramIds
     INTEGER, PARAMETER :: ilsm_pids(1)      = [172]
-    INTEGER, PARAMETER :: irainclim_pids(1) = [228]
+    INTEGER, PARAMETER :: irainclim_pids(1) = [212036]
     INTEGER, PARAMETER :: irain_pids(1)     = [228]
     INTEGER, PARAMETER :: itemp_pids(1)     = [167]
-    INTEGER, PARAMETER :: imaxtemp_pids(1)  = [167]
-    INTEGER, PARAMETER :: imintemp_pids(1)  = [167]
+    INTEGER, PARAMETER :: imaxtemp_pids(1)  = [212032]
+    INTEGER, PARAMETER :: imintemp_pids(1)  = [212033]
     INTEGER, PARAMETER :: irh_pids(1)       = [168]
-    INTEGER, PARAMETER :: imaxrh_pids(1)    = [168]
-    INTEGER, PARAMETER :: iminrh_pids(1)    = [168]
+    INTEGER, PARAMETER :: imaxrh_pids(1)    = [212034]
+    INTEGER, PARAMETER :: iminrh_pids(1)    = [212035]
     INTEGER, PARAMETER :: icc_pids(1)       = [164]
     INTEGER, PARAMETER :: isnow_pids(1)     = [141]
     INTEGER, PARAMETER :: iwspeed_pids(2)   = [165, 166]
-    INTEGER, PARAMETER :: idp_pids(1)       = [228]
+    INTEGER, PARAMETER :: idp_pids(1)       = [212031]
     INTEGER, PARAMETER :: ivs_pids(1)       = [212030]
     INTEGER, PARAMETER :: icr_pids(1)       = [212028]
     INTEGER, PARAMETER :: ifm_pids(1)       = [212029]
@@ -298,25 +298,12 @@ CONTAINS
         islope = tmp
 
         ALLOCATE(mc(npoints))
-        mc = mc_type()
-
         ALLOCATE(fire_prop(npoints))
-        fire_prop = fire_prop_type()
-
         ALLOCATE(fire_prob(npoints))
-        fire_prob = fire_prob_type()
-
         ALLOCATE(mark5_fuel(npoints))
-        mark5_fuel = mark5_fuel_type()
-
         ALLOCATE(mark5_prop(npoints))
-        mark5_prop = mark5_prop_type()
-
         ALLOCATE(mark5_prob(npoints))
-        mark5_prob = mark5_prob_type()
-
         ALLOCATE(fwi_risk(npoints))
-        fwi_risk = fwi_risk_type()
 
         IF (LEN(TRIM(init_file)) > 0) THEN
             PRINT *, "Initialization type: exact initialization from '" // TRIM(init_file) // "'"
