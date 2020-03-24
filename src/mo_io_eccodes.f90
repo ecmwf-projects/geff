@@ -305,10 +305,10 @@ CONTAINS
         ALLOCATE(mark5_prob(npoints))
         ALLOCATE(fwi_risk(npoints))
 
-        IF (LEN(TRIM(init_file)) > 0) THEN
-            PRINT *, "Initialization type: exact initialization from '" // TRIM(init_file) // "'"
+        IF (LEN(TRIM(restart_file)) > 0) THEN
+            PRINT *, "Initialization type: exact initialization from '" // TRIM(restart_file) // "'"
 
-            CALL restart%open_as_restart(init_file)
+            CALL restart%open_as_restart(restart_file)
 
             CALL next_values('restart mc%r1hr', restart, imc_r1hr_pids(1), tmp)
             mc(:)%r1hr = tmp
@@ -393,12 +393,12 @@ CONTAINS
 
     SUBROUTINE io_write_restart
         INTEGER :: fd, handle
-        LOGICAL, SAVE :: lwritten = .FALSE.
 
-        IF (lwritten .OR. LEN(TRIM(init_file)) == 0) RETURN
-        lwritten = .TRUE.
-
-        CALL codes_open_file(fd, init_file, 'w')
+        ! open restart file
+        fd = 0
+        CALL assert(LEN(TRIM(output_restart)) > 0, 'output_restart not empty')
+        CALL codes_open_file(fd, output_restart, 'w')
+        CALL assert(fd /= 0, 'codes_open_file (w): '//TRIM(output_restart))
 
         CALL write_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
         CALL write_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
@@ -425,8 +425,9 @@ CONTAINS
         INTEGER :: fd
         CHARACTER, SAVE :: cmode = 'w'
 
-        ! Open output file
+        ! Open results file
         fd = 0
+        CALL assert(LEN(TRIM(output_file)) > 0, 'output_file not empty')
         CALL codes_open_file(fd, output_file, cmode)
         CALL assert(fd /= 0, 'codes_open_file ('//cmode//'): '//TRIM(output_file))
         cmode = 'a'

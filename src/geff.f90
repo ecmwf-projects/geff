@@ -125,9 +125,9 @@ PROGRAM geff
   REAL :: time1=0.0,time2=0.0
   LOGICAL :: lspinup, &          ! spin up period - turn off output
 &            ltimer=.false.      ! turn the cpu timer on for the first timestep
-  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm, lrestart=.TRUE.
+  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm
 
-NAMELIST /control/ output_file, output_constant, inidate, initime, dt, init_file, restart_day, now
+NAMELIST /control/ output_file, output_restart, output_constant, inidate, initime, dt, restart_file, restart_day, now
 NAMELIST /climate/ tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
 NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
@@ -1280,12 +1280,14 @@ ENDDO !npoints
 
 !!D)    OUTPUT
 !------------
-      CALL io_write_results(istep)
+    IF (LEN(TRIM(output_file))) THEN
+        CALL io_write_results(istep)
+    ENDIF
 
-   IF ( actualdate .EQ. restartdate .AND. lrestart ) THEN
-      CALL io_write_restart
-      lrestart=.FALSE.
-   ENDIF
+    IF (actualdate .EQ. restartdate .AND. LEN(TRIM(output_restart)) > 0) THEN
+        CALL io_write_restart
+        output_restart = ''
+    ENDIF
 
 
 ENDDO ! date loop

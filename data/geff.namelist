@@ -1,12 +1,13 @@
 ! GEFF
 !
 ! CONTROL
-! * output_file      ex. 'geff.nc'
+! * output_file      ex. 'geff.grib'
+! * output_restart   ex. 'restart.grib'
 ! * output_constant  output constant fields, T or F
 ! * inidate          ex. 20170404
 ! * initime          ex. 1200
 ! * dt               (h) ex. 24
-! * init_file        ex. 'restart.nc.grib'
+! * restart_file     ex. 'restart.grib'
 ! * restart_day      number of steps before writing a restart file, ex. 1
 ! * now              ex. '20170404'
 !
@@ -33,12 +34,13 @@
 ! * rainclimfile  climatological precipitation accumulated over an year mm/year
 !
 &CONTROL
-output_file='geff.nc.grib',
+output_file='geff.grib',
+output_restart='',
 output_constant=T,
 inidate=20170404,
 initime=1200,
 dt=24,
-init_file='',
+restart_file='',
 restart_day=1,
 now='20170404'
 /

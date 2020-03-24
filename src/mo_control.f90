@@ -14,7 +14,8 @@ MODULE mo_control
     IMPLICIT NONE
 
     CHARACTER(LEN=200) :: output_file=''
-    CHARACTER(LEN=200) :: init_file=''
+    CHARACTER(LEN=200) :: output_restart=''
+    CHARACTER(LEN=200) :: restart_file=''
     CHARACTER(LEN=50)  :: now=''
 
     CHARACTER(LEN=*), PARAMETER :: namelst='geff.namelist'
