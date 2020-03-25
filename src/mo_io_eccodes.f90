@@ -192,7 +192,7 @@ CONTAINS
         CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
 
         npoints = grib_lsm%npoints
-        PRINT *, 'npoints: ', npoints
+        PRINT *, 'Number of points: ', npoints
 
         CALL assert(npoints > 0)
         ALLOCATE(lats(npoints))
@@ -221,8 +221,9 @@ CONTAINS
 
         ! fields/variables defined in time (SIZE() = ntimestep)
         ntimestep = MAXVAL(input(:)%count)
-        CALL assert(ntimestep > 0, "io_initialize: ntimestep > 0")
+        PRINT *, 'Number of time steps: ', ntimestep
 
+        CALL assert(ntimestep > 0, "io_initialize: ntimestep > 0")
         ALLOCATE(nhours(ntimestep))
         DO i = 1, ntimestep
             nhours(i) = (i - 1) * dt
@@ -230,7 +231,6 @@ CONTAINS
 
         ! fields/variables defined in space (SIZE() = npoints)
         CALL assert(npoints > 0, "io_initialize: npoints > 0")
-
         ALLOCATE(tmp(npoints))
 
         DO i = 1, SIZE(input)
@@ -392,9 +392,9 @@ CONTAINS
     END SUBROUTINE
 
     SUBROUTINE io_write_restart
-        INTEGER :: fd, handle
+        INTEGER :: fd
 
-        ! open restart file
+        ! Open restart file
         fd = 0
         CALL assert(LEN(TRIM(output_restart)) > 0, 'output_restart not empty')
         CALL codes_open_file(fd, output_restart, 'w')
@@ -417,7 +417,6 @@ CONTAINS
         CALL write_field(fd, ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
 
         CALL codes_close_file(fd)
-        fd = 0
     END SUBROUTINE
 
     SUBROUTINE io_write_results(istep)
@@ -494,7 +493,6 @@ CONTAINS
         ENDIF
 
         CALL codes_close_file(fd)
-        fd = 0
     END SUBROUTINE
 
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
