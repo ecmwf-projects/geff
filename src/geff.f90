@@ -97,12 +97,12 @@ PROGRAM geff
        &  etamle,dedrte,livrte,ire,tau,qign,chi,p_i,scn,p_fi,mrisk,lgtdur,&
        &  finsid,fotsid,raidur,fmf,icbar,lrisk,ws
   REAL :: netrainfall, kb_drought_factor
-  REAL:: a1,a2,a3,a4,a5
+  REAL :: a1,a2,a3,a4,a5
   REAL :: lrsf !needs to be put in
-  REAL:: rkwet,rktmp
-  REAL:: KBDI_temp, Ep
+  REAL :: rkwet,rktmp
+  REAL :: KBDI_temp, Ep
 
-  REAL:: mo, rf, kd, kw, &
+  REAL :: mo, kd, kw, &
        & mr, mr0, mr1,&
        & ed, ed0, ed1, ed2,&
        & ko, ko0, ko1, ko2,&
@@ -112,6 +112,7 @@ PROGRAM geff
        & re, moo, mrr, bb, pr, k,&
        & m, fw, fd, fwiB,ff, ff0, ff1,&
        & dc0,dl,lf,fwind,uu,mm,t
+  DOUBLE PRECISION :: rf
 
   CHARACTER (len=8) :: str_date
   CHARACTER (len=4) :: str_time
@@ -1016,7 +1017,11 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         IF ( zrain .GT. 0.5) THEN
            rf = zrain-0.5
            mr0 = EXP(-100.0 /(251.0 - mo))
-           mr1 = (1 - EXP(-6.93 / rf))
+           IF (rf < 0.01) THEN
+            mr1 = 1
+           ELSE
+            mr1 = (1 - EXP(-6.93 / rf))
+           ENDIF
            mr = mo + 42.5 * rf * mr0 * mr1
 
            IF (mo .GT. 150.0)  mr = mr+0.0015*(mo-150.0)**(2.0)*(rf)**(0.5)
