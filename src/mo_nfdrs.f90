@@ -50,24 +50,16 @@ MODULE mo_nfdrs
 
 CONTAINS
 
-SUBROUTINE emc(temp,rh,remc)
-  REAL, INTENT(IN)    :: temp, rh
-  REAL, INTENT(OUT) :: remc
-
-  INTEGER :: i,j
-  REAL :: tempfh
-
-  !
-  !   ! note that in the formula below temperature  has to be in Fahrenheit
-  !   the relative humidy in %
-  !
-  !
+SUBROUTINE emc(tempfh, rh, remc)
+    REAL, INTENT(IN)  :: tempfh  !< temperature [Fahrenheit]
+    REAL, INTENT(IN)  :: rh      !< relative humidity [%]
+    REAL, INTENT(OUT) :: remc
 
   IF ( rh .lt. 10) THEN
      remc=0.03229+0.281073*rh-0.000578*tempfh*rh
-  ELSE IF ( rh .ge. 10 .and.  rh .lt. 50) THEN
+  ELSE IF ( rh .lt. 50) THEN
      remc=2.22749+0.160107*rh-0.014784*tempfh
-  ELSE IF ( rh .ge. 50) THEN
+  ELSE
      remc=21.0606+0.005565*rh**2-0.00035*rh*tempfh-0.483199*rh
   ENDIF
 END SUBROUTINE emc
