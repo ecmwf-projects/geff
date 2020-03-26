@@ -775,7 +775,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         qign = 144.5 - (0.266 * t) - (0.00058 * t ** 2) - (0.01 * t * mc(i)%r1hr) +&
              &  (18.54*(1.0-EXP(-0.151*mc(i)%r1hr))+6.4*mc(i)%r1hr)
 
-        chi=(344.0-qign)/10.0
+        chi=MAX(0., (344.0-qign)/10.0)
         IF ((chi**(3.6)*pnorm3-pnorm1) <= 0.0 ) THEN
           !probability of ignition
            p_i=0.0
