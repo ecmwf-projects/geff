@@ -75,8 +75,10 @@ PROGRAM geff
   ! variables for prognostic calculations
   REAL :: zrain, ztemp, zmaxtemp,  zrainclim &
 &           ,zmintemp,  zcc, zwspeed, zdp&
-&           ,zrh, zminrh, zmaxrh, zsnow, zemc &
+&           ,zminrh, zmaxrh, zsnow, zemc &
 &           ,zbndryh,zbdybar,diff,zlat
+  DOUBLE PRECISION :: zrh
+
   REAL :: &
        & zemcpr,zminem,zmaxem,zemcbar,mcwoodp,mcherbp,&
        & wherbp,fctcur=0
@@ -201,7 +203,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
            ztemp=MAX(rtemp(i),0.0) ! temperature on a daily timestep
            zmaxtemp=MAX(rmaxtemp(i),0.0) ! max daily temperature
            zmintemp=MAX(rmintemp(i),0.0) ! min daily temperature
-           zrh=MAX(rrh(i),0.0) ! relative humidity
+           zrh=MIN(MAX(rrh(i),0.0), 100.0) ! relative humidity
            zmaxrh=MAX(rmaxrh(i),0.0) ! max daily relative humidity
            zminrh=MAX(rminrh(i),0.0) ! min daily relative humidity
            zsnow=rsnow(i) ! snow mask
