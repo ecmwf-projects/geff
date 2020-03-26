@@ -356,7 +356,8 @@ CONTAINS
             ! Here the loop is necessary
             ! Dead fuel
             DO i = 1, npoints
-                IF (rlsm(i) .GT. 0.00001 )   THEN
+                IF (rlsm(i) .GT. 0.0001 ) THEN
+
                     IF (1 <= icr(i) .AND. icr(i) <= 5) THEN
                         mc(i)%r100hr  =  5. + (5. * icr(i))
                         mc(i)%r1000hr = 10. + (5. * icr(i))
