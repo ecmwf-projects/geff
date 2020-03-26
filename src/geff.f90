@@ -66,7 +66,7 @@ PROGRAM geff
   TYPE (vegstage_type) :: vegstage
 
   ! local variables
-  INTEGER :: istep,icheck,idate=0,i,ii,j
+  INTEGER :: istep,icheck,idate=0,i
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate
   INTEGER(4) :: restartdate
@@ -75,7 +75,7 @@ PROGRAM geff
   ! variables for prognostic calculations
   REAL :: zrain, ztemp, zmaxtemp,  zrainclim &
 &           ,zmintemp,  zcc, zwspeed, zdp&
-&           ,zminrh, zmaxrh, zsnow, zemc &
+&           ,zminrh, zmaxrh, zsnow &
 &           ,zbndryh,zbdybar,diff,zlat
   DOUBLE PRECISION :: zrh
 
@@ -93,7 +93,7 @@ PROGRAM geff
        &  hn1,hn10,hn100,hn1000,hnherb,hnwood, wrat,sa1,sa10,sa100,saherb,&
        &  sawood,sadead,salive,f1,f10,f100,fherb,fwood,fdead,flive,wdeadn,wliven,&
        &  sgbrd,sgbrl,sgbrt,betop,gmaop,ad,zeta,mclfe,mxl,wtmcd,wtmcl,etamd,etaml,&
-       &  dedrt,livrt,b,c,e,ufact,phiwnd,slpfct,phislp,ir,htsink
+       &  dedrt,livrt,b,c,e,ufact,phiwnd,phislp,ir,htsink
   REAL :: f1e,f10e,f100e,f1000e,fherbe,fwoode,fdeade,flivee,wdedne,wlivne,&
        &  sgbrde,sgbrle,sgbrte,betope,gmamx,gmamxe,gmaope,ade,wtmcde,wtmcle,etamde,&
        &  etamle,dedrte,livrte,ire,tau,qign,chi,p_i,scn,p_fi,mrisk,lgtdur,&
@@ -112,22 +112,21 @@ PROGRAM geff
        & kl, kl0, kl1, kl2,&
        & vv,rd, qo, qr,dr,&
        & re, moo, mrr, bb, pr, k,&
-       & m, fw, fd, fwiB,ff, ff0, ff1,&
-       & dc0,dl,lf,fwind,uu,mm,t
+       & m, fd, fwiB,ff, &
+       & dl,lf,fwind,uu,mm,t
   DOUBLE PRECISION :: rf
 
   CHARACTER (len=8) :: str_date
   CHARACTER (len=4) :: str_time
 
   ! local integer scalars
-  INTEGER :: jfueltype,jvs
+  INTEGER :: jvs
   INTEGER :: jyear,jmonth,jday,jhh
   INTEGER :: ndaydiag = 1          ! diagnostics every n days
 
   ! fortran timer functions
   REAL :: time1=0.0,time2=0.0
-  LOGICAL :: lspinup, &          ! spin up period - turn off output
-&            ltimer=.false.      ! turn the cpu timer on for the first timestep
+  LOGICAL :: ltimer=.false.      ! turn the cpu timer on for the first timestep
   LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm
 
 NAMELIST /control/ output_file, output_restart, output_constant, inidate, initime, dt, restart_file, restart_day, now
