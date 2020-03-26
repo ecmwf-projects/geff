@@ -12,6 +12,7 @@
 MODULE mo_nfdrs
 
     USE mo_constants
+    USE mo_utilities
 
     IMPLICIT NONE
 
@@ -100,8 +101,8 @@ SUBROUTINE ktmp(tmin,tmax,rktmp)
   !local
   !
   REAL :: tmaxfh,tminfh
- tminfh=(9./5.*tmin)-459.69 !conversion in Fahrenheit
- tmaxfh=(9./5.*tmax)-459.69
+ tminfh=kelvin_to_fahrenheit(tmin)
+ tmaxfh=kelvin_to_fahrenheit(tmax)
 
  rktmp=1.0
 

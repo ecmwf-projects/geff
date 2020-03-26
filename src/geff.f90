@@ -111,7 +111,7 @@ PROGRAM geff
        & vv,rd, qo, qr,dr,&
        & re, moo, mrr, bb, pr, k,&
        & m, fw, fd, fwiB,ff, ff0, ff1,&
-       & dc0,dl,lf,fwind,uu,mm
+       & dc0,dl,lf,fwind,uu,mm,t
 
   CHARACTER (len=8) :: str_date
   CHARACTER (len=4) :: str_time
@@ -342,40 +342,39 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   ! 1- Moisture content calculation for the dead  live fuel
   !---------------------------------------------------------------------------
 
-       tempa= (ztemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-       rhb=  zrh*rweathercorrection_rh(iweather)
-       CALL  emc(tempa,rhb,zemcpr)
+       tempa = kelvin_to_fahrenheit(ztemp) + rweathercorrection_temp(iweather)
+       rhb   = zrh * rweathercorrection_rh(iweather)
+       CALL emc(tempa, rhb, zemcpr)
 
-       tempa= (zmaxtemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-       rhb=  zmaxrh*rweathercorrection_rh(iweather)
-       CALL  emc(tempa,rhb  ,zmaxem)
+       tempa = kelvin_to_fahrenheit(zmaxtemp) + rweathercorrection_temp(iweather)
+       rhb   = zmaxrh * rweathercorrection_rh(iweather)
+       CALL emc(tempa, rhb, zmaxem)
 
-       tempa= (zmintemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-       rhb=  zminrh *rweathercorrection_rh(iweather)
-       CALL  emc(tempa,rhb  ,zminem)
+       tempa = kelvin_to_fahrenheit(zmintemp) + rweathercorrection_temp(iweather)
+       rhb   = zminrh * rweathercorrection_rh(iweather)
+       CALL emc(tempa, rhb, zminem)
 
-
-          !1.1 --- 1hr fuel
-
+       !1.1 --- 1hr fuel
        mc(i)%r1hr=1.03*zemcpr
-     !1.2 --- 10hr fuel
+
+       !1.2 --- 10hr fuel
        mc(i)%r10hr=1.28*zemcpr
 
        !Snow on the ground or  precipitation
       IF ( zrain .gt. 1.5 .or. zsnow .eq. 1) THEN
           ! take relative humidity to saturation
 
-         tempa= (zmintemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-         rhb=  100.0
-         CALL  emc(tempa,rhb,zminem)
+         tempa = kelvin_to_fahrenheit(zmintemp) + rweathercorrection_temp(iweather)
+         rhb   = 100.0
+         CALL emc(tempa, rhb, zminem)
 
-         tempa= (zmaxtemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-         rhb=  100.0
-         CALL  emc(tempa,rhb,zmaxem)
+         tempa = kelvin_to_fahrenheit(zmaxtemp) + rweathercorrection_temp(iweather)
+         rhb   = 100.0
+         CALL emc(tempa, rhb, zmaxem)
+
          ! and reset the values of 1hr and 10 hr to 35 %
          mc(i)%r1hr=35.0
          mc(i)%r10hr=35.0
-
       END IF
 
 
@@ -766,10 +765,8 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         !2.2.1 Ignition probability
 
         !heat of ignition
-
-        qign=144.5-(0.266*(ztemp*9./5.-459.69))               -&
-             &     (0.00058*(ztemp*9./5.-459.69)**2)           -&
-             &     (0.01*(ztemp*9./5.-459.69)*mc(i)%r1hr) +&
+        t = kelvin_to_fahrenheit(ztemp)
+        qign = 144.5 - (0.266 * t) - (0.00058 * t ** 2) - (0.01 * t * mc(i)%r1hr) +&
              &  (18.54*(1.0-EXP(-0.151*mc(i)%r1hr))+6.4*mc(i)%r1hr)
 
         chi=(344.0-qign)/10.0

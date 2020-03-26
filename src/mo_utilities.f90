@@ -130,7 +130,7 @@ CONTAINS
         IF (time.gt.24) THEN
             hour = INT(time/100.)
         ELSE
-            hour = time    
+            hour = time
         ENDIF
         jul = gregorian_to_julian(date) + INT((hh+hour)/24.)
         add_day = julian_to_gregorian(jul)
@@ -165,6 +165,11 @@ CONTAINS
             RETURN
         ENDIF
         daylight = 0
+    END FUNCTION
+
+    REAL FUNCTION kelvin_to_fahrenheit(temp_k)
+        REAL, INTENT(IN) :: temp_k
+        kelvin_to_fahrenheit = temp_k * (9./5.) - 459.69  !FIXME: should be 459.67?
     END FUNCTION
 
 END MODULE
