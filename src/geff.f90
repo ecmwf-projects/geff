@@ -791,10 +791,14 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         lgtdur=-86.83 +153.41*cgrate(ilightning)**(0.1437)
 
         !fraction of area occupied by the lightning -rain and lightning only corridors
+        IF (ilightning > 1) THEN
         finsid=((stmdia(ilightning)*stmspd*lgtdur)+&
                &(0.7854*stmdia(ilightning)**2))    /&
                & ((stmdia(ilightning)*stmspd*totwid(ilightning))+&
                & (0.7854*totwid(ilightning)**2))
+        ELSE
+            finsid = 0.
+        ENDIF
         fotsid=(1-finsid)
 
         !rain duration
