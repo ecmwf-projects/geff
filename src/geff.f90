@@ -642,6 +642,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
        etamd=MIN(MAX(1.0-2.59*dedrt+5.11*dedrt**2-3.52*dedrt**3,0.0),1.0)
        etaml=MIN(MAX(1.0-2.59*livrt+5.11*livrt**2-3.52*livrt**3,0.0),1.0)
 
+       ! reaction intensity
+       ir=gmaop*((wdeadn* fuelmodel%rhd *etasd *etamd)+(wliven*fuelmodel%rhl *etasl*etaml))
+
        !wind effect coefficients
        b=0.02526*sgbrt**0.54
        c=7.47*EXP(-0.133*sgbrt**0.55)
@@ -658,9 +661,6 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
          !
        ! slope effect multiplier
        phislp=rslpfct(jslope)*MAX(betbar,reps)**(-0.3)
-
-    ! reaction intensity
-       ir=gmaop*((wdeadn* fuelmodel%rhd *etasd *etamd)+(wliven*fuelmodel%rhl *etasl*etaml))
 
        !heat sink
        a1=0;a2=0;a3=0;a4=0;a5=0
