@@ -1262,20 +1262,6 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
     fwi_risk(i)%dsr=0.0272*(fwi_risk(i)%fwi**(1.77))
 
- ELSE  ! not a valid point for calculation
-        !NFDRS
-        mc(i) = mc_type()
-        fire_prop(i) = fire_prop_type()
-        fire_prob(i) = fire_prob_type()
-
-        !MARK-5
-        mark5_fuel(i) = mark5_fuel_type()
-        mark5_prop(i) = mark5_prop_type()
-        mark5_prob(i) = mark5_prob_type()
-
-        !FWI
-        fwi_risk(i) = fwi_risk_type()
-
 
     ENDIF !non-lake or sea point
     !--------------------
