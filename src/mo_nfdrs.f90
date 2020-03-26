@@ -74,9 +74,9 @@ SUBROUTINE kwet(mc1000,increment,rkwet)
 
  IF (mc1000 .gt. 25 )THEN
     rkwet=1.0
- ELSE IF (mc1000 .gt. 10 .and. mc1000 .le. 25  )THEN
+ ELSE IF (mc1000 .gt. 10)THEN
     rkwet=(0.0333*mc1000 +0.1675)
- ELSE IF (mc1000 .le. 10  )THEN
+ ELSE
     rkwet=0.5
  END IF
  !overwrite the above if the increment in moisture content is negative

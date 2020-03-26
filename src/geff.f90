@@ -284,10 +284,15 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
     ! 0.1 weather type for the pixel
 
-              IF (zcc .lt. 0.1)                        iweather=0
-              IF (zcc .ge. 0.1 .and. zcc .lt. 0.5 )    iweather=1
-              IF (zcc .ge. 0.5 .and. zcc .lt. 0.7 )    iweather=2
-              IF (zcc .ge. 0.7                    )    iweather=3
+              IF (zcc < 0.1) THEN
+                iweather=0
+              ELSEIF (zcc < 0.5 ) THEN
+                iweather=1
+              ELSEIF (zcc < 0.7 ) THEN
+                iweather=2
+              ELSE
+                iweather=3
+              ENDIF
 
      ! 0.2 fuel model for the pixel based on the JRC climatological maps
               !accordingly to the pixel fuel model the specific characteristic are loaded
@@ -1091,7 +1096,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
       IF  (fwi_risk(i)%dmc .LE. 33.0) THEN
          bb = 100.0 / (0.5 + 0.3 * fwi_risk(i)%dmc)
-       ELSE IF (fwi_risk(i)%dmc .GT. 33.0 .AND. fwi_risk(i)%dmc .LE. 65.0) THEN
+       ELSE IF (fwi_risk(i)%dmc .LE. 65.0) THEN
          bb = 14.0 - 1.3 * LOG(fwi_risk(i)%dmc)
        ELSE
          bb = 6.2 * LOG(fwi_risk(i)%dmc) - 17.2
@@ -1253,12 +1258,19 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
 
 
-    IF (fwi_risk(i)%fwi .LT. 5.2                                    ) fwi_risk(i)%danger_risk=1.0
-    IF (fwi_risk(i)%fwi .GE. 5.2 .AND. fwi_risk(i)%fwi .LT. 11.2) fwi_risk(i)%danger_risk=2.0
-    IF (fwi_risk(i)%fwi .GE. 11.2.AND. fwi_risk(i)%fwi .LT. 21.3) fwi_risk(i)%danger_risk=3.0
-    IF (fwi_risk(i)%fwi .GE. 21.3.AND. fwi_risk(i)%fwi .LT. 38.0) fwi_risk(i)%danger_risk=4.0
-    IF (fwi_risk(i)%fwi .GE. 38.0.AND. fwi_risk(i)%fwi .LT. 50.0) fwi_risk(i)%danger_risk=5.0
-    IF (fwi_risk(i)%fwi .GT. 50.0                                   ) fwi_risk(i)%danger_risk=6.0
+    IF (fwi_risk(i)%fwi .LT. 5.2) THEN
+        fwi_risk(i)%danger_risk=1.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 11.2) THEN
+            fwi_risk(i)%danger_risk=2.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 21.3) THEN
+        fwi_risk(i)%danger_risk=3.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 38.0) THEN
+        fwi_risk(i)%danger_risk=4.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 50.0) THEN
+        fwi_risk(i)%danger_risk=5.0
+    ELSE
+        fwi_risk(i)%danger_risk=6.0
+    ENDIF
 
     fwi_risk(i)%dsr=0.0272*(fwi_risk(i)%fwi**(1.77))
 
