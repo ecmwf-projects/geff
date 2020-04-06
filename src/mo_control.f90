@@ -14,8 +14,8 @@ MODULE mo_control
     IMPLICIT NONE
 
     CHARACTER(LEN=200) :: output_file=''
-    CHARACTER(LEN=200) :: constant_file=''
-    CHARACTER(LEN=200) :: init_file=''
+    CHARACTER(LEN=200) :: output_restart=''
+    CHARACTER(LEN=200) :: restart_file=''
     CHARACTER(LEN=50)  :: now=''
 
     CHARACTER(LEN=*), PARAMETER :: namelst='geff.namelist'
@@ -24,6 +24,8 @@ MODULE mo_control
     INTEGER :: initime
     INTEGER :: dt
     INTEGER :: restart_day
+
+    LOGICAL :: output_constant=.FALSE.
 
     CHARACTER(LEN=200) :: rainfile
     CHARACTER(LEN=200) :: rainclimfile

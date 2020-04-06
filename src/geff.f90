@@ -66,7 +66,7 @@ PROGRAM geff
   TYPE (vegstage_type) :: vegstage
 
   ! local variables
-  INTEGER :: istep,icheck,idate=0,i,ii,j
+  INTEGER :: istep,icheck,idate=0,i
   INTEGER ::  iweather,iclima,ilightning,jslope
   INTEGER(4) :: actualdate
   INTEGER(4) :: restartdate
@@ -75,8 +75,10 @@ PROGRAM geff
   ! variables for prognostic calculations
   REAL :: zrain, ztemp, zmaxtemp,  zrainclim &
 &           ,zmintemp,  zcc, zwspeed, zdp&
-&           ,zrh, zminrh, zmaxrh, zsnow, zemc &
+&           ,zminrh, zmaxrh, zsnow &
 &           ,zbndryh,zbdybar,diff,zlat
+  DOUBLE PRECISION :: zrh
+
   REAL :: &
        & zemcpr,zminem,zmaxem,zemcbar,mcwoodp,mcherbp,&
        & wherbp,fctcur=0
@@ -91,18 +93,18 @@ PROGRAM geff
        &  hn1,hn10,hn100,hn1000,hnherb,hnwood, wrat,sa1,sa10,sa100,saherb,&
        &  sawood,sadead,salive,f1,f10,f100,fherb,fwood,fdead,flive,wdeadn,wliven,&
        &  sgbrd,sgbrl,sgbrt,betop,gmaop,ad,zeta,mclfe,mxl,wtmcd,wtmcl,etamd,etaml,&
-       &  dedrt,livrt,b,c,e,ufact,phiwnd,slpfct,phislp,ir,htsink
+       &  dedrt,livrt,b,c,e,ufact,phiwnd,phislp,ir,htsink
   REAL :: f1e,f10e,f100e,f1000e,fherbe,fwoode,fdeade,flivee,wdedne,wlivne,&
        &  sgbrde,sgbrle,sgbrte,betope,gmamx,gmamxe,gmaope,ade,wtmcde,wtmcle,etamde,&
        &  etamle,dedrte,livrte,ire,tau,qign,chi,p_i,scn,p_fi,mrisk,lgtdur,&
        &  finsid,fotsid,raidur,fmf,icbar,lrisk,ws
   REAL :: netrainfall, kb_drought_factor
-  REAL:: a1,a2,a3,a4,a5
+  REAL :: a1,a2,a3,a4,a5
   REAL :: lrsf !needs to be put in
-  REAL:: rkwet,rktmp
-  REAL:: KBDI_temp, Ep
+  REAL :: rkwet,rktmp
+  REAL :: KBDI_temp, Ep
 
-  REAL:: mo, rf, kd, kw, &
+  REAL :: mo, kd, kw, &
        & mr, mr0, mr1,&
        & ed, ed0, ed1, ed2,&
        & ko, ko0, ko1, ko2,&
@@ -110,24 +112,24 @@ PROGRAM geff
        & kl, kl0, kl1, kl2,&
        & vv,rd, qo, qr,dr,&
        & re, moo, mrr, bb, pr, k,&
-       & m, fw, fd, fwiB,ff, ff0, ff1,&
-       & dc0,dl,lf,fwind,uu,mm
+       & m, fd, fwiB,ff, &
+       & dl,lf,fwind,uu,mm,t
+  DOUBLE PRECISION :: rf
 
   CHARACTER (len=8) :: str_date
   CHARACTER (len=4) :: str_time
 
   ! local integer scalars
-  INTEGER :: jfueltype,jvs
+  INTEGER :: jvs
   INTEGER :: jyear,jmonth,jday,jhh
   INTEGER :: ndaydiag = 1          ! diagnostics every n days
 
   ! fortran timer functions
   REAL :: time1=0.0,time2=0.0
-  LOGICAL :: lspinup, &          ! spin up period - turn off output
-&            ltimer=.false.      ! turn the cpu timer on for the first timestep
-  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm, lrestart=.TRUE.
+  LOGICAL :: ltimer=.false.      ! turn the cpu timer on for the first timestep
+  LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm
 
-NAMELIST /control/ output_file, inidate, initime, dt, init_file, restart_day, now
+NAMELIST /control/ output_file, output_restart, output_constant, inidate, initime, dt, restart_file, restart_day, now
 NAMELIST /climate/ tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
 NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
@@ -154,7 +156,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
   PRINT *, 'now (reference date): ', now
   PRINT *, 'dt (hours): ', dt
-  PRINT *, "time units", "hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" &
+  PRINT *, "time units: ", "hours since "//str_date(1:4)//"-"//str_date(5:6)//"-"//str_date(7:8)//" &
   & "//str_time(1:2)//":"//str_time(3:4)//" UTC"
 
   PRINT *, "Initialize..."
@@ -200,7 +202,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
            ztemp=MAX(rtemp(i),0.0) ! temperature on a daily timestep
            zmaxtemp=MAX(rmaxtemp(i),0.0) ! max daily temperature
            zmintemp=MAX(rmintemp(i),0.0) ! min daily temperature
-           zrh=MAX(rrh(i),0.0) ! relative humidity
+           zrh=MIN(MAX(rrh(i),0.0), 100.0) ! relative humidity
            zmaxrh=MAX(rmaxrh(i),0.0) ! max daily relative humidity
            zminrh=MAX(rminrh(i),0.0) ! min daily relative humidity
            zsnow=rsnow(i) ! snow mask
@@ -275,7 +277,7 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
            ! calculations is performed only on land points for all the indices
            !
       IF (rlsm(i) .gt. 0.0001 .and. zlat .gt. -60.0 )  THEN
-            ! 0- set-up conditions 
+            ! 0- set-up conditions
    !---------------------------------------------------------------------------
 
 
@@ -283,10 +285,15 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
     ! 0.1 weather type for the pixel
 
-              IF (zcc .lt. 0.1)                        iweather=0
-              IF (zcc .ge. 0.1 .and. zcc .lt. 0.5 )    iweather=1
-              IF (zcc .ge. 0.5 .and. zcc .lt. 0.7 )    iweather=2
-              IF (zcc .ge. 0.7                    )    iweather=3
+              IF (zcc < 0.1) THEN
+                iweather=0
+              ELSEIF (zcc < 0.5 ) THEN
+                iweather=1
+              ELSEIF (zcc < 0.7 ) THEN
+                iweather=2
+              ELSE
+                iweather=3
+              ENDIF
 
      ! 0.2 fuel model for the pixel based on the JRC climatological maps
               !accordingly to the pixel fuel model the specific characteristic are loaded
@@ -342,40 +349,39 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
   ! 1- Moisture content calculation for the dead  live fuel
   !---------------------------------------------------------------------------
 
-       tempa= (ztemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-       rhb=  zrh*rweathercorrection_rh(iweather)
-       CALL  emc(tempa,rhb,zemcpr)
+       tempa = kelvin_to_fahrenheit(ztemp) + rweathercorrection_temp(iweather)
+       rhb   = zrh * rweathercorrection_rh(iweather)
+       CALL emc(tempa, rhb, zemcpr)
 
-       tempa= (zmaxtemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-       rhb=  zmaxrh*rweathercorrection_rh(iweather)
-       CALL  emc(tempa,rhb  ,zmaxem)
+       tempa = kelvin_to_fahrenheit(zmaxtemp) + rweathercorrection_temp(iweather)
+       rhb   = zmaxrh * rweathercorrection_rh(iweather)
+       CALL emc(tempa, rhb, zmaxem)
 
-       tempa= (zmintemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-       rhb=  zminrh *rweathercorrection_rh(iweather)
-       CALL  emc(tempa,rhb  ,zminem)
+       tempa = kelvin_to_fahrenheit(zmintemp) + rweathercorrection_temp(iweather)
+       rhb   = zminrh * rweathercorrection_rh(iweather)
+       CALL emc(tempa, rhb, zminem)
 
-
-          !1.1 --- 1hr fuel
-
+       !1.1 --- 1hr fuel
        mc(i)%r1hr=1.03*zemcpr
-     !1.2 --- 10hr fuel
+
+       !1.2 --- 10hr fuel
        mc(i)%r10hr=1.28*zemcpr
 
        !Snow on the ground or  precipitation
       IF ( zrain .gt. 1.5 .or. zsnow .eq. 1) THEN
           ! take relative humidity to saturation
 
-         tempa= (zmintemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-         rhb=  100.0
-         CALL  emc(tempa,rhb,zminem)
+         tempa = kelvin_to_fahrenheit(zmintemp) + rweathercorrection_temp(iweather)
+         rhb   = 100.0
+         CALL emc(tempa, rhb, zminem)
 
-         tempa= (zmaxtemp  *9./5.  -459.69)+rweathercorrection_temp(iweather)
-         rhb=  100.0
-         CALL  emc(tempa,rhb,zmaxem)
+         tempa = kelvin_to_fahrenheit(zmaxtemp) + rweathercorrection_temp(iweather)
+         rhb   = 100.0
+         CALL emc(tempa, rhb, zmaxem)
+
          ! and reset the values of 1hr and 10 hr to 35 %
          mc(i)%r1hr=35.0
          mc(i)%r10hr=35.0
-
       END IF
 
 
@@ -643,6 +649,9 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
        etamd=MIN(MAX(1.0-2.59*dedrt+5.11*dedrt**2-3.52*dedrt**3,0.0),1.0)
        etaml=MIN(MAX(1.0-2.59*livrt+5.11*livrt**2-3.52*livrt**3,0.0),1.0)
 
+       ! reaction intensity
+       ir=gmaop*((wdeadn* fuelmodel%rhd *etasd *etamd)+(wliven*fuelmodel%rhl *etasl*etaml))
+
        !wind effect coefficients
        b=0.02526*sgbrt**0.54
        c=7.47*EXP(-0.133*sgbrt**0.55)
@@ -659,9 +668,6 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
          !
        ! slope effect multiplier
        phislp=rslpfct(jslope)*MAX(betbar,reps)**(-0.3)
-
-    ! reaction intensity
-       ir=gmaop*((wdeadn* fuelmodel%rhd *etasd *etamd)+(wliven*fuelmodel%rhl *etasl*etaml))
 
        !heat sink
        a1=0;a2=0;a3=0;a4=0;a5=0
@@ -766,13 +772,11 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         !2.2.1 Ignition probability
 
         !heat of ignition
-
-        qign=144.5-(0.266*(ztemp*9./5.-459.69))               -&
-             &     (0.00058*(ztemp*9./5.-459.69)**2)           -&
-             &     (0.01*(ztemp*9./5.-459.69)*mc(i)%r1hr) +&
+        t = kelvin_to_fahrenheit(ztemp)
+        qign = 144.5 - (0.266 * t) - (0.00058 * t ** 2) - (0.01 * t * mc(i)%r1hr) +&
              &  (18.54*(1.0-EXP(-0.151*mc(i)%r1hr))+6.4*mc(i)%r1hr)
 
-        chi=(344.0-qign)/10.0
+        chi=MAX(0., (344.0-qign)/10.0)
         IF ((chi**(3.6)*pnorm3-pnorm1) <= 0.0 ) THEN
           !probability of ignition
            p_i=0.0
@@ -794,10 +798,14 @@ NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
         lgtdur=-86.83 +153.41*cgrate(ilightning)**(0.1437)
 
         !fraction of area occupied by the lightning -rain and lightning only corridors
+        IF (ilightning > 1) THEN
         finsid=((stmdia(ilightning)*stmspd*lgtdur)+&
                &(0.7854*stmdia(ilightning)**2))    /&
                & ((stmdia(ilightning)*stmspd*totwid(ilightning))+&
                & (0.7854*totwid(ilightning)**2))
+        ELSE
+            finsid = 0.
+        ENDIF
         fotsid=(1-finsid)
 
         !rain duration
@@ -1015,7 +1023,11 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         IF ( zrain .GT. 0.5) THEN
            rf = zrain-0.5
            mr0 = EXP(-100.0 /(251.0 - mo))
-           mr1 = (1 - EXP(-6.93 / rf))
+           IF (rf < 0.01) THEN
+            mr1 = 1
+           ELSE
+            mr1 = (1 - EXP(-6.93 / rf))
+           ENDIF
            mr = mo + 42.5 * rf * mr0 * mr1
 
            IF (mo .GT. 150.0)  mr = mr+0.0015*(mo-150.0)**(2.0)*(rf)**(0.5)
@@ -1085,7 +1097,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
       IF  (fwi_risk(i)%dmc .LE. 33.0) THEN
          bb = 100.0 / (0.5 + 0.3 * fwi_risk(i)%dmc)
-       ELSE IF (fwi_risk(i)%dmc .GT. 33.0 .AND. fwi_risk(i)%dmc .LE. 65.0) THEN
+       ELSE IF (fwi_risk(i)%dmc .LE. 65.0) THEN
          bb = 14.0 - 1.3 * LOG(fwi_risk(i)%dmc)
        ELSE
          bb = 6.2 * LOG(fwi_risk(i)%dmc) - 17.2
@@ -1247,28 +1259,21 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
 
 
-    IF (fwi_risk(i)%fwi .LT. 5.2                                    ) fwi_risk(i)%danger_risk=1.0
-    IF (fwi_risk(i)%fwi .GE. 5.2 .AND. fwi_risk(i)%fwi .LT. 11.2) fwi_risk(i)%danger_risk=2.0
-    IF (fwi_risk(i)%fwi .GE. 11.2.AND. fwi_risk(i)%fwi .LT. 21.3) fwi_risk(i)%danger_risk=3.0
-    IF (fwi_risk(i)%fwi .GE. 21.3.AND. fwi_risk(i)%fwi .LT. 38.0) fwi_risk(i)%danger_risk=4.0
-    IF (fwi_risk(i)%fwi .GE. 38.0.AND. fwi_risk(i)%fwi .LT. 50.0) fwi_risk(i)%danger_risk=5.0
-    IF (fwi_risk(i)%fwi .GT. 50.0                                   ) fwi_risk(i)%danger_risk=6.0
+    IF (fwi_risk(i)%fwi .LT. 5.2) THEN
+        fwi_risk(i)%danger_risk=1.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 11.2) THEN
+            fwi_risk(i)%danger_risk=2.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 21.3) THEN
+        fwi_risk(i)%danger_risk=3.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 38.0) THEN
+        fwi_risk(i)%danger_risk=4.0
+    ELSE IF (fwi_risk(i)%fwi .LT. 50.0) THEN
+        fwi_risk(i)%danger_risk=5.0
+    ELSE
+        fwi_risk(i)%danger_risk=6.0
+    ENDIF
 
     fwi_risk(i)%dsr=0.0272*(fwi_risk(i)%fwi**(1.77))
-
- ELSE  ! not a valid point for calculation
-        !NFDRS
-        mc(i) = mc_type()
-        fire_prop(i) = fire_prop_type()
-        fire_prob(i) = fire_prob_type()
-
-        !MARK-5
-        mark5_fuel(i) = mark5_fuel_type()
-        mark5_prop(i) = mark5_prop_type()
-        mark5_prob(i) = mark5_prob_type()
-
-        !FWI
-        fwi_risk(i) = fwi_risk_type()
 
 
     ENDIF !non-lake or sea point
@@ -1280,19 +1285,17 @@ ENDDO !npoints
 
 !!D)    OUTPUT
 !------------
-      CALL io_write_results(istep)
+    IF (LEN(TRIM(output_file)) > 0) THEN
+        CALL io_write_results(istep)
+    ENDIF
 
-   IF ( actualdate .EQ. restartdate .AND. lrestart ) THEN
-      CALL io_write_restart
-      lrestart=.FALSE.
-   ENDIF
+    IF (actualdate .EQ. restartdate .AND. LEN(TRIM(output_restart)) > 0) THEN
+        CALL io_write_restart
+        output_restart = ''
+    ENDIF
 
 
 ENDDO ! date loop
-
-
-  ! write
-  CALL io_write_constant_fields
 
 
   PRINT *, 'integration finished'

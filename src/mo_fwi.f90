@@ -44,12 +44,12 @@ CONTAINS
 
  ! original formulation
 
-    IF (lat .GE. 15) THEN
+    IF (lat .GE. 10) THEN
        df = LfN(mm)
        !  Use Equatorial numbers between -10 and 10
-    ELSE IF (lat .LT. 10 .AND. lat .GE. -10) THEN
+    ELSE IF (lat .GE. -10) THEN
        df= 1.39
-    ELSE IF (lat .LT. -15) THEN
+    ELSE
        df = LfS(mm)
     ENDIF
 !
@@ -102,17 +102,19 @@ CONTAINS
 
 !  EFFIS/GWIS implementation
 
-  IF (lat .LE. 90.0 .AND. lat .GE. 30.0) THEN
-      dl=DayLength_ge_30N(mm)
-   ELSE IF (lat .LT. 30.0 .AND. lat .GE. 10.0) THEN
-      dl=DayLength_ge_10N_lt_30N(mm)
-   ELSE IF (lat .LT. 10 .AND. lat .GE. -10.0) THEN
-      dl=DayLength_ge_10S_lt_10N(mm)
-   ELSE IF (lat .LT. -10 .AND. lat .GE. -30.0) THEN
-      dl=DayLength_ge_30S_lt_10S(mm)
-   ELSE IF (lat .LT. -30 ) THEN
-      dl=DayLength_lt_30S(mm)
- END IF
+    IF (lat .LE. 90.0 .AND. lat .GE. -90.0) THEN
+        IF (lat .GE. 30.0) THEN
+            dl=DayLength_ge_30N(mm)
+        ELSE IF (lat .GE. 10.0) THEN
+            dl=DayLength_ge_10N_lt_30N(mm)
+        ELSE IF (lat .GE. -10.0) THEN
+            dl=DayLength_ge_10S_lt_10N(mm)
+        ELSE IF (lat .GE. -30.0) THEN
+            dl=DayLength_ge_30S_lt_10S(mm)
+        ELSE
+            dl=DayLength_lt_30S(mm)
+        ENDIF
+    ENDIF
 
  END SUBROUTINE  DayLength
 END MODULE mo_fwi

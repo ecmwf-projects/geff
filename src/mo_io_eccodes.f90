@@ -25,27 +25,26 @@ MODULE mo_io_eccodes
 
     PUBLIC :: io_getdata
     PUBLIC :: io_initialize
-    PUBLIC :: io_write_constant_fields
     PUBLIC :: io_write_restart
     PUBLIC :: io_write_results
 
     ! GRIB paramIds
     INTEGER, PARAMETER :: ilsm_pids(1)      = [172]
-    INTEGER, PARAMETER :: irainclim_pids(1) = [228]
+    INTEGER, PARAMETER :: irainclim_pids(1) = [212036]
     INTEGER, PARAMETER :: irain_pids(1)     = [228]
     INTEGER, PARAMETER :: itemp_pids(1)     = [167]
-    INTEGER, PARAMETER :: imaxtemp_pids(1)  = [167]
-    INTEGER, PARAMETER :: imintemp_pids(1)  = [167]
+    INTEGER, PARAMETER :: imaxtemp_pids(1)  = [212032]
+    INTEGER, PARAMETER :: imintemp_pids(1)  = [212033]
     INTEGER, PARAMETER :: irh_pids(1)       = [168]
-    INTEGER, PARAMETER :: imaxrh_pids(1)    = [168]
-    INTEGER, PARAMETER :: iminrh_pids(1)    = [168]
+    INTEGER, PARAMETER :: imaxrh_pids(1)    = [212034]
+    INTEGER, PARAMETER :: iminrh_pids(1)    = [212035]
     INTEGER, PARAMETER :: icc_pids(1)       = [164]
     INTEGER, PARAMETER :: isnow_pids(1)     = [141]
     INTEGER, PARAMETER :: iwspeed_pids(2)   = [165, 166]
-    INTEGER, PARAMETER :: idp_pids(1)       = [228]
+    INTEGER, PARAMETER :: idp_pids(1)       = [212031]
     INTEGER, PARAMETER :: ivs_pids(1)       = [212030]
-    INTEGER, PARAMETER :: icr_pids(1)       = [0]
-    INTEGER, PARAMETER :: ifm_pids(1)       = [0]
+    INTEGER, PARAMETER :: icr_pids(1)       = [212028]
+    INTEGER, PARAMETER :: ifm_pids(1)       = [212029]
     INTEGER, PARAMETER :: islope_pids(1)    = [163]
     INTEGER, PARAMETER :: icv_pids(1)       = [28]
 
@@ -193,7 +192,7 @@ CONTAINS
         CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
 
         npoints = grib_lsm%npoints
-        PRINT *, 'npoints: ', npoints
+        PRINT *, 'Number of points: ', npoints
 
         CALL assert(npoints > 0)
         ALLOCATE(lats(npoints))
@@ -222,8 +221,9 @@ CONTAINS
 
         ! fields/variables defined in time (SIZE() = ntimestep)
         ntimestep = MAXVAL(input(:)%count)
-        CALL assert(ntimestep > 0, "io_initialize: ntimestep > 0")
+        PRINT *, 'Number of time steps: ', ntimestep
 
+        CALL assert(ntimestep > 0, "io_initialize: ntimestep > 0")
         ALLOCATE(nhours(ntimestep))
         DO i = 1, ntimestep
             nhours(i) = (i - 1) * dt
@@ -231,7 +231,6 @@ CONTAINS
 
         ! fields/variables defined in space (SIZE() = npoints)
         CALL assert(npoints > 0, "io_initialize: npoints > 0")
-
         ALLOCATE(tmp(npoints))
 
         DO i = 1, SIZE(input)
@@ -299,30 +298,17 @@ CONTAINS
         islope = tmp
 
         ALLOCATE(mc(npoints))
-        mc = mc_type()
-
         ALLOCATE(fire_prop(npoints))
-        fire_prop = fire_prop_type()
-
         ALLOCATE(fire_prob(npoints))
-        fire_prob = fire_prob_type()
-
         ALLOCATE(mark5_fuel(npoints))
-        mark5_fuel = mark5_fuel_type()
-
         ALLOCATE(mark5_prop(npoints))
-        mark5_prop = mark5_prop_type()
-
         ALLOCATE(mark5_prob(npoints))
-        mark5_prob = mark5_prob_type()
-
         ALLOCATE(fwi_risk(npoints))
-        fwi_risk = fwi_risk_type()
 
-        IF (TRIM(init_file(1:4)) == 'rest') THEN
-            PRINT *, "Initialization type: exact initialization from '" // init_file // "'"
+        IF (LEN(TRIM(restart_file)) > 0) THEN
+            PRINT *, "Initialization type: exact initialization from '" // TRIM(restart_file) // "'"
 
-            CALL restart%open_as_restart(init_file)
+            CALL restart%open_as_restart(restart_file)
 
             CALL next_values('restart mc%r1hr', restart, imc_r1hr_pids(1), tmp)
             mc(:)%r1hr = tmp
@@ -370,7 +356,8 @@ CONTAINS
             ! Here the loop is necessary
             ! Dead fuel
             DO i = 1, npoints
-                IF (rlsm(i) .GT. 0.00001 )   THEN
+                IF (rlsm(i) .GT. 0.0001 ) THEN
+
                     IF (1 <= icr(i) .AND. icr(i) <= 5) THEN
                         mc(i)%r100hr  =  5. + (5. * icr(i))
                         mc(i)%r1000hr = 10. + (5. * icr(i))
@@ -405,35 +392,14 @@ CONTAINS
         DEALLOCATE(tmp)
     END SUBROUTINE
 
-    SUBROUTINE io_write_constant_fields
-        INTEGER :: fd, handle
-        LOGICAL, SAVE :: lwritten = .FALSE.
-
-        IF (lwritten .OR. LEN(TRIM(constant_file)) == 0) RETURN
-        lwritten = .TRUE.
-
-        CALL codes_open_file(fd, constant_file, 'w')
-
-        CALL write_field(fd, ilsm_pids(1), rlsm)
-        CALL write_field(fd, icv_pids(1), rcv)
-        CALL write_field(fd, irainclim_pids(1), rrainclim)
-
-        CALL write_field_from_integer(fd, icr_pids(1), icr)
-        CALL write_field_from_integer(fd, ifm_pids(1), ifm)
-        CALL write_field_from_integer(fd, islope_pids(1), islope)
-
-        CALL codes_close_file(fd)
-        fd = 0
-    END SUBROUTINE
-
     SUBROUTINE io_write_restart
-        INTEGER :: fd, handle
-        LOGICAL, SAVE :: lwritten = .FALSE.
+        INTEGER :: fd
 
-        IF (lwritten .OR. LEN(TRIM(init_file)) == 0) RETURN
-        lwritten = .TRUE.
-
-        CALL codes_open_file(fd, init_file, 'w')
+        ! Open restart file
+        fd = 0
+        CALL assert(LEN(TRIM(output_restart)) > 0, 'output_restart not empty')
+        CALL codes_open_file(fd, output_restart, 'w')
+        CALL assert(fd /= 0, 'codes_open_file (w): '//TRIM(output_restart))
 
         CALL write_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
         CALL write_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
@@ -452,24 +418,19 @@ CONTAINS
         CALL write_field(fd, ifwi_risk_dc_pids(1), fwi_risk(:)%dc)
 
         CALL codes_close_file(fd)
-        fd = 0
     END SUBROUTINE
 
     SUBROUTINE io_write_results(istep)
         INTEGER, INTENT(IN) :: istep  ! NOTE: ignored
         INTEGER :: fd
-        REAL, ALLOCATABLE :: tmp(:)
-        LOGICAL, SAVE :: lwritten = .FALSE.
+        CHARACTER, SAVE :: cmode = 'w'
 
-        ! Open output file
+        ! Open results file
         fd = 0
-        IF (lwritten) THEN
-            CALL codes_open_file(fd, output_file, 'a')
-        ELSE
-            CALL codes_open_file(fd, output_file, 'w')
-        ENDIF
-        CALL assert(fd /= 0, 'codes_open_file (w): '//output_file)
-        lwritten = .TRUE.
+        CALL assert(LEN(TRIM(output_file)) > 0, 'output_file not empty')
+        CALL codes_open_file(fd, output_file, cmode)
+        CALL assert(fd /= 0, 'codes_open_file ('//cmode//'): '//TRIM(output_file))
+        cmode = 'a'
 
         CALL write_field(fd, irain_pids(1), rrain)
         CALL write_field(fd, itemp_pids(1), rtemp)
@@ -523,9 +484,16 @@ CONTAINS
         CALL write_field(fd, ifwi_risk_dsr_pids(1), fwi_risk(:)%dsr)
         CALL write_field(fd, ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
-        CALL codes_close_file(fd)
+        IF (output_constant) THEN
+            CALL write_field(fd, ilsm_pids(1), rlsm)
+            CALL write_field(fd, icv_pids(1), rcv)
+            CALL write_field(fd, irainclim_pids(1), rrainclim)
+            CALL write_field_from_integer(fd, icr_pids(1), icr)
+            CALL write_field_from_integer(fd, ifm_pids(1), ifm)
+            CALL write_field_from_integer(fd, islope_pids(1), islope)
+        ENDIF
 
-        IF (ALLOCATED(tmp)) DEALLOCATE(tmp)
+        CALL codes_close_file(fd)
     END SUBROUTINE
 
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
@@ -673,7 +641,7 @@ CONTAINS
         INTEGER, INTENT(IN) :: fd, paramid
         REAL, INTENT(IN) :: values(:)
         INTEGER :: handle, i, bitmapPresent, edition
-        TYPE(GribField), POINTER, SAVE :: ref => input(1)
+        TYPE(GribField), POINTER, SAVE :: ref => input(2)
 
         ! reference defines metadata (date/time/step/..., aside from paramId)
         IF (.NOT. (ref%count > 1)) THEN
@@ -706,7 +674,7 @@ CONTAINS
         IF (ANY(values == missingValue)) bitmapPresent = 1
         CALL codes_set(handle, 'bitmapPresent', bitmapPresent)
 
-        CALL codes_set(handle, 'values', PACK(values, MASK=.TRUE.))
+        CALL codes_set(handle, 'values', values)
 
         CALL codes_write(handle, fd)
         CALL codes_release(handle)

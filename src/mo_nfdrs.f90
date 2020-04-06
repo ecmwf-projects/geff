@@ -12,6 +12,7 @@
 MODULE mo_nfdrs
 
     USE mo_constants
+    USE mo_utilities
 
     IMPLICIT NONE
 
@@ -49,24 +50,16 @@ MODULE mo_nfdrs
 
 CONTAINS
 
-SUBROUTINE emc(temp,rh,remc)
-  REAL, INTENT(IN)    :: temp, rh
-  REAL, INTENT(OUT) :: remc
-
-  INTEGER :: i,j
-  REAL :: tempfh
-
-  !
-  !   ! note that in the formula below temperature  has to be in Fahrenheit
-  !   the relative humidy in %
-  !
-  !
+SUBROUTINE emc(tempfh, rh, remc)
+    REAL, INTENT(IN)  :: tempfh  !< temperature [Fahrenheit]
+    REAL, INTENT(IN)  :: rh      !< relative humidity [%]
+    REAL, INTENT(OUT) :: remc
 
   IF ( rh .lt. 10) THEN
      remc=0.03229+0.281073*rh-0.000578*tempfh*rh
-  ELSE IF ( rh .ge. 10 .and.  rh .lt. 50) THEN
+  ELSE IF ( rh .lt. 50) THEN
      remc=2.22749+0.160107*rh-0.014784*tempfh
-  ELSE IF ( rh .ge. 50) THEN
+  ELSE
      remc=21.0606+0.005565*rh**2-0.00035*rh*tempfh-0.483199*rh
   ENDIF
 END SUBROUTINE emc
@@ -81,9 +74,9 @@ SUBROUTINE kwet(mc1000,increment,rkwet)
 
  IF (mc1000 .gt. 25 )THEN
     rkwet=1.0
- ELSE IF (mc1000 .gt. 10 .and. mc1000 .le. 25  )THEN
+ ELSE IF (mc1000 .gt. 10)THEN
     rkwet=(0.0333*mc1000 +0.1675)
- ELSE IF (mc1000 .le. 10  )THEN
+ ELSE
     rkwet=0.5
  END IF
  !overwrite the above if the increment in moisture content is negative
@@ -100,8 +93,8 @@ SUBROUTINE ktmp(tmin,tmax,rktmp)
   !local
   !
   REAL :: tmaxfh,tminfh
- tminfh=(9./5.*tmin)-459.69 !conversion in Fahrenheit
- tmaxfh=(9./5.*tmax)-459.69
+ tminfh=kelvin_to_fahrenheit(tmin)
+ tmaxfh=kelvin_to_fahrenheit(tmax)
 
  rktmp=1.0
 
