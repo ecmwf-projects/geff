@@ -6,6 +6,7 @@ if (BUILD_TESTING)
     foreach(_file ${_files})
         get_filename_component(_basename "${_file}" NAME)
         get_filename_component(_name "${_basename}" NAME_WE)
+        set(_name "${PROJECT_NAME}_${_name}")
 
         add_executable("${_name}" "${_file}")
         add_test(NAME "${_name}" COMMAND "${_name}")
