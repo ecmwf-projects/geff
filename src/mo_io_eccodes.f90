@@ -39,7 +39,7 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: imaxrh_pids(1)    = [212034]
     INTEGER, PARAMETER :: iminrh_pids(1)    = [212035]
     INTEGER, PARAMETER :: icc_pids(1)       = [164]
-    INTEGER, PARAMETER :: isnow_pids(1)     = [141]
+    INTEGER, PARAMETER :: isnow_pids(2)     = [141, 3066]
     INTEGER, PARAMETER :: iwspeed_pids(2)   = [165, 166]
     INTEGER, PARAMETER :: idp_pids(1)       = [212031]
     INTEGER, PARAMETER :: ivs_pids(1)       = [212030]
@@ -641,7 +641,7 @@ CONTAINS
         INTEGER, INTENT(IN) :: fd, paramid
         REAL, INTENT(IN) :: values(:)
         INTEGER :: handle, i, bitmapPresent, edition
-        TYPE(GribField), POINTER, SAVE :: ref => input(2)
+        TYPE(GribField), POINTER, SAVE :: ref => input(11)
 
         ! reference defines metadata (date/time/step/..., aside from paramId)
         IF (.NOT. (ref%count > 1)) THEN
