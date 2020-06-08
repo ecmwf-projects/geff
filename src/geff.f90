@@ -1173,7 +1173,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
       !are outside the limits of single precision
       !DC is bounded between 0 and 10,000
 
-      fwi_risk(i)%dc=MIN(MAX(fwi_risk(i)%dc + 0.5 * vv,0.0),10000.0)
+      fwi_risk(i)%dc=MIN(MAX(fwi_risk(i)%dc + vv,0.0),10000.0)
 
 !       WRITE (9,*) 'fwi_risk(i)%dc',fwi_risk(i)%dc,'19.013999999999999 '
 ! 4   Initial Spread Index
