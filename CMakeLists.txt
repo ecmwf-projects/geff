@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
- 
-project(geff VERSION 4.0.1 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff" LANGUAGES Fortran)
+
+project(geff VERSION 4.1.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff" LANGUAGES Fortran)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
