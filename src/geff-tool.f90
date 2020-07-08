@@ -1209,7 +1209,10 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 !      fwi_risk(i)%dc=19.013999999999999
 !TEST ***************************
 
-    IF ( fwi_risk(i)%dmc .LE.  0.4 * fwi_risk(i)%dc ) THEN
+    IF (ABS(fwi_risk(i)%dmc + 0.4 * fwi_risk(i)%dc).LE.  1e-9) THEN
+       ! avoid division by zero (triggered by unit tests run-no-restart/run-restart)
+       uu = 0
+    ELSEIF ( fwi_risk(i)%dmc .LE.  0.4 * fwi_risk(i)%dc ) THEN
        uu =( 0.8 * fwi_risk(i)%dmc * fwi_risk(i)%dc ) / (fwi_risk(i)%dmc + 0.4 * fwi_risk(i)%dc)
     ELSE
        uu = fwi_risk(i)%dmc - (1.0 - 0.8 * fwi_risk(i)%dc / (fwi_risk(i)%dmc + 0.4 * fwi_risk(i)%dc )) * &

@@ -23,6 +23,7 @@ add_subdirectory(src)
 
 
 include(CTest)
+w
 if (BUILD_TESTING)
 add_subdirectory(tests)
 endif()

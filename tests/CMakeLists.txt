@@ -19,6 +19,5 @@ foreach(_file ${_files})
     if (_name MATCHES "-fail$")
         set_tests_properties("${_name}" PROPERTIES WILL_FAIL TRUE)
     endif()
-
 endforeach()
 
