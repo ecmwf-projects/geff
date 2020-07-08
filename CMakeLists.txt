@@ -23,9 +23,9 @@ add_subdirectory(src)
 
 
 include(CTest)
-w
-if (BUILD_TESTING)
-add_subdirectory(tests)
+
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+    add_subdirectory(tests)
 endif()
 
 
@@ -34,7 +34,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Global ECMWF Fire Forecasting (GEFF) mode
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 
 set(CPACK_SOURCE_GENERATOR "TBZ2")
-set(CPACK_SOURCE_IGNORE_FILES "/.git/;.gitignore;.vscode;CMakeLists.txt.user*;/data/*;${CPACK_SOURCE_IGNORE_FILES}")
+set(CPACK_SOURCE_IGNORE_FILES ".git/;.gitignore;.vscode;CMakeLists.txt.user*;${CPACK_SOURCE_IGNORE_FILES}")
 
 include(CPack)
 
