@@ -21,7 +21,6 @@ module mo_statistics
     private
 
     public :: extreme_forecast_index
-    public :: assert
     public :: hpsort_eps_epw
     public :: compute_maxfwi
 contains
@@ -304,19 +303,6 @@ contains
             enddo
          endif
       end function extreme_forecast_index
-
-    subroutine assert(condition, message)
-      logical, intent(in) :: condition
-      character(len=*), intent(in), optional :: message
-      if (.not. condition) then
-         if (present(message)) then
-            print *, 'ERROR: assertion failed: '//message
-         else
-            print *, 'ERROR: assertion failed'
-         endif
-         stop 1
-      endif
-    end subroutine assert
 
     ! Copyright (C) 2010-2016 Samuel Ponce', Roxana Margine, Carla Verdi, Feliciano Giustino
     ! Copyright (C) 2007-2009 Jesse Noffsinger, Brad Malone, Feliciano Giustino

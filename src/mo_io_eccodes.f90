@@ -11,7 +11,8 @@
 !> @author Maciel, P., ECMWF
 MODULE mo_io_eccodes
 
-    USE eccodes
+    use eccodes, only: codes_clone, codes_close_file, codes_get, codes_get_size, codes_grib_get_data, codes_grib_new_from_file,&
+                       codes_open_file, codes_release, codes_set, codes_write, CODES_END_OF_FILE
 
     USE mo_control
     USE mo_fire
@@ -89,14 +90,38 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_dsr_pids(1)         = [260546]
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212027]
 
+    type, abstract :: io_t
+    contains
+        procedure(io_input), public, deferred, nopass :: input
+        procedure(io_output), public, deferred, nopass :: output
+    endtype
+
+    interface
+        subroutine io_input(path, data)
+            character(len=*), intent(in) :: path
+            real(kind=8), dimension(:, :), allocatable, intent(out) :: data
+        endsubroutine
+
+        subroutine io_output(path, data)
+            character(len=*), intent(in) :: path
+            real(kind=8), dimension(:), intent(in) :: data
+        endsubroutine
+    endinterface
+
+    type, public, extends(io_t) :: eccodes_t
+    contains
+        procedure, nopass :: input => eccodes_input
+        procedure, nopass :: output => eccodes_output
+    endtype
+
     TYPE :: GribField
-        INTEGER :: fd       = 0
-        INTEGER :: handle   = 0
-        INTEGER :: paramId  = 0
+        INTEGER :: fd = 0
+        INTEGER :: handle = 0
+        INTEGER :: paramId = 0
         CHARACTER(LEN=20) :: shortName = ''
-        CHARACTER(LEN=200) :: name     = ''
-        INTEGER :: npoints  = 0
-        INTEGER :: count    = 0
+        CHARACTER(LEN=200) :: name = ''
+        INTEGER :: npoints = 0
+        INTEGER :: count = 0
     CONTAINS
         PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
         PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
@@ -110,33 +135,31 @@ MODULE mo_io_eccodes
         PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
     END TYPE
 
-    ! missing value indicator
+    TYPE(GribField) :: reference  !internal to eccodes_t (a very simplified interface)
     REAL, PARAMETER :: missingValue = rfillvalue !FIXME: -1.e20
 
     TYPE(GribField), TARGET :: input(18)
 
-    TYPE(GribField), POINTER :: grib_lsm      => input(1)
-    TYPE(GribField), POINTER :: grib_rain     => input(2)
-    TYPE(GribField), POINTER :: grib_temp     => input(3)
-    TYPE(GribField), POINTER :: grib_maxtemp  => input(4)
-    TYPE(GribField), POINTER :: grib_mintemp  => input(5)
-    TYPE(GribField), POINTER :: grib_rh       => input(6)
-    TYPE(GribField), POINTER :: grib_maxrh    => input(7)
-    TYPE(GribField), POINTER :: grib_minrh    => input(8)
-    TYPE(GribField), POINTER :: grib_cc       => input(9)
-    TYPE(GribField), POINTER :: grib_wspeed   => input(10)
-    TYPE(GribField), POINTER :: grib_snow     => input(11)
-    TYPE(GribField), POINTER :: grib_dp       => input(12)
-    TYPE(GribField), POINTER :: grib_vs       => input(13)
-    TYPE(GribField), POINTER :: grib_cr       => input(14)
-    TYPE(GribField), POINTER :: grib_fm       => input(15)
-    TYPE(GribField), POINTER :: grib_slope    => input(16)
-    TYPE(GribField), POINTER :: grib_cv       => input(17)
+    TYPE(GribField), POINTER :: grib_lsm => input(1)
+    TYPE(GribField), POINTER :: grib_rain => input(2)
+    TYPE(GribField), POINTER :: grib_temp => input(3)
+    TYPE(GribField), POINTER :: grib_maxtemp => input(4)
+    TYPE(GribField), POINTER :: grib_mintemp => input(5)
+    TYPE(GribField), POINTER :: grib_rh => input(6)
+    TYPE(GribField), POINTER :: grib_maxrh => input(7)
+    TYPE(GribField), POINTER :: grib_minrh => input(8)
+    TYPE(GribField), POINTER :: grib_cc => input(9)
+    TYPE(GribField), POINTER :: grib_wspeed => input(10)
+    TYPE(GribField), POINTER :: grib_snow => input(11)
+    TYPE(GribField), POINTER :: grib_dp => input(12)
+    TYPE(GribField), POINTER :: grib_vs => input(13)
+    TYPE(GribField), POINTER :: grib_cr => input(14)
+    TYPE(GribField), POINTER :: grib_fm => input(15)
+    TYPE(GribField), POINTER :: grib_slope => input(16)
+    TYPE(GribField), POINTER :: grib_cv => input(17)
     TYPE(GribField), POINTER :: grib_rainclim => input(18)
 
-
 CONTAINS
-
 
     SUBROUTINE io_getdata(istep)
         INTEGER, INTENT(IN) :: istep
@@ -145,26 +168,25 @@ CONTAINS
         CALL assert(npoints > 0)
         IF (istep == 1) RETURN
 
-        IF (grib_rain%count    > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain)
-        IF (grib_temp%count    > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp)
+        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain)
+        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp)
         IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp)
         IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp)
-        IF (grib_rh%count      > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh)
-        IF (grib_maxrh%count   > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
-        IF (grib_minrh%count   > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh)
-        IF (grib_cc%count      > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc)
-        IF (grib_wspeed%count  > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
-        IF (grib_snow%count    > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow)
-        IF (grib_dp%count      > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp)
+        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh)
+        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
+        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh)
+        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc)
+        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
+        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow)
+        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp)
 
         IF (grib_vs%count > 1) THEN
-            ALLOCATE(tmp(npoints))
+            ALLOCATE (tmp(npoints))
             CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp)
             ivs = tmp
-            DEALLOCATE(tmp)
+            DEALLOCATE (tmp)
         ENDIF
     END SUBROUTINE
-
 
     SUBROUTINE next_values(message, grib, paramId, values)
         CHARACTER(LEN=*), INTENT(IN) :: message
@@ -182,7 +204,6 @@ CONTAINS
         CALL grib%values(values)
     END SUBROUTINE
 
-
     SUBROUTINE io_initialize
         TYPE(GribField) :: restart
         INTEGER :: i
@@ -195,8 +216,8 @@ CONTAINS
         PRINT *, 'Number of points: ', npoints
 
         CALL assert(npoints > 0)
-        ALLOCATE(lats(npoints))
-        ALLOCATE(lons(npoints))
+        ALLOCATE (lats(npoints))
+        ALLOCATE (lons(npoints))
 
         CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
         CALL grib_lsm%coordinates(lats, lons)
@@ -224,89 +245,89 @@ CONTAINS
         PRINT *, 'Number of time steps: ', ntimestep
 
         CALL assert(ntimestep > 0, "io_initialize: ntimestep > 0")
-        ALLOCATE(nhours(ntimestep))
+        ALLOCATE (nhours(ntimestep))
         DO i = 1, ntimestep
-            nhours(i) = (i - 1) * dt
+            nhours(i) = (i - 1)*dt
         ENDDO
 
         ! fields/variables defined in space (SIZE() = npoints)
         CALL assert(npoints > 0, "io_initialize: npoints > 0")
-        ALLOCATE(tmp(npoints))
+        ALLOCATE (tmp(npoints))
 
         DO i = 1, SIZE(input)
             IF (i > 1) CALL assert(input(i)%same_geometry(input(1)))
             CALL assert(input(i)%count == 1 .OR. input(i)%count == ntimestep)
         ENDDO
 
-        ALLOCATE(rlsm(npoints))
+        ALLOCATE (rlsm(npoints))
         ! CALL assert(grib_lsm%next())  ! already called (above)
         CALL grib_lsm%values(rlsm)
 
-        ALLOCATE(rrain(npoints))
+        ALLOCATE (rrain(npoints))
         CALL next_values('io_initialize: grib_rain', grib_rain, grib_rain%paramId, rrain)
 
-        ALLOCATE(rtemp(npoints))
+        ALLOCATE (rtemp(npoints))
         CALL next_values('io_initialize: grib_temp', grib_temp, grib_temp%paramId, rtemp)
 
-        ALLOCATE(rmaxtemp(npoints))
+        ALLOCATE (rmaxtemp(npoints))
         CALL next_values('io_initialize: grib_maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp)
 
-        ALLOCATE(rmintemp(npoints))
+        ALLOCATE (rmintemp(npoints))
         CALL next_values('io_initialize: grib_mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp)
 
-        ALLOCATE(rrh(npoints))
+        ALLOCATE (rrh(npoints))
         CALL next_values('io_initialize: grib_rh', grib_rh, grib_rh%paramId, rrh)
 
-        ALLOCATE(rmaxrh(npoints))
+        ALLOCATE (rmaxrh(npoints))
         CALL next_values('io_initialize: grib_maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
 
-        ALLOCATE(rminrh(npoints))
+        ALLOCATE (rminrh(npoints))
         CALL next_values('io_initialize: grib_minrh', grib_minrh, grib_minrh%paramId, rminrh)
 
-        ALLOCATE(rcc(npoints))
+        ALLOCATE (rcc(npoints))
         CALL next_values('io_initialize: grib_cc', grib_cc, grib_cc%paramId, rcc)
 
-        ALLOCATE(rwspeed(npoints))
+        ALLOCATE (rwspeed(npoints))
         CALL next_values('io_initialize: grib_wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
 
-        ALLOCATE(rsnow(npoints))
+        ALLOCATE (rsnow(npoints))
         CALL next_values('io_initialize: grib_snow', grib_snow, grib_snow%paramId, rsnow)
 
-        ALLOCATE(rdp(npoints))
+        ALLOCATE (rdp(npoints))
         CALL next_values('io_initialize: grib_dp', grib_dp, grib_dp%paramId, rdp)
 
-        ALLOCATE(rcv(npoints))
+        ALLOCATE (rcv(npoints))
         CALL next_values('io_initialize: grib_cv', grib_cv, grib_cv%paramId, rcv)
 
-        ALLOCATE(rrainclim(npoints))
+        ALLOCATE (rrainclim(npoints))
         CALL next_values('io_initialize: grib_rainclim', grib_rainclim, grib_rainclim%paramId, rrainclim)
 
-        ALLOCATE(ivs(npoints))
+        ALLOCATE (ivs(npoints))
         CALL next_values('io_initialize: grib_vs', grib_vs, grib_vs%paramId, tmp)
         ivs = tmp
 
-        ALLOCATE(icr(npoints))
+        ALLOCATE (icr(npoints))
         CALL next_values('io_initialize: grib_cr', grib_cr, grib_cr%paramId, tmp)
         icr = tmp
 
-        ALLOCATE(ifm(npoints))
+        ALLOCATE (ifm(npoints))
         CALL next_values('io_initialize: grib_fm', grib_fm, grib_fm%paramId, tmp)
         ifm = tmp
 
-        ALLOCATE(islope(npoints))
+        ALLOCATE (islope(npoints))
         CALL next_values('io_initialize: grib_slope', grib_slope, grib_slope%paramId, tmp)
         islope = tmp
 
-        ALLOCATE(mc(npoints))
-        ALLOCATE(fire_prop(npoints))
-        ALLOCATE(fire_prob(npoints))
-        ALLOCATE(mark5_fuel(npoints))
-        ALLOCATE(mark5_prop(npoints))
-        ALLOCATE(mark5_prob(npoints))
-        ALLOCATE(fwi_risk(npoints))
+        ALLOCATE (mc(npoints))
+        ALLOCATE (fire_prop(npoints))
+        ALLOCATE (fire_prob(npoints))
+        ALLOCATE (mark5_fuel(npoints))
+        ALLOCATE (mark5_prop(npoints))
+        ALLOCATE (mark5_prob(npoints))
+        ALLOCATE (fwi_risk(npoints))
 
         IF (LEN(TRIM(restart_file)) > 0) THEN
-            PRINT *, "Initialization type: exact initialization from '" // TRIM(restart_file) // "'"
+            PRINT *, "Initialization type: exact initialization from '"//TRIM(restart_file)//"'"
 
             CALL restart%open_as_restart(restart_file)
 
@@ -349,20 +370,20 @@ CONTAINS
             CALL next_values('restart fwi_risk%dc', restart, ifwi_risk_dc_pids(1), tmp)
             fwi_risk(:)%dc = tmp
 
-            CALL restart%close()
+            CALL restart%close ()
         ELSE
             PRINT *, 'Initialization type: artificial conditions'
 
             ! Here the loop is necessary
             ! Dead fuel
             DO i = 1, npoints
-                IF (rlsm(i) .GT. 0.0001 ) THEN
+                IF (rlsm(i) .GT. 0.0001) THEN
 
                     IF (1 <= icr(i) .AND. icr(i) <= 5) THEN
-                        mc(i)%r100hr  =  5. + (5. * icr(i))
-                        mc(i)%r1000hr = 10. + (5. * icr(i))
-                        mc(i)%rbndryt = 10. + (5. * icr(i))
-                        mc(i)%rx1000  = 10. + (5. * icr(i))
+                        mc(i)%r100hr = 5.+(5.*icr(i))
+                        mc(i)%r1000hr = 10.+(5.*icr(i))
+                        mc(i)%rbndryt = 10.+(5.*icr(i))
+                        mc(i)%rx1000 = 10.+(5.*icr(i))
                     ENDIF
 
                     mark5_fuel(i)%kb_drought_index = 0. ! saturation of the soil
@@ -383,13 +404,13 @@ CONTAINS
                     ! Armitage (2008) for a more detailed description of code calculation
                     ! startup issues and the over-winter adjustment process.
                     fwi_risk(i)%ffmc = 85.
-                    fwi_risk(i)%dmc  =  6.
-                    fwi_risk(i)%dc   = 15.
+                    fwi_risk(i)%dmc = 6.
+                    fwi_risk(i)%dc = 15.
                 ENDIF
             ENDDO
         ENDIF
 
-        DEALLOCATE(tmp)
+        DEALLOCATE (tmp)
     END SUBROUTINE
 
     SUBROUTINE io_write_restart
@@ -496,6 +517,98 @@ CONTAINS
         CALL codes_close_file(fd)
     END SUBROUTINE
 
+    subroutine eccodes_input(path, data)
+        implicit none
+
+        character(len=*), intent(in) :: path
+        real(kind=8), dimension(:, :), allocatable, intent(out) :: data
+
+        integer :: i, paramId, npoints
+        real(kind=4), dimension(:), allocatable :: tmp  ! ecCodes I/O does not support real(kind=8)?
+
+        type(GribField) :: grib
+
+        ! open file and read messages to the end
+        ! first message: set paramId/numberOfDataPoints, then
+        ! next messages: count messages, confirm paramId/numberOfDataPoints
+        call codes_open_file(grib%fd, path, 'r')
+        call assert(grib%next(), 'file "'//trim(path)//' GRIB not found')
+
+        call grib%header()
+        paramId = grib%paramId
+        npoints = grib%npoints
+
+        if (reference%handle == 0) then
+            call reference%close ()
+            call codes_clone(grib%handle, reference%handle)
+            call assert(reference%handle /= 0)
+            call reference%header()
+        endif
+
+        grib%count = 1
+        do while (grib%next())
+            grib%count = grib%count + 1
+            call grib%header()
+            call assert(paramId == grib%paramId .AND. npoints == grib%npoints, &
+                        'Fields should have the same paramId and numberOfDataPoints')
+        enddo
+
+        print *, "input: '"//trim(path)//"', paramId: ", grib%paramId, &
+            ", npoints: ", grib%npoints, ", count: ", grib%count
+
+        ! end reached, re-open the file to read messages one-by-one
+        call grib%close ()
+        call codes_open_file(grib%fd, path, 'r')
+
+        allocate (data(npoints, grib%count))
+        allocate (tmp(npoints))
+        do i = 1, grib%count
+            call assert(grib%next(), "file '"//trim(path)//"' GRIB not found")
+            call grib%values(tmp)
+            data(:, i) = tmp(:)
+        enddo
+        deallocate (tmp)
+    end subroutine
+
+    subroutine eccodes_output(path, data)
+        implicit none
+
+        character(len=*), intent(in) :: path
+        real(kind=8), dimension(:), intent(in) :: data
+
+        real(kind=4), dimension(:), allocatable :: tmp  ! ecCodes I/O does not support real(kind=8)?
+        integer :: handle, fd, bitmapPresent
+
+        call assert(reference%handle /= 0, "output: reference%handle /= 0")
+
+        ! clone reference handle and set custom metadata/data before writing
+        call assert(reference%handle /= 0)
+        call assert(reference%npoints == size(data), 'output: reference%npoints == size(data)')
+
+        handle = 0
+        call codes_clone(reference%handle, handle)
+        call assert(handle /= 0, 'output: codes_clone(reference)')
+
+        bitmapPresent = 0
+        if (any(data == missingValue)) bitmapPresent = 1
+        call codes_set(handle, 'bitmapPresent', bitmapPresent)
+        call codes_set(handle, 'missingValue', missingValue)
+
+        allocate (tmp(size(data)))
+        tmp = data
+        call codes_set(handle, 'values', tmp)
+        deallocate (tmp)
+
+        print *, "writing output file '"//trim(path)//"'"
+        fd = 0
+        call codes_open_file(fd, path, 'w')
+        call assert(fd /= 0, "codes_open_file(w): '"//trim(path)//"'")
+        call codes_write(handle, fd)
+        call codes_close_file(fd)
+
+        call codes_release(handle)
+    end subroutine
+
     SUBROUTINE gribfield_coordinates(this, latitudes, longitudes)
         CLASS(GribField), INTENT(IN) :: this
         REAL, ALLOCATABLE, INTENT(INOUT) :: latitudes(:)
@@ -507,9 +620,9 @@ CONTAINS
         latitudes = 0
         longitudes = 0
 
-        ALLOCATE(tmp(this%npoints))
+        ALLOCATE (tmp(this%npoints))
         CALL codes_grib_get_data(this%handle, latitudes, longitudes, tmp)
-        DEALLOCATE(tmp)
+        DEALLOCATE (tmp)
     END SUBROUTINE
 
     SUBROUTINE gribfield_values(this, values)
@@ -536,11 +649,11 @@ CONTAINS
         REAL, ALLOCATABLE :: rvalues(:)
         CALL assert(ALLOCATED(values), 'gribfield_values_as_integer: values allocated')
 
-        ALLOCATE(rvalues(SIZE(values)))
+        ALLOCATE (rvalues(SIZE(values)))
         CALL gribfield_values(this, rvalues)
 
         values = rvalues
-        DEALLOCATE(rvalues)
+        DEALLOCATE (rvalues)
     END SUBROUTINE
 
     SUBROUTINE gribfield_header(this)
@@ -605,12 +718,12 @@ CONTAINS
             this%count = this%count + 1
             CALL codes_get(this%handle, 'paramId', i)
             CALL codes_get(this%handle, 'numberOfDataPoints', n)
-            CALL assert(n == this%npoints .AND. i == this%paramId,&
-            'Input fields should have the same paramId and geometry (numberOfDataPoints)')
+            CALL assert(n == this%npoints .AND. i == this%paramId, &
+                        'Input fields should have the same paramId and geometry (numberOfDataPoints)')
         ENDDO
 
         ! end reached, re-open the file to read messages one-by-one
-        CALL this%close()
+        CALL this%close ()
         CALL codes_open_file(this%fd, file, 'r')
         CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
     END SUBROUTINE
@@ -664,7 +777,7 @@ CONTAINS
         ! FIXME fix GRIB2-only fields from GRIB1
         IF (paramid > 260000) THEN
             CALL codes_get(handle, 'edition', edition)
-            IF (edition == 1 ) CALL codes_set(handle, 'edition', 2)
+            IF (edition == 1) CALL codes_set(handle, 'edition', 2)
         ENDIF
 
         CALL codes_set(handle, 'paramId', paramid)
@@ -685,10 +798,10 @@ CONTAINS
         INTEGER, INTENT(IN) :: values(:)
         REAL, ALLOCATABLE :: tmp(:)
 
-        ALLOCATE(tmp(SIZE(values)))
+        ALLOCATE (tmp(SIZE(values)))
         tmp = values
         CALL write_field(fd, paramid, tmp)
-        DEALLOCATE(tmp)
+        DEALLOCATE (tmp)
     END SUBROUTINE
 
     FUNCTION gribfield_same_geometry(this, other) RESULT(yes)
@@ -697,9 +810,9 @@ CONTAINS
         yes = this%npoints == other%npoints
         yes = yes .AND. (this%count == 1 .OR. other%count == 1 .OR. this%count == other%count)
         IF (.not. yes) THEN
-            PRINT *, "%ERROR: fields don't have the same geometry: ",&
-            char(10), "(paramId=", this%paramId, ", numberOfDataPoints=", this%npoints, ", count=", this%count,")",&
-            char(10), "(paramId=", other%paramId, ", numberOfDataPoints=", other%npoints, ", count=", other%count,")"
+            PRINT *, "%ERROR: fields don't have the same geometry: ", &
+                char(10), "(paramId=", this%paramId, ", numberOfDataPoints=", this%npoints, ", count=", this%count, ")", &
+                char(10), "(paramId=", other%paramId, ", numberOfDataPoints=", other%npoints, ", count=", other%count, ")"
             STOP 1
         ENDIF
     END FUNCTION

@@ -9,8 +9,9 @@
 !> @brief GEFF max of the day
 program main
 
-    use eccodes_m
+    use mo_io_eccodes
     use mo_statistics
+    use mo_utilities, only: assert
 
     implicit none
 
@@ -21,20 +22,20 @@ program main
     type(eccodes_t) :: io
 
     call io%input('dvar.grib', var)
-   
+
     nt = size(var, 2)
     npoints = size(var, 1)
-     allocate (maxvar(npoints))
+    allocate (maxvar(npoints))
     allocate (minvar(npoints))
     allocate (meanvar(npoints))
     allocate (timemax(npoints))
-   
-    call assert(0 == compute_maxfwi(nt, npoints,var, -9999.D0, &
-                                         maxvar=maxvar, minvar=minvar, meanvar=meanvar, timemax=timemax))
+
+    call assert(0 == compute_maxfwi(nt, npoints, var, -9999.D0, maxvar=maxvar, minvar=minvar, meanvar=meanvar, timemax=timemax), &
+                "0 == compute_maxfwi")
 
     call io%output('maxvar.grib', maxvar)
     call io%output('minvar.grib', minvar)
     call io%output('meanvar.grib', meanvar)
     call io%output('timemax.grib', timemax)
-   
+
 end program

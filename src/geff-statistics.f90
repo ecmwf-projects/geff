@@ -9,8 +9,9 @@
 !> @brief GEFF statistics runtime
 program main
 
-    use eccodes_m
+    use mo_io_eccodes
     use mo_statistics
+    use mo_utilities, only: assert
 
     implicit none
 
@@ -35,7 +36,8 @@ program main
     allocate (crank(npoints))
 
     call assert(0 == extreme_forecast_index(ncl, nfc, npoints, cl, fc, &
-                                            efi, sot=sot, anomaly=anomaly, canomaly=canomaly, rank=rank, crank=crank))
+                                            efi, sot=sot, anomaly=anomaly, canomaly=canomaly, rank=rank, crank=crank), &
+                "0 == extreme_forecast_index")
 
     call io%output('efi.grib', efi)
     call io%output('sot.grib', sot)

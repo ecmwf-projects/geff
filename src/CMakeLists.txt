@@ -2,7 +2,6 @@
 configure_file(mo_version.f90.in mo_version.f90 @ONLY)
 
 add_library(geff SHARED
-    eccodes_m.f90
     mo_constants.f90
     mo_control.f90
     mo_fire.f90
