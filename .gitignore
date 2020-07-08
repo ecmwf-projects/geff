@@ -3,4 +3,5 @@
 *.pyc
 *~
 CMakeLists.txt.user
-geff_exe
+tests/run-no-restart/*ecfire.grib
+tests/run-restart/*ecfire.grib
