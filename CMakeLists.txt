@@ -4,20 +4,19 @@ if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
 
-project(geff VERSION 4.1.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff" LANGUAGES Fortran)
+project(geff VERSION 5.0.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/repos/geff" LANGUAGES Fortran)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-if (NOT TARGET eccodes_f90)
-    message(STATUS "eccodes Fortran library: attempting to find package")
-    find_package(eccodes REQUIRED HINTS eccodes_DIR)
-    if (NOT TARGET eccodes_f90)
-        message(FATAL_ERROR "eccodes Fortran library (eccodes_f90) not found")
-    endif()
-endif()
+find_package(eccodes REQUIRED HINTS eccodes_DIR)
 
+find_path(eccodes_MOD_PATH "eccodes.mod" PATHS eccodes_DIR ENV eccodes_DIR PATH_SUFFIXES "include")
+message(STATUS "ecCodes Fortran module path: ${eccodes_MOD_PATH}")
+if (NOT eccodes_MOD_PATH)
+    message(FATAL_ERROR "ecCodes Fortran module path (containing eccodes_f90) not found")
+endif()
 
 add_subdirectory(src)
 

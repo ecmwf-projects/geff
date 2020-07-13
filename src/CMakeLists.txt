@@ -14,7 +14,10 @@ add_library(geff SHARED
     mo_utilities.f90
     mo_vegstage.f90
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
+
 target_link_libraries(geff PUBLIC eccodes_f90)
+target_include_directories(geff PUBLIC ${eccodes_MOD_PATH})
+
 install(TARGETS geff RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 
 foreach(_t geff-tool geff-statistics geff-daymax)
