@@ -271,8 +271,14 @@ contains
          
              
                     ANOMALYI = (MEANFORE - MEANCLIM)
-                    CANOMALYI = (MEANFORE - MEANCLIM) / STDCLIM
-                    ! search  in the climate sorted string of values for the closest number to the mean forecast, then identify the location of the number in the vector with minloc,n. n is the ordinal rank. The percentile is n/NCLIM *100 
+
+                    IF (ABS(STDCLIM) .LE. 1e-9) THEN
+                        CANOMALYI = 0
+                    ELSE
+                        CANOMALYI = ANOMALYI / STDCLIM
+                    ENDIF
+
+                    ! search  in the climate sorted string of values for the closest number to the mean forecast, then identify the location of the number in the vector with minloc,n. n is the ordinal rank. The percentile is n/NCLIM *100
                     DUMMY = (minloc(abs(CLIM(i, :) - MEANFORE)) * 100./NCLIM)
                     RANKI = DUMMY(1)
 

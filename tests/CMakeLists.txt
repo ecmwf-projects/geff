@@ -8,6 +8,11 @@ foreach(_test run-no-restart run-restart)
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_test}")
 endforeach()
 
+add_test(
+    NAME "${PROJECT_NAME}_tests_geff-statistics"
+    COMMAND geff-statistics
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+
 file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.f90")
 foreach(_file ${_files})
     get_filename_component(_basename "${_file}" NAME)

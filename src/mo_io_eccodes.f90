@@ -11,7 +11,7 @@
 !> @author Maciel, P., ECMWF
 MODULE mo_io_eccodes
 
-    use eccodes, only: codes_clone, codes_close_file, codes_get, codes_get_size, codes_grib_get_data, codes_grib_new_from_file,&
+    use eccodes, only: codes_clone, codes_close_file, codes_get, codes_get_size, codes_grib_get_data, codes_grib_new_from_file, &
                        codes_open_file, codes_release, codes_set, codes_write, CODES_END_OF_FILE
 
     USE mo_control
@@ -539,7 +539,6 @@ CONTAINS
         npoints = grib%npoints
 
         if (reference%handle == 0) then
-            call reference%close ()
             call codes_clone(grib%handle, reference%handle)
             call assert(reference%handle /= 0)
             call reference%header()
