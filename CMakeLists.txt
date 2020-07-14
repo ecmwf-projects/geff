@@ -12,10 +12,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(eccodes REQUIRED HINTS eccodes_DIR)
 
-find_path(eccodes_MOD_PATH "eccodes.mod" PATHS eccodes_DIR ENV eccodes_DIR PATH_SUFFIXES "include")
-message(STATUS "ecCodes Fortran module path: ${eccodes_MOD_PATH}")
-if (NOT eccodes_MOD_PATH)
-    message(FATAL_ERROR "ecCodes Fortran module path (containing eccodes_f90) not found")
+if (NOT TARGET eccodes_f90)
+    find_path(eccodes_MOD_PATH "eccodes.mod" PATHS eccodes_DIR ENV eccodes_DIR PATH_SUFFIXES "include")
+    message(STATUS "ecCodes Fortran module path: ${eccodes_MOD_PATH}")
+    if (NOT eccodes_MOD_PATH)
+        message(FATAL_ERROR "ecCodes Fortran module path (containing eccodes.mod) not found")
+    endif()
 endif()
 
 add_subdirectory(src)

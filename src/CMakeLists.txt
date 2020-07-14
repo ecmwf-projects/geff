@@ -16,7 +16,9 @@ add_library(geff SHARED
     ${CMAKE_CURRENT_BINARY_DIR}/mo_version.f90)
 
 target_link_libraries(geff PUBLIC eccodes_f90)
-target_include_directories(geff PUBLIC ${eccodes_MOD_PATH})
+if (NOT TARGET eccodes_f90)
+    target_include_directories(geff PUBLIC ${eccodes_MOD_PATH})
+endif()
 
 install(TARGETS geff RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 
