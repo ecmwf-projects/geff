@@ -25,7 +25,7 @@ module mo_statistics
     public :: compute_maxfwi
 contains
 
-  integer function extreme_forecast_index(NCLIM, NFORE, NPOINTS, CLIM, FORE, &
+    integer function extreme_forecast_index(NCLIM, NFORE, NPOINTS, CLIM, FORE, &
                                             EFI, EFI_EPSILON, MV, &
                                             SOT, SOT_EPSILON, SOT_RANK, SOT_FLAG, &
                                             ANOMALY, CANOMALY, RANK, CRANK) &
@@ -262,14 +262,13 @@ contains
                     MEANFORE = sum(FORE(i, :)) / float(NFORE)
                     MEANCLIM = sum(CLIM(i, :)) / float(NCLIM)
                     STDCLIM = sqrt(sum((CLIM(i, :) - MEANCLIM)**2) / float(NCLIM - 1))
-              
+
                     P1CLIM = CLIM(i, int(P1 * NCLIM))
                     P2CLIM = CLIM(i, int(P2 * NCLIM))
                     P3CLIM = CLIM(i, int(P3 * NCLIM))
                     P4CLIM = CLIM(i, int(P4 * NCLIM))
                     P5CLIM = CLIM(i, int(P5 * NCLIM))
-         
-             
+
                     ANOMALYI = (MEANFORE - MEANCLIM)
 
                     IF (ABS(STDCLIM) .LE. 1e-9) THEN
@@ -295,20 +294,20 @@ contains
                     else
                         CRANKI = 6
                     endif
-            !        if ( RANKI .le. 90 ) THEN
-            !           PRINT*,'MEANFORE'
-            !           PRINT*,MEANFORE
-            !           PRINT*,'==='
-            !           PRINT*,CRANKI,RANKI
-            !        END if
-              endif
+                    !        if ( RANKI .le. 90 ) THEN
+                    !           PRINT*,'MEANFORE'
+                    !           PRINT*,MEANFORE
+                    !           PRINT*,'==='
+                    !           PRINT*,CRANKI,RANKI
+                    !        END if
+                endif
                 if (present(ANOMALY)) ANOMALY(i) = ANOMALYI
                 if (present(RANK)) RANK(i) = RANKI
                 if (present(CANOMALY)) CANOMALY(i) = CANOMALYI
                 if (present(CRANK)) CRANK(i) = CRANKI
             enddo
-         endif
-      end function extreme_forecast_index
+        endif
+    end function extreme_forecast_index
 
     ! Copyright (C) 2010-2016 Samuel Ponce', Roxana Margine, Carla Verdi, Feliciano Giustino
     ! Copyright (C) 2007-2009 Jesse Noffsinger, Brad Malone, Feliciano Giustino
@@ -406,7 +405,7 @@ contains
                     endif
                 endif
                 ! demote rra
-                if (hslt(rra, ra(j),eps)) then
+                if (hslt(rra, ra(j), eps)) then
                     ra(i) = ra(j)
                     ind(i) = ind(j)
                     i = j
@@ -432,50 +431,47 @@ contains
             ra(i) = rra
             ind(i) = iind
 
-         enddo sorting
-       end subroutine hpsort_eps_epw
+        enddo sorting
+    end subroutine hpsort_eps_epw
 
-       logical function hslt(a, b ,eps)
-         real(kind=8), intent (in):: a, b, eps
-         if (abs(a - b) < eps) then
+    logical function hslt(a, b, eps)
+        real(kind=8), intent(in):: a, b, eps
+        if (abs(a - b) < eps) then
             hslt = .false.
-         else
+        else
             hslt = (a < b)
-         end if
-       end function hslt
+        end if
+    end function hslt
 
-      
-       !  internal function
-       !  compare two real number and return the result
-          !
-         
+    !  internal function
+    !  compare two real number and return the result
+    !
 
-       integer function compute_maxfwi (NT,NPOINTS,VAR,MV,MAXVAR,MINVAR, MEANVAR,TIMEMAX)&
-               result(err)
-         !  Subroutine to calculate the maximum of the day and the time at wich it occurs 
-         ! the subroutine works on a daily assumption so imputs should be given in chunck of days
-         !   
-         !--------------------------
-         
-    
-         IMPLICIT NONE
-         INTEGER,INTENT(IN) :: NT                 ! number of time steps in a day
-         INTEGER,INTENT(IN) :: NPOINTS            ! Number of points in the grib      
-         REAL(kind=8),INTENT(IN),optional :: MV                 ! MISSING VALUE
-         real(kind=8), intent(inout) :: VAR(NPOINTS, NT)  !< - data 
-  
-         REAL(kind=8),INTENT(OUT) :: MAXVAR(NPOINTS)  ! max FWI 
-         REAL(kind=8),INTENT(OUT) :: MEANVAR(NPOINTS)  ! mean over the day FWI 
-         REAL(kind=8),INTENT(OUT) :: MINVAR(NPOINTS)  ! min FWI 
-         REAL(kind=8),INTENT(OUT) :: TIMEMAX(NPOINTS) ! Time @max FWI
+    integer function compute_maxfwi(NT, NPOINTS, VAR, MV, MAXVAR, MINVAR, MEANVAR, TIMEMAX) &
+        result(err)
+        !  Subroutine to calculate the maximum of the day and the time at wich it occurs
+        ! the subroutine works on a daily assumption so imputs should be given in chunck of days
+        !
+        !--------------------------
 
-         !
-         ! LOCAL VARIABLES
-         !
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: NT                 ! number of time steps in a day
+        INTEGER, INTENT(IN) :: NPOINTS            ! Number of points in the grib
+        REAL(kind=8), INTENT(IN), optional :: MV                 ! MISSING VALUE
+        real(kind=8), intent(inout) :: VAR(NPOINTS, NT)  !< - data
+
+        REAL(kind=8), INTENT(OUT) :: MAXVAR(NPOINTS)  ! max FWI
+        REAL(kind=8), INTENT(OUT) :: MEANVAR(NPOINTS)  ! mean over the day FWI
+        REAL(kind=8), INTENT(OUT) :: MINVAR(NPOINTS)  ! min FWI
+        REAL(kind=8), INTENT(OUT) :: TIMEMAX(NPOINTS) ! Time @max FWI
+
+        !
+        ! LOCAL VARIABLES
+        !
         real(kind=8) :: MV_
-        INTEGER :: i, igrid,dt,zdt
-       
-        REAL(kind=8)     :: Mean=0.D0, std=0.D0
+        INTEGER :: i, igrid, dt, zdt
+
+        REAL(kind=8)     :: Mean = 0.D0, std = 0.D0
         logical :: missing
         missing(i) = (VAR(i, 1) == MV_)
 
@@ -483,79 +479,77 @@ contains
 
         MV_ = -9999.
         if (present(MV)) MV_ = MV
-      
-     
-         ! time step
-         dt=INT(24/nt)
- 
-         ! Respect grid missing 
 
-         DO I=1, NPOINTS
+        ! time step
+        dt = INT(24 / nt)
+
+        ! Respect grid missing
+
+        DO I = 1, NPOINTS
             IF (missing(I)) THEN
-               MAXVAR(I) = MV
-               MINVAR(I) = MV
-               MEANVAR(I) = MV
-               TIMEMAX(I) = MV
+                MAXVAR(I) = MV
+                MINVAR(I) = MV
+                MEANVAR(I) = MV
+                TIMEMAX(I) = MV
             ELSE
-               MAXVAR(I) = 0.D0
-               MINVAR(I) = 0.D0
-               MEANVAR(I) = 0.D0
-               TIMEMAX(I) = 0.D0
+                MAXVAR(I) = 0.D0
+                MINVAR(I) = 0.D0
+                MEANVAR(I) = 0.D0
+                TIMEMAX(I) = 0.D0
             ENDIF
-         ENDDO
+        ENDDO
 
-         ! Sort values if required
+        ! Sort values if required
 
-         DO IGRID=1,NPOINTS
+        DO IGRID = 1, NPOINTS
             IF (MAXVAR(IGRID) .EQ. MV) THEN
-               CYCLE
+                CYCLE
             ENDIF
-            MAXVAR(IGRID)=MAXVAL(VAR(IGRID,:))
-            MINVAR(IGRID)=MINVAL(VAR(IGRID,:))
-           
-            CALL calc_std(nt, VAR(IGRID,:),mean,std)
-       !     print*,size( VAR(IGRID,:)),mean,std
-             MEANVAR(IGRID)=mean
-            IF ( MAXVAR(IGRID)-MINVAR(IGRID) .GT. 5.    ) THEN 
-               ! search the local time only if there is daily variability 
+            MAXVAR(IGRID) = MAXVAL(VAR(IGRID, :))
+            MINVAR(IGRID) = MINVAL(VAR(IGRID, :))
 
-               TIMEMAX(IGRID)=(MAXLOC(VAR(IGRID,:),DIM=1)*DT) 
+            CALL calc_std(nt, VAR(IGRID, :), mean, std)
+            !     print*,size( VAR(IGRID,:)),mean,std
+            MEANVAR(IGRID) = mean
+            IF (MAXVAR(IGRID) - MINVAR(IGRID) .GT. 5.) THEN
+                ! search the local time only if there is daily variability
+
+                TIMEMAX(IGRID) = (MAXLOC(VAR(IGRID, :), DIM=1) * DT)
             ELSE
-               !reset to default that is 12 UTC shell we put MV?
-               TIMEMAX(IGRID)=12
+                !reset to default that is 12 UTC shell we put MV?
+                TIMEMAX(IGRID) = 12
             END IF
-         ! reset values that falls during night 
-            IF (TIMEMAX(IGRID) .GT. 20 .OR. TIMEMAX(IGRID) .LE. 10) TIMEMAX(IGRID)=12
-            
-         ENDDO
+            ! reset values that falls during night
+            IF (TIMEMAX(IGRID) .GT. 20 .OR. TIMEMAX(IGRID) .LE. 10) TIMEMAX(IGRID) = 12
 
-       END FUNCTION  COMPUTE_MAXFWI
+        ENDDO
 
-       SUBROUTINE  calc_std(nt, x, mean, var)
-         IMPLICIT  NONE
-         INTEGER, INTENT(IN)    :: nt
-         REAL*8, INTENT(IN)    :: x(nt)
-         REAL*8, INTENT(INOUT) :: mean, var
- 
-         INTEGER::it
-         REAL:: Variance=0.0
-         mean = 0.0                       ! compute mean
-         var=0.0
+    END FUNCTION COMPUTE_MAXFWI
 
-         DO IT= 1, NT
+    SUBROUTINE calc_std(nt, x, mean, var)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN)    :: nt
+        REAL*8, INTENT(IN)    :: x(nt)
+        REAL*8, INTENT(INOUT) :: mean, var
+
+        INTEGER::it
+        REAL:: Variance = 0.0
+        mean = 0.0                       ! compute mean
+        var = 0.0
+
+        DO IT = 1, NT
             mean = mean + x(IT)
-         END DO
-         mean = mean / NT
-         DO IT = 1, NT
-            
-            Variance = Variance + max( (x(IT) - Mean)**2,1e-10)
-         END DO
-         Variance = Variance / (NT - 1)
+        END DO
+        mean = mean / NT
+        DO IT = 1, NT
 
-         var=SQRT(Variance)
-                
-         RETURN
-       END SUBROUTINE calc_std
+            Variance = Variance + max((x(IT) - Mean)**2, 1e-10)
+        END DO
+        Variance = Variance / (NT - 1)
 
+        var = SQRT(Variance)
 
-     end module
+        RETURN
+    END SUBROUTINE calc_std
+
+end module
