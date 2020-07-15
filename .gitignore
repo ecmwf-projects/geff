@@ -8,6 +8,10 @@ canomaly.grib
 crank.grib
 ecfire.grib
 efi.grib
+maxvar.grib
+meanvar.grib
+minvar.grib
 rank.grib
 restart_ecfire.grib
 sot.grib
+timemax.grib
