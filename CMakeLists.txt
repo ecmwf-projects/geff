@@ -9,6 +9,8 @@ project(geff VERSION 5.0.0 HOMEPAGE_URL "https://git.ecmwf.int/projects/CEMSF/re
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+ecbuild_add_option(FEATURE GEFF_INTERPOLATION DEFAULT OFF DESCRIPTION "GEFF Atlas interpolation")
+
 
 find_package(eccodes REQUIRED HINTS eccodes_DIR)
 

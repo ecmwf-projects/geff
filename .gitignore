@@ -3,5 +3,11 @@
 *.pyc
 *~
 CMakeLists.txt.user
-tests/run-no-restart/*ecfire.grib
-tests/run-restart/*ecfire.grib
+anomaly.grib
+canomaly.grib
+crank.grib
+ecfire.grib
+efi.grib
+rank.grib
+restart_ecfire.grib
+sot.grib
