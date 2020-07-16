@@ -129,9 +129,11 @@ PROGRAM geff
   LOGICAL :: ltimer=.false.      ! turn the cpu timer on for the first timestep
   LOGICAL :: lmask_cr,lmask_vegstage,lmask_fm
 
-NAMELIST /control/ output_file, output_restart, output_constant, inidate, initime, dt, restart_file, restart_day, now
-NAMELIST /climate/ tempfile,maxtempfile,mintempfile,rhfile,maxrhfile,minrhfile,rainfile,ccfile,wspeedfile,snowfile,dpfile,vsfile
-NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
+  NAMELIST /control/ output_file, output_restart, output_constant, inidate, initime, dt, interpolation_file
+  NAMELIST /control/ restart_file, restart_day, now
+  NAMELIST /climate/ tempfile, maxtempfile, mintempfile, rhfile, maxrhfile, minrhfile, rainfile, ccfile, wspeedfile, snowfile
+  NAMELIST /climate/ dpfile, vsfile
+  NAMELIST /constdata/ rainclimfile, lsmfile, crfile, fmfile, cvfile, slopefile
 
 
   ! -----

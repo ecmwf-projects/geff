@@ -186,10 +186,10 @@ MODULE mo_io_eccodes
         INTEGER :: paramId = 0
         CHARACTER(LEN=20) :: shortName = ''
         CHARACTER(LEN=200) :: name = ''
-        CHARACTER(LEN=200) :: interpolMethod
         INTEGER :: npoints = 0
         INTEGER :: count = 0
-        CLASS(interpolation_t), POINTER :: interpol
+        CLASS(interpolation_t), POINTER, PRIVATE :: interpol
+        CHARACTER(LEN=200), PRIVATE :: interpolMethod
     CONTAINS
         PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
         PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
@@ -201,6 +201,8 @@ MODULE mo_io_eccodes
         PROCEDURE, PUBLIC :: values_as_integer => gribfield_values_as_integer
         PROCEDURE, PUBLIC :: header => gribfield_header
         PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
+        PROCEDURE, PUBLIC :: gridname => gribfield_gridname
+        PROCEDURE, PUBLIC :: interpolate => gribfield_interpolate
     END TYPE
 
     TYPE(GribField) :: reference  !internal to eccodes_t (a very simplified interface)
@@ -892,5 +894,42 @@ CONTAINS
             STOP 1
         ENDIF
     END FUNCTION
+
+    FUNCTION gribfield_gridname(this, name) RESULT(yes)
+        CLASS(GribField), INTENT(INOUT) :: this
+        CHARACTER(LEN=8), INTENT(INOUT) :: name
+        LOGICAL :: yes
+
+        CHARACTER(LEN=8) :: n
+        INTEGER :: status, global
+        REAL :: lo1
+
+        ! 'name' is only assigned if:
+        ! * the bounding box starts at Greenwich, and the grid is global (Atlas grids are named this way)
+        ! * the grid has a name (reduced_ll/regular_gg do, regular_ll do not)
+        name = ''
+
+        status = 0
+        n = ''
+        lo1 = 0
+        global  = 0
+        CALL codes_get(this%handle, 'longitudeOfFirstGridPointInDegrees', lo1)
+        CALL codes_get(this%handle, 'global', global, status)
+
+        IF (status == 0 .AND. lo1 == 0 .AND. global == 1) THEN
+            status = 0
+            CALL codes_get(this%handle, 'gridName', n, status)
+            CALL assert(status /= 0 .OR. LEN(TRIM(n)) > 0, 'gridName invalid')
+        ENDIF
+
+        yes = LEN(TRIM(n)) > 0
+        IF (yes) name = n
+    END FUNCTION
+
+    SUBROUTINE gribfield_interpolate(this, gridNameTarget)
+        CLASS(GribField), INTENT(INOUT) :: this
+        CHARACTER(LEN=*), INTENT(IN) :: gridNameTarget
+        ! help
+    END SUBROUTINE
 
 END MODULE
