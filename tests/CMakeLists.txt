@@ -8,6 +8,13 @@ foreach(_test run-no-restart run-restart)
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_test}")
 endforeach()
 
+if(HAVE_GEFF_INTERPOLATION)
+    add_test(
+        NAME "${PROJECT_NAME}_tests_run-interpolation"
+        COMMAND geff-tool
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/run-interpolation")
+endif()
+
 foreach(_test geff-daymax geff-statistics)
     add_test(
         NAME "${PROJECT_NAME}_tests_${_test}"
