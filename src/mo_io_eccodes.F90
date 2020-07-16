@@ -21,6 +21,11 @@ MODULE mo_io_eccodes
     USE mo_nfdrs
     USE mo_utilities
 
+    USE mo_interpolation
+#ifdef HAVE_GEFF_INTERPOLATION
+    USE mo_interpolation_atlas
+#endif
+
     IMPLICIT NONE
     PRIVATE
 
@@ -90,6 +95,67 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_dsr_pids(1)         = [260546]
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212027]
 
+    ! Interpolation per parameter
+    CHARACTER(LEN=50), PARAMETER :: clsm_interpol = "linear_clsm_interpol"
+    CHARACTER(LEN=50), PARAMETER :: crainclim_interpol = "linear_crainclim_interpol"
+    CHARACTER(LEN=50), PARAMETER :: crain_interpol = "linear_crain_interpol"
+    CHARACTER(LEN=50), PARAMETER :: ctemp_interpol = "linear_ctemp_interpol"
+    CHARACTER(LEN=50), PARAMETER :: cmaxtemp_interpol = "linear_cmaxtemp_interpol"
+    CHARACTER(LEN=50), PARAMETER :: cmintemp_interpol = "linear_cmintemp_interpol"
+    CHARACTER(LEN=50), PARAMETER :: crh_interpol = "linear_crh_interpol"
+    CHARACTER(LEN=50), PARAMETER :: cmaxrh_interpol = "linear_cmaxrh_interpol"
+    CHARACTER(LEN=50), PARAMETER :: cminrh_interpol = "linear_cminrh_interpol"
+    CHARACTER(LEN=50), PARAMETER :: ccc_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: csnow_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cwspeed_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cdp_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cvs_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: ccr_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfm_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cslope_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: ccv_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cmc_r1hr_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r10hr_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r100hr_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r1000hr_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rx1000_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rherb_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rwood_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rbndryt_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_ros_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_sc_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_erc_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_bi_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_ic_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_mcoi_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_loi_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_fli_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_kb_drought_index_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_drought_factor_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_moist_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_weight_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_timesincerain_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta0_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_height_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_distance_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prob_fire_danger_index_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_fwi_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_ffmc_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dmc_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dc_interpol = "linear"
+
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_isi_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_bui_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dsr_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_danger_risk_interpol = "linear"
+
     type, abstract :: io_t
     contains
         procedure(io_input), public, deferred, nopass :: input
@@ -120,8 +186,10 @@ MODULE mo_io_eccodes
         INTEGER :: paramId = 0
         CHARACTER(LEN=20) :: shortName = ''
         CHARACTER(LEN=200) :: name = ''
+        CHARACTER(LEN=200) :: interpolMethod
         INTEGER :: npoints = 0
         INTEGER :: count = 0
+        CLASS(interpolation_t), POINTER :: interpol
     CONTAINS
         PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
         PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
@@ -725,6 +793,15 @@ CONTAINS
         CALL this%close ()
         CALL codes_open_file(this%fd, file, 'r')
         CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
+
+        ! initialize interpolation
+#ifdef HAVE_GEFF_INTERPOLATION
+        this%interpol => atlas_interpol
+#else
+        this%interpol => no_interpol
+#endif
+        CALL assert(associated(this%interpol), 'interpolation: unable to initialize interpolation')
+        CALL assert(LEN(TRIM(this%interpolMethod)) > 0, 'interpolation: invalid method "'//TRIM(this%interpolMethod)//'"')
     END SUBROUTINE
 
     SUBROUTINE gribfield_open_as_output(this, file)

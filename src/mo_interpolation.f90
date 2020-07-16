@@ -21,9 +21,9 @@ module mo_interpolation
     endtype
 
     interface
-        subroutine generic_interpolate(path, data)
-            character(len=*), intent(in) :: path
-            real(kind=8), dimension(:, :), allocatable, intent(out) :: data
+        subroutine generic_interpolate(method, field)
+        character(len=*), intent(in) :: method
+        real, allocatable, intent(inout) :: field(:)
         end subroutine
     end interface
 
@@ -32,13 +32,14 @@ module mo_interpolation
         procedure, nopass :: interpolate => no_interpolation
     endtype
 
+    type(no_interpolation_t), public, target :: no_interpol
+
 contains
 
-    subroutine no_interpolation(path, data)
+    subroutine no_interpolation(method, field)
         implicit none
-
-        character(len=*), intent(in) :: path
-        real(kind=8), dimension(:, :), allocatable, intent(out) :: data
+        character(len=*), intent(in) :: method
+        real, allocatable, intent(inout) :: field(:)
 
         call assert(.false., 'no interpolation setup')
 

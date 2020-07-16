@@ -23,20 +23,15 @@ module mo_interpolation_atlas
         procedure, nopass :: interpolate => atlas_interpolate
     end type
 
+    type(atlas_interpolation_t), public, target :: atlas_interpol
+
 contains
 
-    subroutine atlas_interpolate(path, data)
+    subroutine atlas_interpolate(method, field)
         implicit none
-
-        character(len=*), intent(in) :: path
-        real(kind=8), dimension(:, :), allocatable, intent(out) :: data
-
-        !integer :: i, paramId, npoints
-        !real(kind=4), dimension(:), allocatable :: tmp  ! ecCodes I/O does not support real(kind=8)?
-
-        !type(GribField) :: grib
+        character(len=*), intent(in) :: method
+        real, allocatable, intent(inout) :: field(:)
 
         call fckit_log%info("MeMeMe!")
-
     end subroutine
 end module
