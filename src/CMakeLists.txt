@@ -7,6 +7,7 @@ add_library(geff SHARED
     mo_fire.f90
     mo_fuelmodel.f90
     mo_fwi.f90
+    mo_interpolation.F90
     mo_io_eccodes.f90
     mo_mark5.f90
     mo_nfdrs.f90
@@ -18,6 +19,12 @@ add_library(geff SHARED
 target_link_libraries(geff PUBLIC eccodes_f90)
 if (NOT TARGET eccodes_f90)
     target_include_directories(geff PUBLIC ${eccodes_MOD_PATH})
+endif()
+
+if(HAVE_GEFF_INTERPOLATION)
+    target_link_libraries(geff PUBLIC atlas_f)
+    set_source_files_properties(mo_interpolation.F90 PROPERTIES COMPILE_DEFINITIONS HAVE_GEFF_INTERPOLATION)
+    target_sources(geff PRIVATE mo_interpolation_atlas.f90)
 endif()
 
 install(TARGETS geff RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
