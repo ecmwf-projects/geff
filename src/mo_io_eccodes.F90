@@ -897,7 +897,7 @@ CONTAINS
 
     FUNCTION gribfield_gridname(this, name) RESULT(yes)
         CLASS(GribField), INTENT(INOUT) :: this
-        CHARACTER(LEN=8), INTENT(INOUT) :: name
+        CHARACTER(LEN=8), INTENT(OUT) :: name
         LOGICAL :: yes
 
         CHARACTER(LEN=8) :: n
@@ -906,7 +906,7 @@ CONTAINS
 
         ! 'name' is only assigned if:
         ! * the bounding box starts at Greenwich, and the grid is global (Atlas grids are named this way)
-        ! * the grid has a name (reduced_ll/regular_gg do, regular_ll do not)
+        ! * the grid has a name (reduced_gg/regular_gg do, regular_ll do not)
         name = ''
 
         status = 0
