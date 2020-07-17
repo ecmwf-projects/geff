@@ -17,6 +17,12 @@ Maintainers:
 - If you use this software, please cite: _Di Giuseppe, F., Pappenberger, F., Wetterhall, F., Krzeminski, B., Camia, A., Libertá, G. and San Miguel, J., 2016.
   **The potential predictability of fire danger provided by numerical weather prediction**. Journal of Applied Meteorology and Climatology, 55(11), pp.2469-2491. https://journals.ametsoc.org/doi/abs/10.1175/JAMC-D-15-0297.1
 
+### Interpolation
+
+All fields used in GEFF have to described in space in the same way (in loose terminology, share the same grid). For fields provided in different grids, GEFF has a build-time interpolation feature. By default, this feature is off (enable with -DENABLE_GEFF_INTERPOLATION=ON). Interpolation is implemented using ECMWF's Atlas library, taylored to support GEFF operationally: it supports only "canonical" global, non-rotated Gaussian grids.
+
+From the technical side and GRIB-wise: gridName must be present, longitudeOfFirstGridPointInDegrees must be 0, gridType=reduced_gg are not checked for pl array, gridType=regular_gg with Ni different to 4 * N are not supported (these are not "canonical" grids.)
+
 ### Release notes
 * 2020/03 GEFF 4.0:
 
