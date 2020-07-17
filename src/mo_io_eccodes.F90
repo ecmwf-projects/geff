@@ -194,6 +194,7 @@ MODULE mo_io_eccodes
         PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
         PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
         PROCEDURE, PUBLIC :: open_as_restart => gribfield_open_as_restart
+        PROCEDURE, PUBLIC :: open_close_as_interpolation => gribfield_open_close_as_interpolation
         PROCEDURE, PUBLIC :: next => gribfield_next
         PROCEDURE, PUBLIC :: close => gribfield_close
         PROCEDURE, PUBLIC :: coordinates => gribfield_coordinates
@@ -207,6 +208,7 @@ MODULE mo_io_eccodes
 
     TYPE(GribField) :: reference  !internal to eccodes_t (a very simplified interface)
     REAL, PARAMETER :: missingValue = rfillvalue !FIXME: -1.e20
+    CHARACTER(LEN=8), ALLOCATABLE :: interpol_list(:)
 
     TYPE(GribField), TARGET :: input(18)
 
@@ -275,7 +277,7 @@ CONTAINS
     END SUBROUTINE
 
     SUBROUTINE io_initialize
-        TYPE(GribField) :: restart
+        TYPE(GribField) :: restart, grib_interpol
         INTEGER :: i
         REAL, ALLOCATABLE :: tmp(:)
 
@@ -481,6 +483,23 @@ CONTAINS
         ENDIF
 
         DEALLOCATE (tmp)
+
+        CALL assert(.NOT. ALLOCATED(interpol_list), 'io_initialize: .NOT. ALLOCATED(interpol_list)')
+        IF (LEN(TRIM(interpolation_file)) > 0) THEN
+            ! use GRIB messages gridName as reference interpolation (paramId ignored == 0)
+            CALL grib_interpol%open_close_as_interpolation(interpolation_file, 'interpolation', (/0/), interpol_list)
+
+            CALL assert(ALLOCATED(interpol_list), 'io_initialize: ALLOCATED(interpol_list)')
+            CALL assert(SIZE(interpol_list) == ntimestep, 'io_initialize: SIZE(interpol_list) == ntimestep')
+
+            PRINT *, 'Interpolation list (gridName at time step):'
+            DO i = 1, SIZE(interpol_list)
+                CALL assert(LEN(TRIM(interpol_list(i))) > 0, 'io_initialize: empty interpol_list entry')
+                PRINT *, i, ' = ', interpol_list(i)
+            ENDDO
+        ELSE
+            ALLOCATE (interpol_list(0))
+        ENDIF
     END SUBROUTINE
 
     SUBROUTINE io_write_restart
@@ -783,28 +802,39 @@ CONTAINS
         CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' field not found')
         PRINT *, 'Found '//TRIM(var)//' field with paramId=', this%paramId
 
-        this%count = 1
-        DO WHILE (this%next())
-            this%count = this%count + 1
-            CALL codes_get(this%handle, 'paramId', i)
-            CALL codes_get(this%handle, 'numberOfDataPoints', n)
-            CALL assert(n == this%npoints .AND. i == this%paramId, &
-                        'Input fields should have the same paramId and geometry (numberOfDataPoints)')
-        ENDDO
-
-        ! end reached, re-open the file to read messages one-by-one
-        CALL this%close ()
-        CALL codes_open_file(this%fd, file, 'r')
-        CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
-
         ! initialize interpolation
 #ifdef HAVE_GEFF_INTERPOLATION
         this%interpol => atlas_interpol
 #else
         this%interpol => no_interpol
 #endif
-        CALL assert(associated(this%interpol), 'interpolation: unable to initialize interpolation')
-        CALL assert(LEN(TRIM(this%interpolMethod)) > 0, 'interpolation: invalid method "'//TRIM(this%interpolMethod)//'"')
+        CALL assert(associated(this%interpol), 'open_as_input: unable to initialize interpolation')
+
+        this%count = 1
+        IF (this%interpol%can_interpolate()) THEN
+            ! Don't check for the same number of points in the fields, assumes interpolation solves this
+            CALL assert(LEN(TRIM(this%interpolMethod)) > 0, &
+                        'open_as_input: invalid interpolation method "'//TRIM(this%interpolMethod)//'"')
+            DO WHILE (this%next())
+                this%count = this%count + 1
+                CALL codes_get(this%handle, 'paramId', i)
+                CALL assert(i == this%paramId, 'Input fields should have the same paramId')
+            ENDDO
+        ELSE
+            DO WHILE (this%next())
+                this%count = this%count + 1
+                CALL codes_get(this%handle, 'paramId', i)
+                CALL codes_get(this%handle, 'numberOfDataPoints', n)
+                CALL assert(n == this%npoints .AND. i == this%paramId, &
+                            'Input fields should have the same paramId and numberOfDataPoints')
+            ENDDO
+        ENDIF
+
+        ! end reached, re-open the file to read messages one-by-one
+        CALL this%close ()
+        CALL codes_open_file(this%fd, file, 'r')
+        CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
+
     END SUBROUTINE
 
     SUBROUTINE gribfield_open_as_output(this, file)
@@ -827,6 +857,70 @@ CONTAINS
         CALL assert(LEN(file) > 0, 'file "'//TRIM(file)//'": invalid file name')
         CALL codes_open_file(this%fd, file, 'r')
         CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
+    END SUBROUTINE
+
+    SUBROUTINE gribfield_open_close_as_interpolation(this, file, var, pids, list)
+        CLASS(GribField), INTENT(INOUT) :: this
+
+        CHARACTER(LEN=*), INTENT(IN) :: file
+        CHARACTER(LEN=*), INTENT(IN) :: var
+        INTEGER, DIMENSION(:), INTENT(IN) :: pids
+        CHARACTER(LEN=8), ALLOCATABLE, INTENT(INOUT) :: list(:)
+
+        INTEGER :: i
+        LOGICAL :: found
+        CHARACTER(LEN=8) :: name
+
+        ! initialize interpolation
+#ifdef HAVE_GEFF_INTERPOLATION
+        this%interpol => atlas_interpol
+#else
+        this%interpol => no_interpol
+#endif
+        CALL assert(associated(this%interpol), 'open_close_as_interpolation: unable to initialize interpolation')
+        CALL assert(.NOT. ALLOCATED(list), 'open_close_as_interpolation: .NOT. ALLOCATED(list)')
+
+        ! open file and read messages to the end
+        CALL codes_open_file(this%fd, file, 'r')
+        CALL assert(this%next(), 'file "'//TRIM(file)//'": '//TRIM(var)//' GRIB not found')
+
+        ! first GRIB message: get header (variable name/id and geometry), then
+        ! next GRIB messages: check gridName, increment count
+        ! user input paramId == 0 accepts anything in the GRIB message
+        CALL this%header()
+
+        found = .FALSE.
+        DO i = 1, SIZE(pids)
+            found = pids(i) == 0 .OR. this%paramId .EQ. pids(i)
+            IF (found) EXIT
+        ENDDO
+        CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' field not found')
+        PRINT *, 'Found '//TRIM(var)//' field with paramId=', this%paramId
+
+        ! count messages, check if they have gridName (assignment on 2nd pass)
+        this%count = 1
+        DO WHILE (this%next())
+            this%count = this%count + 1
+            CALL codes_get(this%handle, 'paramId', i)
+            CALL assert(i == this%paramId, 'Interpolation fields should have the same paramId')
+            CALL assert(this%gridname(name), 'Interpolation fields should have gridName')
+        ENDDO
+        CALL this%close ()
+
+        ! re-open and read messages to the end, assign gridNames to list, leave closed
+        ! (this subroutine is not intended to be followed by close())
+        CALL assert(this%count > 0, 'open_close_as_interpolation: this%count > 0')
+        ALLOCATE (list(this%count))
+
+        CALL codes_open_file(this%fd, file, 'r')
+        this%count = 0
+        DO WHILE (this%next())
+            this%count = this%count + 1
+            CALL assert(this%gridname(list(this%count)), 'Interpolation fields should have gridName')
+        ENDDO
+        CALL this%close ()
+
+        CALL assert(ALLOCATED(list), 'open_close_as_interpolation: ALLOCATED(list)')
     END SUBROUTINE
 
     SUBROUTINE write_field(fd, paramid, values)
@@ -913,7 +1007,7 @@ CONTAINS
         status = 0
         n = ''
         lo1 = 0
-        global  = 0
+        global = 0
         CALL codes_get(this%handle, 'longitudeOfFirstGridPointInDegrees', lo1)
         CALL codes_get(this%handle, 'global', global, status)
 
