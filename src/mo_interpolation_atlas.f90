@@ -21,6 +21,7 @@ module mo_interpolation_atlas
     type, public, extends(interpolation_t) :: atlas_interpolation_t
     contains
         procedure, nopass :: interpolate => atlas_interpolate
+        procedure, nopass :: can_interpolate => atlas_can_interpolate
     end type
 
     type(atlas_interpolation_t), public, target :: atlas_interpol
@@ -34,4 +35,11 @@ contains
 
         call fckit_log%info("MeMeMe!")
     end subroutine
+
+    function atlas_can_interpolate()
+        implicit none
+        logical :: atlas_can_interpolate
+        atlas_can_interpolate = .true.
+    end function
 end module
+
