@@ -280,12 +280,16 @@ CONTAINS
         TYPE(GribField) :: restart, grib_interpol
         INTEGER :: i
         REAL, ALLOCATABLE :: tmp(:)
+        LOGICAL ::  check_gridname
 
         ! use land-sea mask to define geometry
         CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
 
         npoints = grib_lsm%npoints
         PRINT *, 'Number of points: ', npoints
+
+        check_gridname = LEN(TRIM(interpolation_file)) > 0
+        PRINT *, 'Check gridname: ', check_gridname
 
         CALL assert(npoints > 0)
         ALLOCATE (lats(npoints))
@@ -294,23 +298,23 @@ CONTAINS
         CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
         CALL grib_lsm%coordinates(lats, lons)
 
-        CALL grib_temp%open_as_input(tempfile, 'temperature', itemp_pids)
-        CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', imaxtemp_pids)
-        CALL grib_mintemp%open_as_input(mintempfile, 'minimum daily temperature', imintemp_pids)
-        CALL grib_rh%open_as_input(rhfile, 'relative humidity', irh_pids)
-        CALL grib_maxrh%open_as_input(maxrhfile, 'maximum daily relative humidity', imaxrh_pids)
-        CALL grib_minrh%open_as_input(minrhfile, 'minimum daily relative humidity', iminrh_pids)
-        CALL grib_rain%open_as_input(rainfile, 'rainfall', irain_pids)
-        CALL grib_cc%open_as_input(ccfile, 'cloud cover', icc_pids)
-        CALL grib_wspeed%open_as_input(wspeedfile, 'wind speed', iwspeed_pids)
-        CALL grib_snow%open_as_input(snowfile, 'ground snow', isnow_pids)
-        CALL grib_dp%open_as_input(dpfile, 'duration of precipitation in the previous 24h', idp_pids)
-        CALL grib_vs%open_as_input(vsfile, 'vegetation stage', ivs_pids)
-        CALL grib_cr%open_as_input(crfile, 'climate region', icr_pids)
-        CALL grib_fm%open_as_input(fmfile, 'fuel model', ifm_pids)
-        CALL grib_slope%open_as_input(slopefile, 'slope of sub-gridscale orography', islope_pids)
-        CALL grib_cv%open_as_input(cvfile, 'fractional coverage for vegetation (high + low)', icv_pids)
-        CALL grib_rainclim%open_as_input(rainclimfile, 'climate rainfall', irainclim_pids)
+        CALL grib_temp%open_as_input(tempfile, 'temperature', itemp_pids, check_gridname)
+        CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', imaxtemp_pids, check_gridname)
+        CALL grib_mintemp%open_as_input(mintempfile, 'minimum daily temperature', imintemp_pids, check_gridname)
+        CALL grib_rh%open_as_input(rhfile, 'relative humidity', irh_pids, check_gridname)
+        CALL grib_maxrh%open_as_input(maxrhfile, 'maximum daily relative humidity', imaxrh_pids, check_gridname)
+        CALL grib_minrh%open_as_input(minrhfile, 'minimum daily relative humidity', iminrh_pids, check_gridname)
+        CALL grib_rain%open_as_input(rainfile, 'rainfall', irain_pids, check_gridname)
+        CALL grib_cc%open_as_input(ccfile, 'cloud cover', icc_pids, check_gridname)
+        CALL grib_wspeed%open_as_input(wspeedfile, 'wind speed', iwspeed_pids, check_gridname)
+        CALL grib_snow%open_as_input(snowfile, 'ground snow', isnow_pids, check_gridname)
+        CALL grib_dp%open_as_input(dpfile, 'duration of precipitation in the previous 24h', idp_pids, check_gridname)
+        CALL grib_vs%open_as_input(vsfile, 'vegetation stage', ivs_pids, check_gridname)
+        CALL grib_cr%open_as_input(crfile, 'climate region', icr_pids, check_gridname)
+        CALL grib_fm%open_as_input(fmfile, 'fuel model', ifm_pids, check_gridname)
+        CALL grib_slope%open_as_input(slopefile, 'slope of sub-gridscale orography', islope_pids, check_gridname)
+        CALL grib_cv%open_as_input(cvfile, 'fractional coverage for vegetation (high + low)', icv_pids, check_gridname)
+        CALL grib_rainclim%open_as_input(rainclimfile, 'climate rainfall', irainclim_pids, check_gridname)
 
         ! fields/variables defined in time (SIZE() = ntimestep)
         ntimestep = MAXVAL(input(:)%count)
@@ -775,15 +779,22 @@ CONTAINS
         this%fd = 0
     END SUBROUTINE
 
-    SUBROUTINE gribfield_open_as_input(this, file, var, pids)
+    SUBROUTINE gribfield_open_as_input(this, file, var, pids, check_gridname)
         CLASS(GribField), INTENT(INOUT) :: this
 
         CHARACTER(LEN=*), INTENT(IN) :: file
         CHARACTER(LEN=*), INTENT(IN) :: var
         INTEGER, DIMENSION(:), INTENT(IN) :: pids
+        LOGICAL, INTENT(IN), OPTIONAL :: check_gridname
 
         INTEGER :: i, n
-        LOGICAL :: found
+        LOGICAL :: found, check_for_gridname
+        CHARACTER(LEN=8) :: name
+
+        check_for_gridname = .FALSE.
+        IF (PRESENT(check_gridname)) THEN
+            check_for_gridname = check_gridname
+        ENDIF
 
         ! open file and read messages to the end
         CALL codes_open_file(this%fd, file, 'r')
@@ -811,14 +822,15 @@ CONTAINS
         CALL assert(associated(this%interpol), 'open_as_input: unable to initialize interpolation')
 
         this%count = 1
-        IF (this%interpol%can_interpolate()) THEN
-            ! Don't check for the same number of points in the fields, assumes interpolation solves this
+        IF (check_for_gridname) THEN
+            ! Check for gridName instead of number of points (ability to support interpolation)
             CALL assert(LEN(TRIM(this%interpolMethod)) > 0, &
                         'open_as_input: invalid interpolation method "'//TRIM(this%interpolMethod)//'"')
             DO WHILE (this%next())
                 this%count = this%count + 1
                 CALL codes_get(this%handle, 'paramId', i)
                 CALL assert(i == this%paramId, 'Input fields should have the same paramId')
+                CALL assert(this%gridname(name), 'Input fields should have a gridName')
             ENDDO
         ELSE
             DO WHILE (this%next())
