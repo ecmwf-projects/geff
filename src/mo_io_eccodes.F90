@@ -774,9 +774,10 @@ CONTAINS
         ! next GRIB messages: confirm numberOfDataPoints, increment count
         CALL this%header()
 
+        ! user input paramId == 0 accepts anything in the GRIB message
         found = .FALSE.
         DO i = 1, SIZE(pids)
-            found = this%paramId .EQ. pids(i)
+            found = pids(i) == 0 .OR. this%paramId .EQ. pids(i)
             IF (found) EXIT
         ENDDO
         CALL assert(found, 'file "'//TRIM(file)//'": '//TRIM(var)//' field not found')
