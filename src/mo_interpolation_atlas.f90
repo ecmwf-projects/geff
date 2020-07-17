@@ -28,10 +28,11 @@ module mo_interpolation_atlas
 
 contains
 
-    subroutine atlas_interpolate(method, field)
+    subroutine atlas_interpolate(method, gridA, gridB, fieldA, fieldB)
         implicit none
-        character(len=*), intent(in) :: method
-        real, allocatable, intent(inout) :: field(:)
+        character(len=*), intent(in) :: method, gridA, gridB
+        real, intent(in) :: fieldA(:)
+        real, intent(inout) :: fieldB(:)
 
         call fckit_log%info("MeMeMe!")
     end subroutine

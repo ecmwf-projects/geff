@@ -96,65 +96,65 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212027]
 
     ! Interpolation per parameter
-    CHARACTER(LEN=50), PARAMETER :: clsm_interpol = "linear_clsm_interpol"
-    CHARACTER(LEN=50), PARAMETER :: crainclim_interpol = "linear_crainclim_interpol"
-    CHARACTER(LEN=50), PARAMETER :: crain_interpol = "linear_crain_interpol"
-    CHARACTER(LEN=50), PARAMETER :: ctemp_interpol = "linear_ctemp_interpol"
-    CHARACTER(LEN=50), PARAMETER :: cmaxtemp_interpol = "linear_cmaxtemp_interpol"
-    CHARACTER(LEN=50), PARAMETER :: cmintemp_interpol = "linear_cmintemp_interpol"
-    CHARACTER(LEN=50), PARAMETER :: crh_interpol = "linear_crh_interpol"
-    CHARACTER(LEN=50), PARAMETER :: cmaxrh_interpol = "linear_cmaxrh_interpol"
-    CHARACTER(LEN=50), PARAMETER :: cminrh_interpol = "linear_cminrh_interpol"
-    CHARACTER(LEN=50), PARAMETER :: ccc_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: csnow_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cwspeed_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cdp_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cvs_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: ccr_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfm_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cslope_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: ccv_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: clsm_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: crainclim_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: crain_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: ctemp_interpol = "nearest-neighbour"  ! "finite-element"
+    CHARACTER(LEN=50), PARAMETER :: cmaxtemp_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmintemp_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: crh_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmaxrh_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cminrh_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: ccc_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: csnow_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cwspeed_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cdp_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cvs_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: ccr_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfm_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cslope_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: ccv_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cmc_r1hr_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_r10hr_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_r100hr_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_r1000hr_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rx1000_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rherb_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rwood_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rbndryt_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r1hr_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r10hr_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r100hr_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_r1000hr_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rx1000_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rherb_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rwood_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmc_rbndryt_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_ros_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_sc_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_erc_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_bi_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_ros_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_sc_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_erc_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prop_bi_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_ic_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_mcoi_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_loi_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_fli_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_ic_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_mcoi_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_loi_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfire_prob_fli_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_kb_drought_index_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_drought_factor_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_moist_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_weight_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_timesincerain_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_kb_drought_index_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_drought_factor_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_moist_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_weight_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_timesincerain_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta0_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_height_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_distance_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prob_fire_danger_index_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta0_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_height_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_distance_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cmark5_prob_fire_danger_index_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_fwi_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_ffmc_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dmc_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dc_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_fwi_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_ffmc_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dmc_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dc_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_isi_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_bui_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dsr_interpol = "linear"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_danger_risk_interpol = "linear"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_isi_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_bui_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dsr_interpol = "nearest-neighbour"
+    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_danger_risk_interpol = "nearest-neighbour"
 
     type, abstract :: io_t
     contains
@@ -209,6 +209,7 @@ MODULE mo_io_eccodes
     TYPE(GribField) :: reference  !internal to eccodes_t (a very simplified interface)
     REAL, PARAMETER :: missingValue = rfillvalue !FIXME: -1.e20
     CHARACTER(LEN=8), ALLOCATABLE :: interpol_list(:)
+    INTEGER, ALLOCATABLE :: interpol_npoints(:)
 
     TYPE(GribField), TARGET :: input(18)
 
@@ -236,39 +237,74 @@ CONTAINS
     SUBROUTINE io_getdata(istep)
         INTEGER, INTENT(IN) :: istep
         REAL, ALLOCATABLE :: tmp(:)
+        CHARACTER(LEN=8) :: name
 
         CALL assert(npoints > 0)
         IF (istep == 1) RETURN
 
-        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain)
-        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp)
-        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp)
-        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp)
-        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh)
-        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
-        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh)
-        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc)
-        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
-        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow)
-        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp)
+        ! if interpolation is active, pick current step gridname;
+        ! in next_values, this is compared to the obtained gridName; interpolation happens if it differs
+        name = ''
+        IF (SIZE(interpol_list) > 0) THEN
+            CALL assert(SIZE(interpol_list) == SIZE(interpol_npoints), 'io_getdata: SIZE(interpol_list)==SIZE(interpol_npoints)')
+            CALL assert(1 < istep .AND. istep <= SIZE(interpol_list), 'io_getdata: 0 < istep .AND. istep <= SIZE(interpol_list)')
+            name = interpol_list(istep)
+            CALL assert(LEN(TRIM(name)) > 0, 'io_getdata: LEN(TRIM(name)) > 0')
+            npoints = interpol_npoints(istep)
+            CALL assert(npoints > 0, 'io_getdata: npoints > 0')
+        ENDIF
+
+        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain, name)
+        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp, name)
+        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, name)
+        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, name)
+        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh, name)
+        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, name)
+        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh, name)
+        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc, name)
+        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, name)
+        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow, name)
+        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp, name)
 
         IF (grib_vs%count > 1) THEN
             ALLOCATE (tmp(npoints))
-            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp)
+            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp, name)
             ivs = tmp
             DEALLOCATE (tmp)
         ENDIF
     END SUBROUTINE
 
-    SUBROUTINE next_values(message, grib, paramId, values)
+    SUBROUTINE next_values(message, grib, paramId, values, gridNameB)
         CHARACTER(LEN=*), INTENT(IN) :: message
         TYPE(GribField), INTENT(INOUT) :: grib
         INTEGER, INTENT(IN) :: paramId
         REAL, INTENT(INOUT), ALLOCATABLE :: values(:)
+        CHARACTER(LEN=8), INTENT(IN) :: gridNameB
+
+        REAL, ALLOCATABLE :: valuesA(:)
+        CHARACTER(LEN=8) :: gridNameA
+
         CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
 
         CALL assert(grib%next(), message//' grib%next()')
         CALL grib%header()
+
+        IF (LEN(TRIM(gridNameB)) > 0) THEN
+            CALL assert(grib%gridname(gridNameA), message//' grib%gridname(gridNameA)')
+            IF (gridNameA == gridNameB) THEN
+                ! but no interpolation needed, (even if (gridName passed in)
+            ELSE
+                ! interpolate gridName|A -> gridName|B, passing in values|A
+                ALLOCATE (valuesA(grib%npoints))
+                CALL grib%values(valuesA)
+                CALL grib%interpol%interpolate(grib%interpolMethod, gridNameA, gridNameB, valuesA, values)
+                DEALLOCATE (valuesA)
+
+                CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
+                CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
+                RETURN
+            ENDIF
+        ENDIF
 
         CALL assert(grib%npoints == npoints, message//' grib%npoints == npoints')
         CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
@@ -277,18 +313,51 @@ CONTAINS
     END SUBROUTINE
 
     SUBROUTINE io_initialize
-        TYPE(GribField) :: restart, grib_interpol
+        TYPE(GribField) :: restart, interpol
         INTEGER :: i
         REAL, ALLOCATABLE :: tmp(:)
-        LOGICAL ::  check_gridname
+        LOGICAL :: check_gridname, interpol_available
+        CHARACTER(LEN=8) :: name
 
-        ! use land-sea mask to define geometry
-        CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
+        ! if interpolation_file IS set: that defines the geometry for all other fields
+        ! if interpolation_file IS NOT set: land-sea mask defines geometry
 
-        npoints = grib_lsm%npoints
+        CALL assert(.NOT. ALLOCATED(interpol_list), 'io_initialize: .NOT. ALLOCATED(interpol_list)')
+        CALL assert(.NOT. ALLOCATED(interpol_npoints), 'io_initialize: .NOT. ALLOCATED(interpol_npoints)')
+        IF (LEN(TRIM(interpolation_file)) > 0) THEN
+            ! (interpolation_file IS set)
+
+            CALL interpol%open_close_as_interpolation(interpolation_file, 'interpolation', (/0/), &
+                                                      interpol_list, interpol_npoints)
+            CALL assert(ALLOCATED(interpol_list), 'io_initialize: ALLOCATED(interpol_list)')
+            CALL assert(ALLOCATED(interpol_npoints), 'io_initialize: ALLOCATED(interpol_npoints)')
+            CALL assert(SIZE(interpol_list) == SIZE(interpol_npoints), &
+                        'io_initialize: SIZE(interpol_list)==SIZE(interpol_npoints)')
+
+            PRINT *, 'Interpolation list (step -> gridName -> #points):'
+            DO i = 1, SIZE(interpol_list)
+                CALL assert(LEN(TRIM(interpol_list(i))) > 0, 'io_initialize: LEN(TRIM(interpol_list(i))) > 0')
+                PRINT *, i, ' -> ', interpol_list(i), ' -> ', interpol_npoints(i)
+            ENDDO
+
+            name = interpol_list(1)
+
+            CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
+            npoints = interpol%npoints
+
+        ELSE
+            ! (interpolation_file IS NOT set)
+
+            ALLOCATE (interpol_list(0))
+            name = ''
+
+            CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
+            npoints = grib_lsm%npoints
+        ENDIF
+
+        check_gridname = LEN(TRIM(name)) > 0
+        interpol_available = check_gridname
         PRINT *, 'Number of points: ', npoints
-
-        check_gridname = LEN(TRIM(interpolation_file)) > 0
         PRINT *, 'Check gridname: ', check_gridname
 
         CALL assert(npoints > 0)
@@ -316,11 +385,33 @@ CONTAINS
         CALL grib_cv%open_as_input(cvfile, 'fractional coverage for vegetation (high + low)', icv_pids, check_gridname)
         CALL grib_rainclim%open_as_input(rainclimfile, 'climate rainfall', irainclim_pids, check_gridname)
 
+        grib_lsm%interpolMethod = clsm_interpol
+        grib_rain%interpolMethod = crain_interpol
+        grib_temp%interpolMethod = ctemp_interpol
+        grib_maxtemp%interpolMethod = cmaxtemp_interpol
+        grib_mintemp%interpolMethod = cmintemp_interpol
+        grib_rh%interpolMethod = crh_interpol
+        grib_maxrh%interpolMethod = cmaxrh_interpol
+        grib_minrh%interpolMethod = cminrh_interpol
+        grib_cc%interpolMethod = ccc_interpol
+        grib_wspeed%interpolMethod = cwspeed_interpol
+        grib_snow%interpolMethod = csnow_interpol
+        grib_dp%interpolMethod = cdp_interpol
+        grib_vs%interpolMethod = cvs_interpol
+        grib_cr%interpolMethod = ccr_interpol
+        grib_fm%interpolMethod = cfm_interpol
+        grib_slope%interpolMethod = cslope_interpol
+        grib_cv%interpolMethod = ccv_interpol
+        grib_rainclim%interpolMethod = crainclim_interpol
+
         ! fields/variables defined in time (SIZE() = ntimestep)
         ntimestep = MAXVAL(input(:)%count)
         PRINT *, 'Number of time steps: ', ntimestep
 
         CALL assert(ntimestep > 0, "io_initialize: ntimestep > 0")
+        CALL assert(SIZE(interpol_list) == ntimestep .OR. SIZE(interpol_list) == 0, &
+                    'io_initialize: SIZE(interpol_list) == ntimestep .OR. SIZE(interpol_list) == 0')
+
         ALLOCATE (nhours(ntimestep))
         DO i = 1, ntimestep
             nhours(i) = (i - 1)*dt
@@ -331,7 +422,7 @@ CONTAINS
         ALLOCATE (tmp(npoints))
 
         DO i = 1, SIZE(input)
-            IF (i > 1) CALL assert(input(i)%same_geometry(input(1)))
+            IF (i > 1 .AND. .NOT. interpol_available) CALL assert(input(i)%same_geometry(input(1)))
             CALL assert(input(i)%count == 1 .OR. input(i)%count == ntimestep)
         ENDDO
 
@@ -340,58 +431,58 @@ CONTAINS
         CALL grib_lsm%values(rlsm)
 
         ALLOCATE (rrain(npoints))
-        CALL next_values('io_initialize: grib_rain', grib_rain, grib_rain%paramId, rrain)
+        CALL next_values('io_initialize: grib_rain', grib_rain, grib_rain%paramId, rrain, name)
 
         ALLOCATE (rtemp(npoints))
-        CALL next_values('io_initialize: grib_temp', grib_temp, grib_temp%paramId, rtemp)
+        CALL next_values('io_initialize: grib_temp', grib_temp, grib_temp%paramId, rtemp, name)
 
         ALLOCATE (rmaxtemp(npoints))
-        CALL next_values('io_initialize: grib_maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp)
+        CALL next_values('io_initialize: grib_maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, name)
 
         ALLOCATE (rmintemp(npoints))
-        CALL next_values('io_initialize: grib_mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp)
+        CALL next_values('io_initialize: grib_mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, name)
 
         ALLOCATE (rrh(npoints))
-        CALL next_values('io_initialize: grib_rh', grib_rh, grib_rh%paramId, rrh)
+        CALL next_values('io_initialize: grib_rh', grib_rh, grib_rh%paramId, rrh, name)
 
         ALLOCATE (rmaxrh(npoints))
-        CALL next_values('io_initialize: grib_maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh)
+        CALL next_values('io_initialize: grib_maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, name)
 
         ALLOCATE (rminrh(npoints))
-        CALL next_values('io_initialize: grib_minrh', grib_minrh, grib_minrh%paramId, rminrh)
+        CALL next_values('io_initialize: grib_minrh', grib_minrh, grib_minrh%paramId, rminrh, name)
 
         ALLOCATE (rcc(npoints))
-        CALL next_values('io_initialize: grib_cc', grib_cc, grib_cc%paramId, rcc)
+        CALL next_values('io_initialize: grib_cc', grib_cc, grib_cc%paramId, rcc, name)
 
         ALLOCATE (rwspeed(npoints))
-        CALL next_values('io_initialize: grib_wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed)
+        CALL next_values('io_initialize: grib_wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, name)
 
         ALLOCATE (rsnow(npoints))
-        CALL next_values('io_initialize: grib_snow', grib_snow, grib_snow%paramId, rsnow)
+        CALL next_values('io_initialize: grib_snow', grib_snow, grib_snow%paramId, rsnow, name)
 
         ALLOCATE (rdp(npoints))
-        CALL next_values('io_initialize: grib_dp', grib_dp, grib_dp%paramId, rdp)
+        CALL next_values('io_initialize: grib_dp', grib_dp, grib_dp%paramId, rdp, name)
 
         ALLOCATE (rcv(npoints))
-        CALL next_values('io_initialize: grib_cv', grib_cv, grib_cv%paramId, rcv)
+        CALL next_values('io_initialize: grib_cv', grib_cv, grib_cv%paramId, rcv, name)
 
         ALLOCATE (rrainclim(npoints))
-        CALL next_values('io_initialize: grib_rainclim', grib_rainclim, grib_rainclim%paramId, rrainclim)
+        CALL next_values('io_initialize: grib_rainclim', grib_rainclim, grib_rainclim%paramId, rrainclim, name)
 
         ALLOCATE (ivs(npoints))
-        CALL next_values('io_initialize: grib_vs', grib_vs, grib_vs%paramId, tmp)
+        CALL next_values('io_initialize: grib_vs', grib_vs, grib_vs%paramId, tmp, name)
         ivs = tmp
 
         ALLOCATE (icr(npoints))
-        CALL next_values('io_initialize: grib_cr', grib_cr, grib_cr%paramId, tmp)
+        CALL next_values('io_initialize: grib_cr', grib_cr, grib_cr%paramId, tmp, name)
         icr = tmp
 
         ALLOCATE (ifm(npoints))
-        CALL next_values('io_initialize: grib_fm', grib_fm, grib_fm%paramId, tmp)
+        CALL next_values('io_initialize: grib_fm', grib_fm, grib_fm%paramId, tmp, name)
         ifm = tmp
 
         ALLOCATE (islope(npoints))
-        CALL next_values('io_initialize: grib_slope', grib_slope, grib_slope%paramId, tmp)
+        CALL next_values('io_initialize: grib_slope', grib_slope, grib_slope%paramId, tmp, name)
         islope = tmp
 
         ALLOCATE (mc(npoints))
@@ -407,43 +498,43 @@ CONTAINS
 
             CALL restart%open_as_restart(restart_file)
 
-            CALL next_values('restart mc%r1hr', restart, imc_r1hr_pids(1), tmp)
+            CALL next_values('restart mc%r1hr', restart, imc_r1hr_pids(1), tmp, name)
             mc(:)%r1hr = tmp
 
-            CALL next_values('restart mc%r10hr', restart, imc_r10hr_pids(1), tmp)
+            CALL next_values('restart mc%r10hr', restart, imc_r10hr_pids(1), tmp, name)
             mc(:)%r10hr = tmp
 
-            CALL next_values('restart mc%r100hr', restart, imc_r100hr_pids(1), tmp)
+            CALL next_values('restart mc%r100hr', restart, imc_r100hr_pids(1), tmp, name)
             mc(:)%r100hr = tmp
 
-            CALL next_values('restart mc%r1000hr', restart, imc_r1000hr_pids(1), tmp)
+            CALL next_values('restart mc%r1000hr', restart, imc_r1000hr_pids(1), tmp, name)
             mc(:)%r1000hr = tmp
 
-            CALL next_values('restart mc%rherb', restart, imc_rherb_pids(1), tmp)
+            CALL next_values('restart mc%rherb', restart, imc_rherb_pids(1), tmp, name)
             mc(:)%rherb = tmp
 
-            CALL next_values('restart mc%rwood', restart, imc_rwood_pids(1), tmp)
+            CALL next_values('restart mc%rwood', restart, imc_rwood_pids(1), tmp, name)
             mc(:)%rwood = tmp
 
-            CALL next_values('restart mc%rx1000', restart, imc_rx1000_pids(1), tmp)
+            CALL next_values('restart mc%rx1000', restart, imc_rx1000_pids(1), tmp, name)
             mc(:)%rx1000 = tmp
 
-            CALL next_values('restart mc%rbndryt', restart, imc_rbndryt_pids(1), tmp)
+            CALL next_values('restart mc%rbndryt', restart, imc_rbndryt_pids(1), tmp, name)
             mc(:)%rbndryt = tmp
 
-            CALL next_values('restart mark5_fuel%kb_drought_index', restart, imark5_fuel_kb_drought_index_pids(1), tmp)
+            CALL next_values('restart mark5_fuel%kb_drought_index', restart, imark5_fuel_kb_drought_index_pids(1), tmp, name)
             mark5_fuel(:)%kb_drought_index = tmp
 
-            CALL next_values('restart mark5_fuel%timesincerain', restart, imark5_fuel_timesincerain_pids(1), tmp)
+            CALL next_values('restart mark5_fuel%timesincerain', restart, imark5_fuel_timesincerain_pids(1), tmp, name)
             mark5_fuel(:)%timesincerain = tmp
 
-            CALL next_values('restart fwi_risk%ffmc', restart, ifwi_risk_ffmc_pids(1), tmp)
+            CALL next_values('restart fwi_risk%ffmc', restart, ifwi_risk_ffmc_pids(1), tmp, name)
             fwi_risk(:)%ffmc = tmp
 
-            CALL next_values('restart fwi_risk%dmc', restart, ifwi_risk_dmc_pids(1), tmp)
+            CALL next_values('restart fwi_risk%dmc', restart, ifwi_risk_dmc_pids(1), tmp, name)
             fwi_risk(:)%dmc = tmp
 
-            CALL next_values('restart fwi_risk%dc', restart, ifwi_risk_dc_pids(1), tmp)
+            CALL next_values('restart fwi_risk%dc', restart, ifwi_risk_dc_pids(1), tmp, name)
             fwi_risk(:)%dc = tmp
 
             CALL restart%close ()
@@ -487,23 +578,6 @@ CONTAINS
         ENDIF
 
         DEALLOCATE (tmp)
-
-        CALL assert(.NOT. ALLOCATED(interpol_list), 'io_initialize: .NOT. ALLOCATED(interpol_list)')
-        IF (LEN(TRIM(interpolation_file)) > 0) THEN
-            ! use GRIB messages gridName as reference interpolation (paramId ignored == 0)
-            CALL grib_interpol%open_close_as_interpolation(interpolation_file, 'interpolation', (/0/), interpol_list)
-
-            CALL assert(ALLOCATED(interpol_list), 'io_initialize: ALLOCATED(interpol_list)')
-            CALL assert(SIZE(interpol_list) == ntimestep, 'io_initialize: SIZE(interpol_list) == ntimestep')
-
-            PRINT *, 'Interpolation list (gridName at time step):'
-            DO i = 1, SIZE(interpol_list)
-                CALL assert(LEN(TRIM(interpol_list(i))) > 0, 'io_initialize: empty interpol_list entry')
-                PRINT *, i, ' = ', interpol_list(i)
-            ENDDO
-        ELSE
-            ALLOCATE (interpol_list(0))
-        ENDIF
     END SUBROUTINE
 
     SUBROUTINE io_write_restart
@@ -871,17 +945,21 @@ CONTAINS
         CALL assert(this%fd /= 0, 'file "'//TRIM(file)//'": GRIB codes_open_file (r)')
     END SUBROUTINE
 
-    SUBROUTINE gribfield_open_close_as_interpolation(this, file, var, pids, list)
+    SUBROUTINE gribfield_open_close_as_interpolation(this, file, var, pids, list, npts)
         CLASS(GribField), INTENT(INOUT) :: this
 
         CHARACTER(LEN=*), INTENT(IN) :: file
         CHARACTER(LEN=*), INTENT(IN) :: var
         INTEGER, DIMENSION(:), INTENT(IN) :: pids
-        CHARACTER(LEN=8), ALLOCATABLE, INTENT(INOUT) :: list(:)
+        CHARACTER(LEN=8), ALLOCATABLE, INTENT(OUT) :: list(:)
+        INTEGER, ALLOCATABLE, INTENT(OUT) :: npts(:)
 
         INTEGER :: i
         LOGICAL :: found
         CHARACTER(LEN=8) :: name
+
+        CALL assert(.NOT. ALLOCATED(list), 'open_close_as_interpolation: .NOT. ALLOCATED(list)')
+        CALL assert(.NOT. ALLOCATED(npts), 'open_close_as_interpolation: .NOT. ALLOCATED(npts)')
 
         ! initialize interpolation
 #ifdef HAVE_GEFF_INTERPOLATION
@@ -890,7 +968,7 @@ CONTAINS
         this%interpol => no_interpol
 #endif
         CALL assert(associated(this%interpol), 'open_close_as_interpolation: unable to initialize interpolation')
-        CALL assert(.NOT. ALLOCATED(list), 'open_close_as_interpolation: .NOT. ALLOCATED(list)')
+        CALL assert(this%interpol%can_interpolate(), 'open_close_as_interpolation: unable to interpolate')
 
         ! open file and read messages to the end
         CALL codes_open_file(this%fd, file, 'r')
@@ -923,16 +1001,17 @@ CONTAINS
         ! (this subroutine is not intended to be followed by close())
         CALL assert(this%count > 0, 'open_close_as_interpolation: this%count > 0')
         ALLOCATE (list(this%count))
+        ALLOCATE (npts(this%count))
 
         CALL codes_open_file(this%fd, file, 'r')
         this%count = 0
         DO WHILE (this%next())
             this%count = this%count + 1
             CALL assert(this%gridname(list(this%count)), 'Interpolation fields should have gridName')
+            CALL codes_get(this%handle, 'numberOfDataPoints', npts(this%count))
+            CALL assert(npts(this%count) > 0, 'Interpolation fields should have numberOfDataPoints > 0')
         ENDDO
         CALL this%close ()
-
-        CALL assert(ALLOCATED(list), 'open_close_as_interpolation: ALLOCATED(list)')
     END SUBROUTINE
 
     SUBROUTINE write_field(fd, paramid, values)

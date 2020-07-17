@@ -22,9 +22,10 @@ module mo_interpolation
     endtype
 
     interface
-        subroutine generic_interpolate(method, field)
-            character(len=*), intent(in) :: method
-            real, allocatable, intent(inout) :: field(:)
+        subroutine generic_interpolate(method, gridA, gridB, fieldA, fieldB)
+            character(len=*), intent(in) :: method, gridA, gridB
+            real, intent(in) :: fieldA(:)
+            real, intent(inout) :: fieldB(:)
         end subroutine
         function generic_can_interpolate()
             logical :: generic_can_interpolate
@@ -41,10 +42,11 @@ module mo_interpolation
 
 contains
 
-    subroutine no_interpolation_interpolate(method, field)
+    subroutine no_interpolation_interpolate(method, gridA, gridB, fieldA, fieldB)
         implicit none
-        character(len=*), intent(in) :: method
-        real, allocatable, intent(inout) :: field(:)
+        character(len=*), intent(in) :: method, gridA, gridB
+        real, intent(in) :: fieldA(:)
+        real, intent(inout) :: fieldB(:)
 
         call assert(.false., 'interpolate: no interpolation setup')
     end subroutine
