@@ -42,25 +42,25 @@ contains
         type(atlas_Mesh) :: meshA, meshB
         type(atlas_MeshGenerator) :: gen
 
-        call fckit_log%info("interpolate...")
+        call fckit_log%debug("GEFF interpolate...")
 
-        call fckit_log%info("atlas_MeshGenerator")
+        call fckit_log%debug("GEFF atlas_MeshGenerator")
         cfg1 = atlas_Config()
         call cfg1%set("type", "structured")
         call cfg1%set("3d", .true.)
         gen = atlas_MeshGenerator(cfg1)
 
-        call fckit_log%info("atlas_functionspace_NodeColumns(meshA("//TRIM(gridA)//"))")
+        call fckit_log%debug("GEFF atlas_functionspace_NodeColumns(meshA("//TRIM(gridA)//"))")
         A = atlas_StructuredGrid(gridA)
         meshA = gen%generate(A)
         fsA = atlas_functionspace_NodeColumns(meshA)
 
-        call fckit_log%info("atlas_functionspace_NodeColumns(meshB("//TRIM(gridB)//"))")
+        call fckit_log%debug("GEFF atlas_functionspace_NodeColumns(meshB("//TRIM(gridB)//"))")
         B = atlas_StructuredGrid(gridB)
         meshB = gen%generate(B)
         fsB = atlas_functionspace_NodeColumns(meshB)
 
-        call fckit_log%info("atlas_Interpolation("//TRIM(method)//", fsA, fsB)")
+        call fckit_log%debug("GEFF atlas_Interpolation("//TRIM(method)//", fsA, fsB)")
         cfg2 = atlas_Config()
         call cfg2%set("type", method)
         interpol = atlas_Interpolation(cfg2, fsA, fsB)
@@ -70,7 +70,7 @@ contains
         call interpol%execute(fA, fB)
         call interpol%final()  ! is this necessary?
 
-        call fckit_log%info("interpolate.")
+        call fckit_log%debug("GEFF interpolate.")
     end subroutine
 
     function atlas_can_interpolate()
