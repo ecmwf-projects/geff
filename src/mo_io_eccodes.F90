@@ -96,65 +96,109 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifwi_risk_danger_risk_pids(1) = [212027]
 
     ! Interpolation per parameter
-    CHARACTER(LEN=50), PARAMETER :: clsm_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: crainclim_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: crain_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: ctemp_interpol = "nearest-neighbour"  ! "finite-element"
-    CHARACTER(LEN=50), PARAMETER :: cmaxtemp_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmintemp_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: crh_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmaxrh_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cminrh_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: ccc_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: csnow_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cwspeed_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cdp_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cvs_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: ccr_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfm_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cslope_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: ccv_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        clsm_interpol = "nearest-neighbour", &
+        crainclim_interpol = "nearest-neighbour", &
+        crain_interpol = "nearest-neighbour", &
+        ctemp_interpol = "nearest-neighbour", &  ! "finite-element"
+        cmaxtemp_interpol = "nearest-neighbour", &
+        cmintemp_interpol = "nearest-neighbour", &
+        crh_interpol = "nearest-neighbour", &
+        cmaxrh_interpol = "nearest-neighbour", &
+        cminrh_interpol = "nearest-neighbour", &
+        ccc_interpol = "nearest-neighbour", &
+        csnow_interpol = "nearest-neighbour", &
+        cwspeed_interpol = "nearest-neighbour", &
+        cdp_interpol = "nearest-neighbour", &
+        cvs_interpol = "nearest-neighbour", &
+        ccr_interpol = "nearest-neighbour", &
+        cfm_interpol = "nearest-neighbour", &
+        cslope_interpol = "nearest-neighbour", &
+        ccv_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cmc_r1hr_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_r10hr_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_r100hr_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_r1000hr_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rx1000_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rherb_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rwood_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmc_rbndryt_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cmc_r1hr_interpol = "nearest-neighbour", &
+        cmc_r10hr_interpol = "nearest-neighbour", &
+        cmc_r100hr_interpol = "nearest-neighbour", &
+        cmc_r1000hr_interpol = "nearest-neighbour", &
+        cmc_rx1000_interpol = "nearest-neighbour", &
+        cmc_rherb_interpol = "nearest-neighbour", &
+        cmc_rwood_interpol = "nearest-neighbour", &
+        cmc_rbndryt_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_ros_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_sc_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_erc_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prop_bi_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cfire_prop_ros_interpol = "nearest-neighbour", &
+        cfire_prop_sc_interpol = "nearest-neighbour", &
+        cfire_prop_erc_interpol = "nearest-neighbour", &
+        cfire_prop_bi_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_ic_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_mcoi_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_loi_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfire_prob_fli_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cfire_prob_ic_interpol = "nearest-neighbour", &
+        cfire_prob_mcoi_interpol = "nearest-neighbour", &
+        cfire_prob_loi_interpol = "nearest-neighbour", &
+        cfire_prob_fli_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_kb_drought_index_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_drought_factor_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_moist_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_weight_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_fuel_timesincerain_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cmark5_fuel_kb_drought_index_interpol = "nearest-neighbour", &
+        cmark5_fuel_drought_factor_interpol = "nearest-neighbour", &
+        cmark5_fuel_moist_interpol = "nearest-neighbour", &
+        cmark5_fuel_weight_interpol = "nearest-neighbour", &
+        cmark5_fuel_timesincerain_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta0_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_ros_theta_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_height_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prop_flame_distance_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cmark5_prob_fire_danger_index_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cmark5_prop_ros_theta0_interpol = "nearest-neighbour", &
+        cmark5_prop_ros_theta_interpol = "nearest-neighbour", &
+        cmark5_prop_flame_height_interpol = "nearest-neighbour", &
+        cmark5_prop_flame_distance_interpol = "nearest-neighbour", &
+        cmark5_prob_fire_danger_index_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_fwi_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_ffmc_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dmc_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dc_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cfwi_risk_fwi_interpol = "nearest-neighbour", &
+        cfwi_risk_ffmc_interpol = "nearest-neighbour", &
+        cfwi_risk_dmc_interpol = "nearest-neighbour", &
+        cfwi_risk_dc_interpol = "nearest-neighbour"
 
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_isi_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_bui_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_dsr_interpol = "nearest-neighbour"
-    CHARACTER(LEN=50), PARAMETER :: cfwi_risk_danger_risk_interpol = "nearest-neighbour"
+    character(len=50), parameter :: &
+        cfwi_risk_isi_interpol = "nearest-neighbour", &
+        cfwi_risk_bui_interpol = "nearest-neighbour", &
+        cfwi_risk_dsr_interpol = "nearest-neighbour", &
+        cfwi_risk_danger_risk_interpol = "nearest-neighbour"
+
+    character(len=50), parameter :: &
+        fld_rlsm_interpol = "nearest-neighbour", &
+        fld_rcv_interpol = "nearest-neighbour", &
+        fld_rrainclim_interpol = "nearest-neighbour", &
+        fld_icr_interpol = "nearest-neighbour", &
+        fld_ifm_interpol = "nearest-neighbour", &
+        fld_islope_interpol = "nearest-neighbour", &
+        fld_mc_interpol = "nearest-neighbour", &
+        fld_fire_prop_ros_interpol = "nearest-neighbour", &
+        fld_fire_prop_sc_interpol = "nearest-neighbour", &
+        fld_fire_prop_erc_interpol = "nearest-neighbour", &
+        fld_fire_prop_bi_interpol = "nearest-neighbour", &
+        fld_fire_prob_ic_interpol = "nearest-neighbour", &
+        fld_fire_prob_mcoi_interpol = "nearest-neighbour", &
+        fld_fire_prob_loi_interpol = "nearest-neighbour", &
+        fld_fire_prob_fli_interpol = "nearest-neighbour", &
+        fld_mark5_fuel_moist_interpol = "nearest-neighbour", &
+        fld_mark5_fuel_weight_interpol = "nearest-neighbour", &
+        fld_mark5_fuel_curing_interpol = "nearest-neighbour", &
+        fld_mark5_fuel_kb_drought_index_interpol = "nearest-neighbour", &
+        fld_mark5_fuel_drought_factor_interpol = "nearest-neighbour", &
+        fld_mark5_fuel_timesincerain_interpol = "nearest-neighbour", &
+        fld_mark5_prop_ros_theta0_interpol = "nearest-neighbour", &
+        fld_mark5_prop_ros_theta_interpol = "nearest-neighbour", &
+        fld_mark5_prop_flame_height_interpol = "nearest-neighbour", &
+        fld_mark5_prop_flame_distance_interpol = "nearest-neighbour", &
+        fld_mark5_prob_fire_danger_index_interpol = "nearest-neighbour", &
+        fld_fwi_risk_fwi_interpol = "nearest-neighbour", &
+        fld_fwi_risk_ffmc_interpol = "nearest-neighbour", &
+        fld_fwi_risk_dmc_interpol = "nearest-neighbour", &
+        fld_fwi_risk_dc_interpol = "nearest-neighbour", &
+        fld_fwi_risk_isi_interpol = "nearest-neighbour", &
+        fld_fwi_risk_bui_interpol = "nearest-neighbour", &
+        fld_fwi_risk_dsr_interpol = "nearest-neighbour", &
+        fld_fwi_risk_danger_risk_interpol = "nearest-neighbour"
 
     type, abstract :: io_t
     contains
@@ -180,112 +224,347 @@ MODULE mo_io_eccodes
         procedure, nopass :: output => eccodes_output
     endtype
 
-    TYPE :: GribField
-        INTEGER :: fd = 0
-        INTEGER :: handle = 0
-        INTEGER :: paramId = 0
-        CHARACTER(LEN=20) :: shortName = ''
-        CHARACTER(LEN=200) :: name = ''
-        INTEGER :: npoints = 0
-        INTEGER :: count = 0
-        CLASS(interpolation_t), POINTER, PRIVATE :: interpol
-        CHARACTER(LEN=200), PRIVATE :: interpolMethod
-    CONTAINS
-        PROCEDURE, PUBLIC :: open_as_input => gribfield_open_as_input
-        PROCEDURE, PUBLIC :: open_as_output => gribfield_open_as_output
-        PROCEDURE, PUBLIC :: open_as_restart => gribfield_open_as_restart
-        PROCEDURE, PUBLIC :: open_close_as_interpolation => gribfield_open_close_as_interpolation
-        PROCEDURE, PUBLIC :: next => gribfield_next
-        PROCEDURE, PUBLIC :: close => gribfield_close
-        PROCEDURE, PUBLIC :: coordinates => gribfield_coordinates
-        PROCEDURE, PUBLIC :: values => gribfield_values
-        PROCEDURE, PUBLIC :: values_as_integer => gribfield_values_as_integer
-        PROCEDURE, PUBLIC :: header => gribfield_header
-        PROCEDURE, PUBLIC :: same_geometry => gribfield_same_geometry
-        PROCEDURE, PUBLIC :: gridname => gribfield_gridname
-        PROCEDURE, PUBLIC :: interpolate => gribfield_interpolate
-    END TYPE
+    type :: GribField
+        integer :: fd = 0
+        integer :: handle = 0
+        integer :: paramId = 0
+        character(len=20) :: shortName = ''
+        character(len=200) :: name = ''
+        integer :: npoints = 0
+        integer :: count = 0
+        class(interpolation_t), pointer, private :: interpol
+        character(len=200), private :: interpolMethod
+    contains
+        procedure, public :: open_as_input => gribfield_open_as_input
+        procedure, public :: open_as_output => gribfield_open_as_output
+        procedure, public :: open_as_restart => gribfield_open_as_restart
+        procedure, public :: open_close_as_interpolation => gribfield_open_close_as_interpolation
+        procedure, public :: next => gribfield_next
+        procedure, public :: close => gribfield_close
+        procedure, public :: coordinates => gribfield_coordinates
+        procedure, public :: values => gribfield_values
+        procedure, public :: values_as_integer => gribfield_values_as_integer
+        procedure, public :: header => gribfield_header
+        procedure, public :: same_geometry => gribfield_same_geometry
+        procedure, public :: gridname => gribfield_gridname
+    end type
 
     TYPE(GribField) :: reference  !internal to eccodes_t (a very simplified interface)
     REAL, PARAMETER :: missingValue = rfillvalue !FIXME: -1.e20
     CHARACTER(LEN=8), ALLOCATABLE :: interpol_list(:)
     INTEGER, ALLOCATABLE :: interpol_npoints(:)
 
-    TYPE(GribField), TARGET :: input(18)
-
-    TYPE(GribField), POINTER :: grib_lsm => input(1)
-    TYPE(GribField), POINTER :: grib_rain => input(2)
-    TYPE(GribField), POINTER :: grib_temp => input(3)
-    TYPE(GribField), POINTER :: grib_maxtemp => input(4)
-    TYPE(GribField), POINTER :: grib_mintemp => input(5)
-    TYPE(GribField), POINTER :: grib_rh => input(6)
-    TYPE(GribField), POINTER :: grib_maxrh => input(7)
-    TYPE(GribField), POINTER :: grib_minrh => input(8)
-    TYPE(GribField), POINTER :: grib_cc => input(9)
-    TYPE(GribField), POINTER :: grib_wspeed => input(10)
-    TYPE(GribField), POINTER :: grib_snow => input(11)
-    TYPE(GribField), POINTER :: grib_dp => input(12)
-    TYPE(GribField), POINTER :: grib_vs => input(13)
-    TYPE(GribField), POINTER :: grib_cr => input(14)
-    TYPE(GribField), POINTER :: grib_fm => input(15)
-    TYPE(GribField), POINTER :: grib_slope => input(16)
-    TYPE(GribField), POINTER :: grib_cv => input(17)
-    TYPE(GribField), POINTER :: grib_rainclim => input(18)
+    type(GribField), target :: input(18)
+    type(GribField), pointer :: &
+        grib_lsm => input(1), &
+        grib_rain => input(2), &
+        grib_temp => input(3), &
+        grib_maxtemp => input(4), &
+        grib_mintemp => input(5), &
+        grib_rh => input(6), &
+        grib_maxrh => input(7), &
+        grib_minrh => input(8), &
+        grib_cc => input(9), &
+        grib_wspeed => input(10), &
+        grib_snow => input(11), &
+        grib_dp => input(12), &
+        grib_vs => input(13), &
+        grib_cr => input(14), &
+        grib_fm => input(15), &
+        grib_slope => input(16), &
+        grib_cv => input(17), &
+        grib_rainclim => input(18)
 
 CONTAINS
 
     SUBROUTINE io_getdata(istep)
         INTEGER, INTENT(IN) :: istep
-        REAL, ALLOCATABLE :: tmp(:)
-        CHARACTER(LEN=8) :: a, b
-        LOGICAL :: resize
+        REAL, ALLOCATABLE :: valuesA(:), valuesB(:)
+        CHARACTER(LEN=8) :: gridA, gridB
+        LOGICAL :: r
+
+        TYPE(fwi_risk_type), ALLOCATABLE :: alt_fwi_risk(:)
+
+        TYPE(mark5_fuel_type), ALLOCATABLE :: alt_mark5_fuel(:)
+        TYPE(mark5_prob_type), ALLOCATABLE :: alt_mark5_prob(:)
+        TYPE(mark5_prop_type), ALLOCATABLE :: alt_mark5_prop(:)
+
+        TYPE(mc_type), ALLOCATABLE :: alt_mc(:)
+        TYPE(fire_prop_type), ALLOCATABLE :: alt_fire_prop(:)
+        TYPE(fire_prob_type), ALLOCATABLE :: alt_fire_prob(:)
+
+        class(interpolation_t), pointer :: interpol => null()
 
         CALL assert(npoints > 0)
         IF (istep == 1) RETURN
 
         ! if interpolation is active, pick current step gridname;
         ! in next_values, this is compared to the obtained gridName; interpolation happens if it differs
-        a = ''  ! gridName (before)
-        b = ''  ! gridName (after)
-        resize = .false.
+        gridA = ''  ! gridName (before)
+        gridB = ''  ! gridName (after)
+        r = .false.
         IF (SIZE(interpol_list) > 0) THEN
             CALL assert(SIZE(interpol_list) == SIZE(interpol_npoints), 'io_getdata: SIZE(interpol_list)==SIZE(interpol_npoints)')
             CALL assert(1 < istep .AND. istep <= SIZE(interpol_list), 'io_getdata: 0 < istep .AND. istep <= SIZE(interpol_list)')
 
-            a = interpol_list(istep - 1)
-            b = interpol_list(istep)
-            CALL assert(LEN(TRIM(a)) > 0, 'io_getdata: LEN(TRIM(a)) > 0')
-            CALL assert(LEN(TRIM(b)) > 0, 'io_getdata: LEN(TRIM(b)) > 0')
+            gridA = interpol_list(istep - 1)
+            gridB = interpol_list(istep)
+            CALL assert(LEN(TRIM(gridA)) > 0, 'io_getdata: LEN(TRIM(gridA)) > 0')
+            CALL assert(LEN(TRIM(gridB)) > 0, 'io_getdata: LEN(TRIM(gridB)) > 0')
 
             ! resizing fields might be necessary
-            resize = npoints /= interpol_npoints(istep)
+            r = npoints /= interpol_npoints(istep)
 
             npoints = interpol_npoints(istep)
             CALL assert(npoints > 0, 'io_getdata: npoints > 0')
         ENDIF
 
-        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain, b, resize)
-        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp, b, resize)
-        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, b, resize)
-        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, b, resize)
-        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh, b, resize)
-        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, b, resize)
-        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh, b, resize)
-        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc, b, resize)
-        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, b, resize)
-        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow, b, resize)
-        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp, b, resize)
+        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain, gridB, r)
+        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp, gridB, r)
+        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, gridB, r)
+        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, gridB, r)
+        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh, gridB, r)
+        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, gridB, r)
+        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh, gridB, r)
+        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc, gridB, r)
+        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, gridB, r)
+        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow, gridB, r)
+        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp, gridB, r)
 
         IF (grib_vs%count > 1) THEN
-            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp, b, .true.)
-            CALL assert(ALLOCATED(ivs) .AND. ALLOCATED(tmp), 'io_getdata: ALLOCATED(ivs) .AND. ALLOCATED(tmp)')
-            IF (SIZE(ivs) /= SIZE(tmp)) THEN
-                CALL assert(resize .AND. SIZE(tmp) == npoints, 'io_getdata: resize .AND. SIZE(tmp) == npoints')
+            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, valuesB, gridB, .true.)
+            CALL assert(ALLOCATED(ivs) .AND. ALLOCATED(valuesB), 'io_getdata: ALLOCATED(ivs) .AND. ALLOCATED(valuesB)')
+            IF (r) THEN
+                CALL assert(SIZE(valuesB) == npoints, 'io_getdata: r .AND. SIZE(valuesB) == npoints')
                 DEALLOCATE (ivs)
                 ALLOCATE (ivs(npoints))
             ENDIF
-            ivs = tmp
-            DEALLOCATE (tmp)
+            ivs = valuesB
+            DEALLOCATE (valuesB)
+        ENDIF
+
+        IF (r) THEN
+            print *, 'Resize at step ', istep, ', gridName (#points): ', &
+                trim(interpol_list(istep - 1)), ' (', interpol_npoints(istep - 1), ') -> ', &
+                trim(interpol_list(istep)), ' (', interpol_npoints(istep), ')'
+
+            ! setup internal fields defaults
+#ifdef HAVE_GEFF_INTERPOLATION
+            interpol => atlas_interpol
+#else
+            interpol => no_interpol
+#endif
+            call assert(interpol%can_interpolate(), 'io_getdata: interpol%can_interpolate()')
+
+            call assert(interpol_npoints(istep - 1) > 0, 'io_getdata: interpol_npoints(istep - 1) > 0')
+            call assert(interpol_npoints(istep) > 0, 'io_getdata: interpol_npoints(istep) > 0')
+            allocate (valuesA(interpol_npoints(istep - 1)))
+            allocate (valuesB(interpol_npoints(istep)))
+
+            allocate (alt_mc(npoints), alt_fire_prop(npoints), alt_fire_prob(npoints))
+
+            valuesA = mc(:)%r1hr
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%r1hr = valuesB
+
+            valuesA = mc(:)%r10hr
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%r10hr = valuesB
+
+            valuesA = mc(:)%r100hr
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%r100hr = valuesB
+
+            valuesA = mc(:)%r1000hr
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%r1000hr = valuesB
+
+            valuesA = mc(:)%rherb
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%rherb = valuesB
+
+            valuesA = mc(:)%rwood
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%rwood = valuesB
+
+            valuesA = mc(:)%rx1000
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%rx1000 = valuesB
+
+            valuesA = mc(:)%rbndryt
+            call interpol%interpolate(fld_mc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mc(:)%rbndryt = valuesB
+
+            valuesA = fire_prop(:)%ros
+            call interpol%interpolate(fld_fire_prop_ros_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prop(:)%ros = valuesB
+
+            valuesA = fire_prop(:)%sc
+            call interpol%interpolate(fld_fire_prop_sc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prop(:)%sc = valuesB
+
+            valuesA = fire_prop(:)%erc
+            call interpol%interpolate(fld_fire_prop_erc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prop(:)%erc = valuesB
+
+            valuesA = fire_prop(:)%bi
+            call interpol%interpolate(fld_fire_prop_bi_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prop(:)%bi = valuesB
+
+            valuesA = fire_prob(:)%ic
+            call interpol%interpolate(fld_fire_prob_ic_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prob(:)%ic = valuesB
+
+            valuesA = fire_prob(:)%mcoi
+            call interpol%interpolate(fld_fire_prob_mcoi_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prob(:)%mcoi = valuesB
+
+            valuesA = fire_prob(:)%loi
+            call interpol%interpolate(fld_fire_prob_loi_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prob(:)%loi = valuesB
+
+            valuesA = fire_prob(:)%fli
+            call interpol%interpolate(fld_fire_prob_fli_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fire_prob(:)%fli = valuesB
+
+            deallocate (mc, fire_prop, fire_prob)
+            allocate (mc(npoints), fire_prop(npoints), fire_prob(npoints))
+            mc = alt_mc
+            fire_prop = alt_fire_prop
+            fire_prop = alt_fire_prop
+            deallocate (alt_mc, alt_fire_prop, alt_fire_prob)
+
+            allocate (alt_mark5_fuel(npoints), alt_mark5_prop(npoints), alt_mark5_prob(npoints))
+
+            valuesA = mark5_fuel(:)%moist
+            call interpol%interpolate(fld_mark5_fuel_moist_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_fuel(:)%moist = valuesB
+
+            valuesA = mark5_fuel(:)%weight
+            call interpol%interpolate(fld_mark5_fuel_weight_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_fuel(:)%weight = valuesB
+
+            valuesA = mark5_fuel(:)%curing
+            call interpol%interpolate(fld_mark5_fuel_curing_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_fuel(:)%curing = valuesB
+
+            valuesA = mark5_fuel(:)%kb_drought_index
+            call interpol%interpolate(fld_mark5_fuel_kb_drought_index_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_fuel(:)%kb_drought_index = valuesB
+
+            valuesA = mark5_fuel(:)%drought_factor
+            call interpol%interpolate(fld_mark5_fuel_drought_factor_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_fuel(:)%drought_factor = valuesB
+
+            valuesA = mark5_fuel(:)%timesincerain
+            call interpol%interpolate(fld_mark5_fuel_timesincerain_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_fuel(:)%timesincerain = valuesB
+
+            valuesA = mark5_prop(:)%ros_theta0
+            call interpol%interpolate(fld_mark5_prop_ros_theta0_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_prop(:)%ros_theta0 = valuesB
+
+            valuesA = mark5_prop(:)%ros_theta
+            call interpol%interpolate(fld_mark5_prop_ros_theta_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_prop(:)%ros_theta = valuesB
+
+            valuesA = mark5_prop(:)%flame_height
+            call interpol%interpolate(fld_mark5_prop_flame_height_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_prop(:)%flame_height = valuesB
+
+            valuesA = mark5_prop(:)%flame_distance
+            call interpol%interpolate(fld_mark5_prop_flame_distance_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_prop(:)%flame_distance = valuesB
+
+            valuesA = mark5_prob(:)%fire_danger_index
+            call interpol%interpolate(fld_mark5_prob_fire_danger_index_interpol, gridA, gridB, valuesA, valuesB)
+            alt_mark5_prob(:)%fire_danger_index = valuesB
+
+            deallocate (mark5_fuel, mark5_prop, mark5_prob)
+            allocate (mark5_fuel(npoints), mark5_prop(npoints), mark5_prob(npoints))
+            mark5_fuel = alt_mark5_fuel
+            mark5_prop = alt_mark5_prop
+            mark5_prob = alt_mark5_prob
+            deallocate (alt_mark5_fuel, alt_mark5_prop, alt_mark5_prob)
+
+            allocate (alt_fwi_risk(npoints))
+
+            valuesA = fwi_risk(:)%fwi
+            call interpol%interpolate(fld_fwi_risk_fwi_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%fwi = valuesB
+
+            valuesA = fwi_risk(:)%ffmc
+            call interpol%interpolate(fld_fwi_risk_ffmc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%ffmc = valuesB
+
+            valuesA = fwi_risk(:)%dmc
+            call interpol%interpolate(fld_fwi_risk_dmc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%dmc = valuesB
+
+            valuesA = fwi_risk(:)%dc
+            call interpol%interpolate(fld_fwi_risk_dc_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%dc = valuesB
+
+            valuesA = fwi_risk(:)%isi
+            call interpol%interpolate(fld_fwi_risk_isi_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%isi = valuesB
+
+            valuesA = fwi_risk(:)%bui
+            call interpol%interpolate(fld_fwi_risk_bui_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%bui = valuesB
+
+            valuesA = fwi_risk(:)%dsr
+            call interpol%interpolate(fld_fwi_risk_dsr_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%dsr = valuesB
+
+            valuesA = fwi_risk(:)%danger_risk
+            call interpol%interpolate(fld_fwi_risk_danger_risk_interpol, gridA, gridB, valuesA, valuesB)
+            alt_fwi_risk(:)%danger_risk = valuesB
+
+            deallocate (fwi_risk)
+            allocate (fwi_risk(npoints))
+            fwi_risk = alt_fwi_risk
+            deallocate (alt_fwi_risk)
+
+            valuesA = rlsm
+            deallocate (rlsm)
+            allocate (rlsm(npoints))
+            call interpol%interpolate(fld_rlsm_interpol, gridA, gridB, valuesA, rlsm)
+
+            valuesA = rcv
+            deallocate (rcv)
+            allocate (rcv(npoints))
+            call interpol%interpolate(fld_rcv_interpol, gridA, gridB, valuesA, rcv)
+
+            valuesA = rrainclim
+            deallocate (rrainclim)
+            allocate (rrainclim(npoints))
+            call interpol%interpolate(fld_rrainclim_interpol, gridA, gridB, valuesA, rrainclim)
+
+            valuesA = icr
+            deallocate (icr)
+            allocate (icr(npoints))
+            call interpol%interpolate(fld_icr_interpol, gridA, gridB, valuesA, valuesB)
+            icr = valuesB
+
+            valuesA = ifm
+            deallocate (ifm)
+            allocate (ifm(npoints))
+            call interpol%interpolate(fld_ifm_interpol, gridA, gridB, valuesA, valuesB)
+            ifm = valuesB
+
+            valuesA = islope
+            deallocate (islope)
+            allocate (islope(npoints))
+            call interpol%interpolate(fld_islope_interpol, gridA, gridB, valuesA, valuesB)
+            islope = valuesB
+
+            deallocate (valuesA, valuesB)
+
+            ! on resizing, coordinates are also updated
+            !call assert(allocated(lats) .and. size(lats) == npoints, 'io_getdata: allocated(lats) .and. size(lats) == npoints')
+            !call assert(allocated(lons) .and. size(lons) == npoints, 'io_getdata: allocated(lons) .and. size(lons) == npoints')
+            !CALL grib_lsm%coordinates(lats, lons)
         ENDIF
     END SUBROUTINE
 
@@ -393,7 +672,7 @@ CONTAINS
         ALLOCATE (lons(npoints))
 
         CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
-        CALL grib_lsm%coordinates(lats, lons)
+        !CALL grib_lsm%coordinates(lats, lons)
 
         CALL grib_temp%open_as_input(tempfile, 'temperature', itemp_pids, check_gridname)
         CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', imaxtemp_pids, check_gridname)
@@ -748,10 +1027,8 @@ CONTAINS
         real(kind=4), dimension(:), allocatable :: tmp  ! ecCodes I/O does not support real(kind=8)?
         integer :: handle, fd, bitmapPresent
 
-        call assert(reference%handle /= 0, "output: reference%handle /= 0")
-
         ! clone reference handle and set custom metadata/data before writing
-        call assert(reference%handle /= 0)
+        call assert(reference%handle /= 0, "output: reference%handle /= 0")
         call assert(reference%npoints == size(data), 'output: reference%npoints == size(data)')
 
         handle = 0
@@ -1114,11 +1391,5 @@ CONTAINS
         yes = LEN(TRIM(n)) > 0
         IF (yes) name = n
     END FUNCTION
-
-    SUBROUTINE gribfield_interpolate(this, gridNameTarget)
-        CLASS(GribField), INTENT(INOUT) :: this
-        CHARACTER(LEN=*), INTENT(IN) :: gridNameTarget
-        ! help
-    END SUBROUTINE
 
 END MODULE
