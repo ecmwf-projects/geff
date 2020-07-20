@@ -237,54 +237,81 @@ CONTAINS
     SUBROUTINE io_getdata(istep)
         INTEGER, INTENT(IN) :: istep
         REAL, ALLOCATABLE :: tmp(:)
-        CHARACTER(LEN=8) :: name
+        CHARACTER(LEN=8) :: a, b
+        LOGICAL :: resize
 
         CALL assert(npoints > 0)
         IF (istep == 1) RETURN
 
         ! if interpolation is active, pick current step gridname;
         ! in next_values, this is compared to the obtained gridName; interpolation happens if it differs
-        name = ''
+        a = ''  ! gridName (before)
+        b = ''  ! gridName (after)
+        resize = .false.
         IF (SIZE(interpol_list) > 0) THEN
             CALL assert(SIZE(interpol_list) == SIZE(interpol_npoints), 'io_getdata: SIZE(interpol_list)==SIZE(interpol_npoints)')
             CALL assert(1 < istep .AND. istep <= SIZE(interpol_list), 'io_getdata: 0 < istep .AND. istep <= SIZE(interpol_list)')
-            name = interpol_list(istep)
-            CALL assert(LEN(TRIM(name)) > 0, 'io_getdata: LEN(TRIM(name)) > 0')
+
+            a = interpol_list(istep - 1)
+            b = interpol_list(istep)
+            CALL assert(LEN(TRIM(a)) > 0, 'io_getdata: LEN(TRIM(a)) > 0')
+            CALL assert(LEN(TRIM(b)) > 0, 'io_getdata: LEN(TRIM(b)) > 0')
+
+            ! resizing fields might be necessary
+            resize = npoints /= interpol_npoints(istep)
+
             npoints = interpol_npoints(istep)
             CALL assert(npoints > 0, 'io_getdata: npoints > 0')
         ENDIF
 
-        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain, name)
-        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp, name)
-        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, name)
-        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, name)
-        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh, name)
-        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, name)
-        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh, name)
-        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc, name)
-        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, name)
-        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow, name)
-        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp, name)
+        IF (grib_rain%count > 1) CALL next_values('io_getdata: rain', grib_rain, grib_rain%paramId, rrain, b, resize)
+        IF (grib_temp%count > 1) CALL next_values('io_getdata: temp', grib_temp, grib_temp%paramId, rtemp, b, resize)
+        IF (grib_maxtemp%count > 1) CALL next_values('io_getdata: maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, b, resize)
+        IF (grib_mintemp%count > 1) CALL next_values('io_getdata: mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, b, resize)
+        IF (grib_rh%count > 1) CALL next_values('io_getdata: rh', grib_rh, grib_rh%paramId, rrh, b, resize)
+        IF (grib_maxrh%count > 1) CALL next_values('io_getdata: maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, b, resize)
+        IF (grib_minrh%count > 1) CALL next_values('io_getdata: minrh', grib_minrh, grib_minrh%paramId, rminrh, b, resize)
+        IF (grib_cc%count > 1) CALL next_values('io_getdata: cc', grib_cc, grib_cc%paramId, rcc, b, resize)
+        IF (grib_wspeed%count > 1) CALL next_values('io_getdata: wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, b, resize)
+        IF (grib_snow%count > 1) CALL next_values('io_getdata: snow', grib_snow, grib_snow%paramId, rsnow, b, resize)
+        IF (grib_dp%count > 1) CALL next_values('io_getdata: dp', grib_dp, grib_dp%paramId, rdp, b, resize)
 
         IF (grib_vs%count > 1) THEN
-            ALLOCATE (tmp(npoints))
-            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp, name)
+            CALL next_values('io_getdata: vs', grib_vs, grib_vs%paramId, tmp, b, .true.)
+            CALL assert(ALLOCATED(ivs) .AND. ALLOCATED(tmp), 'io_getdata: ALLOCATED(ivs) .AND. ALLOCATED(tmp)')
+            IF (SIZE(ivs) /= SIZE(tmp)) THEN
+                CALL assert(resize .AND. SIZE(tmp) == npoints, 'io_getdata: resize .AND. SIZE(tmp) == npoints')
+                DEALLOCATE (ivs)
+                ALLOCATE (ivs(npoints))
+            ENDIF
             ivs = tmp
             DEALLOCATE (tmp)
         ENDIF
     END SUBROUTINE
 
-    SUBROUTINE next_values(message, grib, paramId, values, gridNameB)
+    SUBROUTINE next_values(message, grib, paramId, values, gridNameB, resize)
         CHARACTER(LEN=*), INTENT(IN) :: message
         TYPE(GribField), INTENT(INOUT) :: grib
         INTEGER, INTENT(IN) :: paramId
         REAL, INTENT(INOUT), ALLOCATABLE :: values(:)
         CHARACTER(LEN=8), INTENT(IN) :: gridNameB
+        LOGICAL, INTENT(IN), OPTIONAL :: resize
 
         REAL, ALLOCATABLE :: valuesA(:)
         CHARACTER(LEN=8) :: gridNameA
 
-        CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
+        IF (PRESENT(resize)) THEN
+            IF (resize) THEN
+                IF (ALLOCATED(values)) THEN
+                    IF (SIZE(values) /= npoints) THEN
+                        DEALLOCATE (values)
+                        ALLOCATE (values(npoints))
+                    ENDIF
+                ELSE
+                    ALLOCATE (values(npoints))
+                ENDIF
+            ENDIF
+        ENDIF
 
         CALL assert(grib%next(), message//' grib%next()')
         CALL grib%header()
@@ -292,7 +319,7 @@ CONTAINS
         IF (LEN(TRIM(gridNameB)) > 0) THEN
             CALL assert(grib%gridname(gridNameA), message//' grib%gridname(gridNameA)')
             IF (gridNameA == gridNameB) THEN
-                ! but no interpolation needed, (even if (gridName passed in)
+                ! no interpolation needed, even if gridName passed in
             ELSE
                 ! interpolate gridName|A -> gridName|B, passing in values|A
                 ALLOCATE (valuesA(grib%npoints))
@@ -309,6 +336,7 @@ CONTAINS
         CALL assert(grib%npoints == npoints, message//' grib%npoints == npoints')
         CALL assert(grib%paramId == paramId, message//' grib%paramId == paramId')
 
+        CALL assert(SIZE(values) == npoints, message//' SIZE(values) == npoints')
         CALL grib%values(values)
     END SUBROUTINE
 
@@ -430,44 +458,19 @@ CONTAINS
         ! CALL assert(grib_lsm%next())  ! already called (above)
         CALL grib_lsm%values(rlsm)
 
-        ALLOCATE (rrain(npoints))
-        CALL next_values('io_initialize: grib_rain', grib_rain, grib_rain%paramId, rrain, name)
-
-        ALLOCATE (rtemp(npoints))
-        CALL next_values('io_initialize: grib_temp', grib_temp, grib_temp%paramId, rtemp, name)
-
-        ALLOCATE (rmaxtemp(npoints))
-        CALL next_values('io_initialize: grib_maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, name)
-
-        ALLOCATE (rmintemp(npoints))
-        CALL next_values('io_initialize: grib_mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, name)
-
-        ALLOCATE (rrh(npoints))
-        CALL next_values('io_initialize: grib_rh', grib_rh, grib_rh%paramId, rrh, name)
-
-        ALLOCATE (rmaxrh(npoints))
-        CALL next_values('io_initialize: grib_maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, name)
-
-        ALLOCATE (rminrh(npoints))
-        CALL next_values('io_initialize: grib_minrh', grib_minrh, grib_minrh%paramId, rminrh, name)
-
-        ALLOCATE (rcc(npoints))
-        CALL next_values('io_initialize: grib_cc', grib_cc, grib_cc%paramId, rcc, name)
-
-        ALLOCATE (rwspeed(npoints))
-        CALL next_values('io_initialize: grib_wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, name)
-
-        ALLOCATE (rsnow(npoints))
-        CALL next_values('io_initialize: grib_snow', grib_snow, grib_snow%paramId, rsnow, name)
-
-        ALLOCATE (rdp(npoints))
-        CALL next_values('io_initialize: grib_dp', grib_dp, grib_dp%paramId, rdp, name)
-
-        ALLOCATE (rcv(npoints))
-        CALL next_values('io_initialize: grib_cv', grib_cv, grib_cv%paramId, rcv, name)
-
-        ALLOCATE (rrainclim(npoints))
-        CALL next_values('io_initialize: grib_rainclim', grib_rainclim, grib_rainclim%paramId, rrainclim, name)
+        CALL next_values('io_initialize: grib_rain', grib_rain, grib_rain%paramId, rrain, name, .true.)
+        CALL next_values('io_initialize: grib_temp', grib_temp, grib_temp%paramId, rtemp, name, .true.)
+        CALL next_values('io_initialize: grib_maxtemp', grib_maxtemp, grib_maxtemp%paramId, rmaxtemp, name, .true.)
+        CALL next_values('io_initialize: grib_mintemp', grib_mintemp, grib_mintemp%paramId, rmintemp, name, .true.)
+        CALL next_values('io_initialize: grib_rh', grib_rh, grib_rh%paramId, rrh, name, .true.)
+        CALL next_values('io_initialize: grib_maxrh', grib_maxrh, grib_maxrh%paramId, rmaxrh, name, .true.)
+        CALL next_values('io_initialize: grib_minrh', grib_minrh, grib_minrh%paramId, rminrh, name, .true.)
+        CALL next_values('io_initialize: grib_cc', grib_cc, grib_cc%paramId, rcc, name, .true.)
+        CALL next_values('io_initialize: grib_wspeed', grib_wspeed, grib_wspeed%paramId, rwspeed, name, .true.)
+        CALL next_values('io_initialize: grib_snow', grib_snow, grib_snow%paramId, rsnow, name, .true.)
+        CALL next_values('io_initialize: grib_dp', grib_dp, grib_dp%paramId, rdp, name, .true.)
+        CALL next_values('io_initialize: grib_cv', grib_cv, grib_cv%paramId, rcv, name, .true.)
+        CALL next_values('io_initialize: grib_rainclim', grib_rainclim, grib_rainclim%paramId, rrainclim, name, .true.)
 
         ALLOCATE (ivs(npoints))
         CALL next_values('io_initialize: grib_vs', grib_vs, grib_vs%paramId, tmp, name)
