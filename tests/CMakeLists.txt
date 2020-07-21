@@ -1,18 +1,15 @@
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-foreach(_test run-no-restart run-restart)
+foreach(_test run-no-restart run-restart run-interpolation)
     add_test(
         NAME "${PROJECT_NAME}_tests_${_test}"
         COMMAND geff-tool
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_test}")
 endforeach()
 
-if(HAVE_GEFF_INTERPOLATION)
-    add_test(
-        NAME "${PROJECT_NAME}_tests_run-interpolation"
-        COMMAND geff-tool
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/run-interpolation")
+if(NOT HAVE_GEFF_INTERPOLATION)
+    set_tests_properties("${PROJECT_NAME}_tests_run-interpolation" PROPERTIES WILL_FAIL TRUE)
 endif()
 
 foreach(_test geff-daymax geff-statistics)
