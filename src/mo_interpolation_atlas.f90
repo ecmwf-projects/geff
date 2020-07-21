@@ -14,12 +14,14 @@ module mo_interpolation_atlas
     use atlas_module
 
     use mo_interpolation
+    use mo_utilities, only: assert
 
     implicit none
     private
 
     type, public, extends(interpolation_t) :: atlas_interpolation_t
     contains
+        procedure, nopass :: coordinates => atlas_coordinates
         procedure, nopass :: interpolate => atlas_interpolate
         procedure, nopass :: can_interpolate => atlas_can_interpolate
     end type
@@ -27,6 +29,42 @@ module mo_interpolation_atlas
     type(atlas_interpolation_t), public, target :: atlas_interpol
 
 contains
+
+    subroutine atlas_coordinates(grid, lat, lon)
+        implicit none
+        character(len=*), intent(in) :: grid
+        real, intent(inout) :: lat(:), lon(:)
+
+        type(atlas_StructuredGrid) :: g
+        integer :: i, j, k, npts
+        real :: l(2)
+
+        call fckit_log%debug("GEFF coordinates...")
+
+        g = atlas_StructuredGrid(grid)
+
+        npts = g%size()
+        call assert(size(lat) == npts, 'atlas_coordinates: size(lat) == npts')
+        call assert(size(lon) == npts, 'atlas_coordinates: size(lon) == npts')
+
+        k = 0
+        do j = 1, g%ny()
+            do i = 1, g%nx(j)
+                k = k + 1
+                call assert(k <= npts, 'atlas_coordinates: k <= npts')
+                l = g%lonlat(i, j)
+                lon(k) = l(1)
+                lat(k) = l(2)
+            enddo
+        enddo
+        call assert(k == npts, 'atlas_coordinates: k == npts')
+
+        call assert(maxval(lat) <= 90, 'atlas_coordinates: maxval(lat) <= 90')
+        call assert(minval(lat) >= -90, 'atlas_coordinates: minval(lat) >= -90')
+        call assert(maxval(lon) - minval(lon) <= 360, 'atlas_coordinates: maxval(lon) - minval(lon) <= 360')
+
+        call fckit_log%debug("GEFF coordinates.")
+    end subroutine
 
     subroutine atlas_interpolate(method, gridA, gridB, fieldA, fieldB)
         implicit none

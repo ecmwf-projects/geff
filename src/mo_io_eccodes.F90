@@ -562,9 +562,9 @@ CONTAINS
             deallocate (valuesA, valuesB)
 
             ! on resizing, coordinates are also updated
-            !call assert(allocated(lats) .and. size(lats) == npoints, 'io_getdata: allocated(lats) .and. size(lats) == npoints')
-            !call assert(allocated(lons) .and. size(lons) == npoints, 'io_getdata: allocated(lons) .and. size(lons) == npoints')
-            !CALL grib_lsm%coordinates(lats, lons)
+            deallocate (lats, lons)
+            allocate (lats(npoints), lons(npoints))
+            call interpol%coordinates(gridB, lats, lons)
         ENDIF
     END SUBROUTINE
 
@@ -631,7 +631,10 @@ CONTAINS
 
         CALL assert(.NOT. ALLOCATED(interpol_list), 'io_initialize: .NOT. ALLOCATED(interpol_list)')
         CALL assert(.NOT. ALLOCATED(interpol_npoints), 'io_initialize: .NOT. ALLOCATED(interpol_npoints)')
-        IF (LEN(TRIM(interpolation_file)) > 0) THEN
+
+        interpol_available = LEN(TRIM(interpolation_file)) > 0
+        check_gridname = interpol_available
+        IF (interpol_available) THEN
             ! (interpolation_file IS set)
 
             CALL interpol%open_close_as_interpolation(interpolation_file, 'interpolation', (/0/), &
@@ -648,31 +651,35 @@ CONTAINS
             ENDDO
 
             name = interpol_list(1)
+            npoints = interpol%npoints
+            CALL assert(npoints > 0 .AND. npoints == interpol_npoints(1), &
+                        'io_initialize: npoints > 0 .AND. npoints == interpol_npoints(1)')
+
+            ! assign coordinates for the first step
+            ALLOCATE (lats(npoints), lons(npoints))
+            CALL interpol%interpol%coordinates(name, lats, lons)
 
             CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
-            npoints = interpol%npoints
+            CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
 
         ELSE
             ! (interpolation_file IS NOT set)
-
             ALLOCATE (interpol_list(0))
             name = ''
 
             CALL grib_lsm%open_as_input(lsmfile, 'land-sea mask', ilsm_pids)
+            CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
+
             npoints = grib_lsm%npoints
+            CALL assert(npoints > 0, 'io_initialize: npoints > 0')
+
+            ! assign coordinates for the first step
+            ALLOCATE (lats(npoints), lons(npoints))
+            CALL grib_lsm%coordinates(lats, lons)
         ENDIF
 
-        check_gridname = LEN(TRIM(name)) > 0
-        interpol_available = check_gridname
         PRINT *, 'Number of points: ', npoints
         PRINT *, 'Check gridname: ', check_gridname
-
-        CALL assert(npoints > 0)
-        ALLOCATE (lats(npoints))
-        ALLOCATE (lons(npoints))
-
-        CALL assert(grib_lsm%next(), 'io_initialize: grib_lsm%next()')
-        !CALL grib_lsm%coordinates(lats, lons)
 
         CALL grib_temp%open_as_input(tempfile, 'temperature', itemp_pids, check_gridname)
         CALL grib_maxtemp%open_as_input(maxtempfile, 'maximum daily temperature', imaxtemp_pids, check_gridname)

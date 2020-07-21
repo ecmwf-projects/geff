@@ -17,11 +17,16 @@ module mo_interpolation
 
     type, public, abstract :: interpolation_t
     contains
+        procedure(generic_coordinates), public, deferred, nopass :: coordinates
         procedure(generic_interpolate), public, deferred, nopass :: interpolate
         procedure(generic_can_interpolate), public, deferred, nopass :: can_interpolate
     endtype
 
     interface
+        subroutine generic_coordinates(grid, lat, lon)
+            character(len=*), intent(in) :: grid
+            real, intent(inout) :: lat(:), lon(:)
+        end subroutine
         subroutine generic_interpolate(method, gridA, gridB, fieldA, fieldB)
             character(len=*), intent(in) :: method, gridA, gridB
             real, intent(in) :: fieldA(:)
@@ -34,6 +39,7 @@ module mo_interpolation
 
     type, public, extends(interpolation_t) :: no_interpolation_t
     contains
+        procedure, nopass :: coordinates => no_interpolation_coordinates
         procedure, nopass :: interpolate => no_interpolation_interpolate
         procedure, nopass :: can_interpolate => no_interpolation_can_interpolate
     endtype
@@ -41,6 +47,13 @@ module mo_interpolation
     type(no_interpolation_t), public, target :: no_interpol
 
 contains
+
+    subroutine no_interpolation_coordinates(grid, lat, lon)
+        character(len=*), intent(in) :: grid
+        real, intent(inout) :: lat(:), lon(:)
+
+        call assert(.false., 'interpolate: no interpolation setup')
+    end subroutine
 
     subroutine no_interpolation_interpolate(method, gridA, gridB, fieldA, fieldB)
         implicit none
