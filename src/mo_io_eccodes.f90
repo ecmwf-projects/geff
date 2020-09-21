@@ -385,12 +385,12 @@ CONTAINS
                     fwi_risk(i)%ffmc = 85.
                     fwi_risk(i)%dmc  =  6.
                     fwi_risk(i)%dc   = 15.
-                ENDIF
-            ENDDO
-        ENDIF
+                 ENDIF
+              ENDDO
+           ENDIF
 
-        DEALLOCATE(tmp)
-    END SUBROUTINE
+           DEALLOCATE(tmp)
+     END SUBROUTINE io_initialize
 
     SUBROUTINE io_write_restart
         INTEGER :: fd
