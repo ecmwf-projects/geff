@@ -58,11 +58,11 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: imc_rbndryt_pids(1)     = [212008]
 
     INTEGER, PARAMETER :: ifire_prop_ros_pids(1)  = [212009]
-    INTEGER, PARAMETER :: ifire_prop_sc_pids(1)   = [212010]
-    INTEGER, PARAMETER :: ifire_prop_erc_pids(1)  = [212011]
-    INTEGER, PARAMETER :: ifire_prop_bi_pids(1)   = [212012]
+    INTEGER, PARAMETER :: ifire_prop_sc_pids(1)   = [260561]
+    INTEGER, PARAMETER :: ifire_prop_erc_pids(1)  = [260564]
+    INTEGER, PARAMETER :: ifire_prop_bi_pids(1)   = [260562]
 
-    INTEGER, PARAMETER :: ifire_prob_ic_pids(1)   = [212013]
+    INTEGER, PARAMETER :: ifire_prob_ic_pids(1)   = [260563]
     INTEGER, PARAMETER :: ifire_prob_mcoi_pids(1) = [212014]
     INTEGER, PARAMETER :: ifire_prob_loi_pids(1)  = [212015]
     INTEGER, PARAMETER :: ifire_prob_fli_pids(1)  = [212016]
@@ -385,12 +385,12 @@ CONTAINS
                     fwi_risk(i)%ffmc = 85.
                     fwi_risk(i)%dmc  =  6.
                     fwi_risk(i)%dc   = 15.
-                 ENDIF
-              ENDDO
-           ENDIF
+                ENDIF
+            ENDDO
+        ENDIF
 
-           DEALLOCATE(tmp)
-     END SUBROUTINE io_initialize
+        DEALLOCATE(tmp)
+    END SUBROUTINE
 
     SUBROUTINE io_write_restart
         INTEGER :: fd
