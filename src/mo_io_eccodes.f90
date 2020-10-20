@@ -67,17 +67,17 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: ifire_prob_loi_pids(1)  = [212015]
     INTEGER, PARAMETER :: ifire_prob_fli_pids(1)  = [212016]
 
-    INTEGER, PARAMETER :: imark5_fuel_kb_drought_index_pids(1)  = [212017]
-    INTEGER, PARAMETER :: imark5_fuel_drought_factor_pids(1)    = [212018]
+    INTEGER, PARAMETER :: imark5_fuel_kb_drought_index_pids(1)  = [260557]
+    INTEGER, PARAMETER :: imark5_fuel_drought_factor_pids(1)    = [260558]
     INTEGER, PARAMETER :: imark5_fuel_moist_pids(1)             = [212019]
     INTEGER, PARAMETER :: imark5_fuel_weight_pids(1)            = [212020]
     INTEGER, PARAMETER :: imark5_fuel_timesincerain_pids(1)     = [212021]
 
     INTEGER, PARAMETER :: imark5_prop_ros_theta0_pids(1)        = [212022]
-    INTEGER, PARAMETER :: imark5_prop_ros_theta_pids(1)         = [212023]
+    INTEGER, PARAMETER :: imark5_prop_ros_theta_pids(1)         = [260559]
     INTEGER, PARAMETER :: imark5_prop_flame_height_pids(1)      = [212024]
     INTEGER, PARAMETER :: imark5_prop_flame_distance_pids(1)    = [212025]
-    INTEGER, PARAMETER :: imark5_prob_fire_danger_index_pids(1) = [212026]
+    INTEGER, PARAMETER :: imark5_prob_fire_danger_index_pids(1) = [260560]
 
     INTEGER, PARAMETER :: ifwi_risk_fwi_pids(1)         = [260540]
     INTEGER, PARAMETER :: ifwi_risk_ffmc_pids(1)        = [260541]
