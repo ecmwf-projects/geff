@@ -944,10 +944,7 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
         ! the Keetch-Byram drough index of today is the Keetch-Byram drough index  of yestrday  PLUS
         ! the drought factor calculated above
-    !    WRITE(9,*) 'Keetch-Byram drough index ',mark5_fuel(i)%kb_drought_index,'drought factor',kb_drought_factor
-        mark5_fuel(i)%kb_drought_index=MIN(MAX(KBDI_temp + kb_drought_factor,0.0),203.2)
-
-
+          mark5_fuel(i)%kb_drought_index=MIN(MAX(KBDI_temp + kb_drought_factor,0.0),203.2)
         ! Once the Keetch-Byram index has been calculated use it to
         ! calculatethe mark-5 drought factor Drought factor [scaled
         ! from 0 to 10], which estimates the proportion of fine fuels
@@ -956,8 +953,6 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
         mark5_fuel(i)%drought_factor=MAX(MIN(0.191*(mark5_fuel(i)%kb_drought_index+104.0)* &
              & ((mark5_fuel(i)%timesincerain + 1.0)**(1.5))/ &
              & (3.52*((mark5_fuel(i)%timesincerain + 1.0)**(1.5))+zrain-1.0),10.0),0.0)
-
-
 
         !Forest Fire Danger Index [open-ended scale, generally less than
         !100]. It measures both: the flammability of fuels, and thus the fire
@@ -1275,11 +1270,47 @@ Ep= (0.968*EXP(0.0875*(zmaxtemp-r0CtoK)+1.5552)-8.3)/&
 
     fwi_risk(i)%dsr=0.0272*(fwi_risk(i)%fwi**(1.77))
 
+ ELSE  ! not a valid point for calculation 
+   
+! force point to fill values. This is done to avoid inconsistencies in the  event the mask of the reastart file is not the same as the forcings. This will avoid to pass over invalid points. 
 
-    ENDIF !non-lake or sea point
-    !--------------------
-    ! END OF SPATIAL LOOP
-    !--------------------
+    !NFDRS
+    fire_prop(i)%ros=rfillvalue
+    fire_prop(i)%sc=ifillvalue
+    fire_prop(i)%erc=ifillvalue
+    fire_prop(i)%bi=ifillvalue
+
+    fire_prob(i)%ic=ifillvalue
+    fire_prob(i)%mcoi=ifillvalue         
+    fire_prob(i)%loi=ifillvalue
+    fire_prob(i)%fli=rfillvalue
+    
+    mc(i)%r1hr=rfillvalue
+    mc(i)%r10hr=rfillvalue
+    mc(i)%r100hr=rfillvalue
+    mc(i)%r1000hr=rfillvalue
+    
+    mc(i)%rherb=rfillvalue
+    mc(i)%rwood=rfillvalue
+    mc(i)%rx1000=rfillvalue
+    mc(i)%rbndryt=rfillvalue
+  
+  !MARK-5
+    mark5_fuel(i)%kb_drought_index=rfillvalue
+    mark5_fuel(i)%drought_factor=rfillvalue
+    mark5_fuel(i)%timesincerain=ifillvalue
+    mark5_prob(i)%fire_danger_index=rfillvalue
+    
+    !FWI
+    fwi_risk(i)%fwi=rfillvalue        
+    fwi_risk(i)%ffmc=rfillvalue       
+    fwi_risk(i)%dmc=rfillvalue        
+    fwi_risk(i)%dc=rfillvalue         
+    fwi_risk(i)%isi=rfillvalue        
+    fwi_risk(i)%bui=rfillvalue        
+    fwi_risk(i)%dsr=rfillvalue        
+    fwi_risk(i)%danger_risk=rfillvalue
+ ENDIF !non-lake or sea point
 
 ENDDO !npoints
 

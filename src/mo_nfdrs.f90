@@ -27,7 +27,7 @@ MODULE mo_nfdrs
         REAL :: rwood   = rfillvalue
         REAL :: rx1000  = rfillvalue
         REAL :: rbndryt = rfillvalue
-    END TYPE
+     END TYPE mc_type
 
     ! diagnostic
     TYPE fire_prop_type
@@ -35,14 +35,14 @@ MODULE mo_nfdrs
         INTEGER :: sc   = ifillvalue  !< spread component
         INTEGER :: erc  = ifillvalue  !< energy release component
         INTEGER :: bi   = ifillvalue  !< burning index
-    END TYPE
+     END TYPE fire_prop_type
 
     TYPE fire_prob_type
         INTEGER :: ic   = ifillvalue  !< ignition probability
         INTEGER :: mcoi = ifillvalue  !< human caused fire occurrence
         INTEGER :: loi  = ifillvalue  !< lightining coused occurrence index
         REAL :: fli     = rfillvalue  !< fire load index
-    END TYPE
+     END TYPE fire_prob_type
 
     TYPE(mc_type), ALLOCATABLE :: mc(:)
     TYPE(fire_prop_type), ALLOCATABLE :: fire_prop(:)

@@ -25,14 +25,14 @@ MODULE mo_mark5
         REAL :: timesincerain     = rfillvalue
     END TYPE
 
-    ! Mark 5 (fuel) status
+    ! Mark 5 Fuel properties and behaviours 
     TYPE mark5_prop_type
         REAL :: ros_theta0        = rfillvalue  !< spread component
         REAL :: ros_theta         = rfillvalue  !< spread rate
         REAL :: flame_height      = rfillvalue
         REAL :: flame_distance    = rfillvalue  !< distance at which flame can be seen
     END TYPE
-
+    ! Mark 5 Fire danger 
     TYPE mark5_prob_type
         REAL :: fire_danger_index = rfillvalue
     END TYPE
