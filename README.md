@@ -24,6 +24,10 @@ While it was principally designed for gridded data, it can operate with any kind
   Journal of Applied Meteorology and Climatology, 55(11), pp.2469-2491. https://journals.ametsoc.org/doi/abs/10.1175/JAMC-D-15-0297.1
 
 ### Release notes
+* 2020/03 GEFF 4.0:
+
+ * constructed GRIB interface and removed the netcdf i/o.
+ * shuffled around the modules to compact and organise 
 
 * 2019/03 GEFF 3.0:
 
