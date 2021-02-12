@@ -26,8 +26,8 @@ While it was principally designed for gridded data, it can operate with any kind
 ### Release notes
 * 2020/03 GEFF 4.0:
 
- * constructed GRIB interface and removed the netcdf i/o.
- * shuffled around the modules to compact and organise 
+	* constructed GRIB interface and removed the netcdf i/o.
+	* shuffled around the modules to compact and organise 
 
 * 2019/03 GEFF 3.0:
 
