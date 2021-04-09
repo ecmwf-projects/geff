@@ -1,5 +1,5 @@
 
-if (BUILD_TESTING)
+if(BUILD_TESTING)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
     file(GLOB _files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.f90")
@@ -9,10 +9,13 @@ if (BUILD_TESTING)
 
         add_executable("${_name}" "${_file}")
         add_test(NAME "${_name}" COMMAND "${_name}")
-        if (_name MATCHES "-fail$")
+        if(_name MATCHES "-fail$")
             set_tests_properties("${_name}" PROPERTIES WILL_FAIL TRUE)
         endif()
-
     endforeach()
+
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/data" "${CMAKE_CURRENT_BINARY_DIR}/data")
+    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/geff.namelist" "${CMAKE_CURRENT_BINARY_DIR}/geff.namelist")
+    add_test(NAME geff-tool COMMAND geff)
 endif()
 
