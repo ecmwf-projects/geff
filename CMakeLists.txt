@@ -8,7 +8,7 @@
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-project(geff VERSION 4.2.1 HOMEPAGE_URL "https://github.com/ecmwf-projects/geff" LANGUAGES Fortran)
+project(geff VERSION 4.2.2 HOMEPAGE_URL "https://github.com/ecmwf-projects/geff" LANGUAGES Fortran)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -31,7 +31,7 @@ add_subdirectory(tests)
 
 
 set(CPACK_PACKAGE_CONTACT "ECMWF")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Global ECMWF Fire Forecasting (GEFF) model")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Global ECMWF Fire Forecast (GEFF) model")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 
 set(CPACK_SOURCE_GENERATOR "TBZ2")
