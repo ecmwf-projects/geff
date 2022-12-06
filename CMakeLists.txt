@@ -8,7 +8,7 @@
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-project(geff VERSION 4.2.1 HOMEPAGE_URL "https://github.com/ecmwf-projects/geff" LANGUAGES Fortran)
+project(geff VERSION 4.2.2 HOMEPAGE_URL "https://github.com/ecmwf-projects/geff" LANGUAGES Fortran)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
