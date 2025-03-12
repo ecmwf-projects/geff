@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -ex
+version=4.3.0
+module_name=${1:-$version}
+srcdir=$PWD
+srchost=$HOST
+destdir=/usr/local/apps/geff/$module_name
+hosts=${2:-deploy@aa-login deploy@ab-login deploy@ac-login deploy@ad-login}
+
+for host in $hosts; do
+    case $module_name in
+        *test | dev | 4.2.3 | 4.3.0)
+            echo "(re)installing geff/$module_name on $host"
+            ;;
+        * )
+            if ssh $host [[ -d $destdir ]]; then
+                echo "package version $version is already installed on $host. skipping."
+                continue
+            else
+                echo installing geff/$version on $host ...
+            fi
+            ;;
+    esac
+    ssh $host bash -l << END
+       set -eux
+       TMPDIR=\$(mktemp -d)
+       echo \$TMPDIR
+       cd \$TMPDIR
+       rsync -avz --exclude='.git/' $srchost:$srcdir .
+       cd geff
+       ./install_as_ecmwf_module $destdir
+END
+    echo done
+done
+
+# how to set default module version:
+# modulemgr -m lxc tag geff 0.3 default

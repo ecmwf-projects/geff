@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+# ECMWF installation script.
+# Installs 'comfies' package as a module.
+
+destdir=${1:?'destination dir not specified'}
+module load cmake/3.19.5
+module load ecmwf-toolbox/2023.01.0.0
+set -ex
+
+umask 022
+echo $HOST $USER
+rm -rf build || :
+mkdir -p $destdir/bin
+mkdir -p build && cd build
+cmake ../
+make
+cp bin/geff $destdir/bin/geff_exe
+chmod 755 $destdir/bin/geff_exe
