@@ -33,18 +33,18 @@ MODULE mo_io_eccodes
     INTEGER, PARAMETER :: irainclim_pids(1) = [212036]
     INTEGER, PARAMETER :: irain_pids(2)     = [228, 228228]
     INTEGER, PARAMETER :: itemp_pids(1)     = [167]
-    INTEGER, PARAMETER :: imaxtemp_pids(1)  = [212032]
-    INTEGER, PARAMETER :: imintemp_pids(1)  = [212033]
-    INTEGER, PARAMETER :: irh_pids(2)       = [157, 168]
-    INTEGER, PARAMETER :: imaxrh_pids(1)    = [212034]
-    INTEGER, PARAMETER :: iminrh_pids(1)    = [212035]
+    INTEGER, PARAMETER :: imaxtemp_pids(2)  = [212032, 237167]
+    INTEGER, PARAMETER :: imintemp_pids(2)  = [212033, 238167]
+    INTEGER, PARAMETER :: irh_pids(4)       = [157, 168, 260242, 228037]
+    INTEGER, PARAMETER :: imaxrh_pids(2)    = [212034, 237092]
+    INTEGER, PARAMETER :: iminrh_pids(2)    = [212035, 238092]
     INTEGER, PARAMETER :: icc_pids(2)       = [164, 228164]
-    INTEGER, PARAMETER :: isnow_pids(3)     = [141, 3066, 228144]
+    INTEGER, PARAMETER :: isnow_pids(4)     = [141, 3066, 228144, 228141]
     INTEGER, PARAMETER :: iwspeed_pids(4)   = [10, 165, 166, 207]
-    INTEGER, PARAMETER :: idp_pids(1)       = [212031]
-    INTEGER, PARAMETER :: ivs_pids(1)       = [212030]
+    INTEGER, PARAMETER :: idp_pids(2)       = [212031, 228218]
+    INTEGER, PARAMETER :: ivs_pids(2)       = [212030, 260373]
     INTEGER, PARAMETER :: icr_pids(1)       = [212028]
-    INTEGER, PARAMETER :: ifm_pids(1)       = [212029]
+    INTEGER, PARAMETER :: ifm_pids(2)       = [212029, 232004]
     INTEGER, PARAMETER :: islope_pids(1)    = [163]
     INTEGER, PARAMETER :: icv_pids(1)       = [28]
 
@@ -432,18 +432,18 @@ CONTAINS
         CALL assert(fd /= 0, 'codes_open_file ('//cmode//'): '//TRIM(output_file))
         cmode = 'a'
 
-        CALL write_field(fd, irain_pids(1), rrain)
-        CALL write_field(fd, itemp_pids(1), rtemp)
-        CALL write_field(fd, imaxtemp_pids(1), rmaxtemp)
-        CALL write_field(fd, imintemp_pids(1), rmintemp)
-        CALL write_field(fd, irh_pids(1), rrh)
-        CALL write_field(fd, imaxrh_pids(1), rmaxrh)
-        CALL write_field(fd, iminrh_pids(1), rminrh)
-        CALL write_field(fd, icc_pids(1), rcc)
-        CALL write_field(fd, isnow_pids(1), rsnow)
-        CALL write_field(fd, iwspeed_pids(1), rwspeed)
-        CALL write_field(fd, idp_pids(1), rdp)
-        CALL write_field_from_integer(fd, ivs_pids(1), ivs)
+        CALL write_field(fd, grib_rain%paramId, rrain)
+        CALL write_field(fd, grib_temp%paramId, rtemp)
+        CALL write_field(fd, grib_maxtemp%paramId, rmaxtemp)
+        CALL write_field(fd, grib_mintemp%paramId, rmintemp)
+        CALL write_field(fd, grib_rh%paramId, rrh)
+        CALL write_field(fd, grib_maxrh%paramId, rmaxrh)
+        CALL write_field(fd, grib_minrh%paramId, rminrh)
+        CALL write_field(fd, grib_cc%paramId, rcc)
+        CALL write_field(fd, grib_snow%paramId, rsnow)
+        CALL write_field(fd, grib_wspeed%paramId, rwspeed)
+        CALL write_field(fd, grib_dp%paramId, rdp)
+        CALL write_field_from_integer(fd, grib_vs%paramId, ivs)
 
         CALL write_field(fd, imc_r1hr_pids(1), mc(:)%r1hr)
         CALL write_field(fd, imc_r10hr_pids(1), mc(:)%r10hr)
@@ -485,12 +485,12 @@ CONTAINS
         CALL write_field(fd, ifwi_risk_danger_risk_pids(1), fwi_risk(:)%danger_risk)
 
         IF (output_constant) THEN
-            CALL write_field(fd, ilsm_pids(1), rlsm)
-            CALL write_field(fd, icv_pids(1), rcv)
-            CALL write_field(fd, irainclim_pids(1), rrainclim)
-            CALL write_field_from_integer(fd, icr_pids(1), icr)
-            CALL write_field_from_integer(fd, ifm_pids(1), ifm)
-            CALL write_field_from_integer(fd, islope_pids(1), islope)
+            CALL write_field(fd, grib_lsm%paramId, rlsm)
+            CALL write_field(fd, grib_cv%paramId, rcv)
+            CALL write_field(fd, grib_rainclim%paramId, rrainclim)
+            CALL write_field_from_integer(fd, grib_cr%paramId, icr)
+            CALL write_field_from_integer(fd, grib_fm%paramId, ifm)
+            CALL write_field_from_integer(fd, grib_slope%paramId, islope)
         ENDIF
 
         CALL codes_close_file(fd)
